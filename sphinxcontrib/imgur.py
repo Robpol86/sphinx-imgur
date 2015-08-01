@@ -11,7 +11,7 @@ import re
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from sphinx.application import ExtensionError, SphinxError
+from sphinx.application import SphinxError
 
 __author__ = '@Robpol86'
 __license__ = 'MIT'
@@ -87,7 +87,7 @@ class ImgurBlockQuoteDirective(Directive):
         """
         imgur_id = self.arguments[0]
         if not RE_IMGUR_ID.match(imgur_id):
-            raise ExtensionError('Invalid Imgur ID specified. Must be 5-10 letters and numbers.')
+            raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers.')
         return imgur_id
 
     def get_hide_post_details(self):
