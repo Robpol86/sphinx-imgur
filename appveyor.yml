@@ -1,0 +1,17 @@
+init:
+  - set PATH=C:\Python34-x64;C:\Python34-x64\Scripts;%PATH%
+
+install:
+  - ps: Start-FileDownload https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+  - python get-pip.py
+
+build_script:
+  - pip install codecov tox
+
+test_script:
+  - tox -e flake8,check,requirements,py27x64,py27
+  - tox -e combine py27x64 py27
+
+after_test:
+  - mv tests/.coverage .
+  - codecov || exit /B 0
