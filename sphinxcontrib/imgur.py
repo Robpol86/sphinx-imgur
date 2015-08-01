@@ -26,7 +26,7 @@ class ImgurError(SphinxError):
 
 
 class ImgurJavaScriptNode(nodes.General, nodes.Element):
-    """JavaScript node required after each embedded album because Imgur sucks at JavaScript."""
+    """JavaScript node required after each embedded album/image because Imgur sucks at JavaScript."""
 
     @staticmethod
     def visit(spht, node):
@@ -43,20 +43,22 @@ class ImgurJavaScriptNode(nodes.General, nodes.Element):
 class ImgurBlockQuoteNode(nodes.General, nodes.Element):
     """Imgur <blockquote><a /></blockquote> node for Sphinx/docutils."""
 
-    def __init__(self, imgur_id, hide_post_details):
+    def __init__(self, imgur_id, is_album, hide_post_details):
         """Store directive options during instantiation.
 
-        :param str imgur_id: Imgur ID of the album.
-        :param bool hide_post_details: Hide title and image descriptions in embedded albums.
+        :param str imgur_id: Imgur ID of the album or image.
+        :param bool is_album: Whether this block quote embeds an image or an album.
+        :param bool hide_post_details: Hide title and image descriptions in embedded albums or images.
         """
         super(ImgurBlockQuoteNode, self).__init__()
         self.imgur_id = imgur_id
+        self.is_album = is_album
         self.hide_post_details = hide_post_details
 
     @staticmethod
     def visit(spht, node):
         """Append opening tags to document body list."""
-        imgur_id = 'a/{}'.format(node.imgur_id)
+        imgur_id = ('a/{}' if node.is_album else '{}').format(node.imgur_id)
         html_attrs_bq = {'CLASS': 'imgur-embed-pub', 'lang': spht.settings.language_code, 'data-id': imgur_id}
         if node.hide_post_details:
             html_attrs_bq['data-context'] = 'false'
@@ -71,7 +73,7 @@ class ImgurBlockQuoteNode(nodes.General, nodes.Element):
 
 
 class ImgurBlockQuoteDirective(Directive):
-    """Imgur ".. imgur-album::" rst directive for embedded albums."""
+    """Imgur ".. imgur-album::" or ".. imgur-image::" rst directive for embedded albums/images."""
 
     required_arguments = 1
     optional_arguments = 1
@@ -106,7 +108,8 @@ class ImgurBlockQuoteDirective(Directive):
         """
         imgur_id = self.get_id()
         hide_post_details = self.get_hide_post_details()
-        return [ImgurBlockQuoteNode(imgur_id, hide_post_details), ImgurJavaScriptNode()]
+        is_album = self.name == 'imgur-album'
+        return [ImgurBlockQuoteNode(imgur_id, is_album, hide_post_details), ImgurJavaScriptNode()]
 
 
 def setup(app):
@@ -121,4 +124,5 @@ def setup(app):
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
     app.add_node(ImgurBlockQuoteNode, html=(ImgurBlockQuoteNode.visit, ImgurBlockQuoteNode.depart))
     app.add_directive('imgur-album', ImgurBlockQuoteDirective)
+    app.add_directive('imgur-image', ImgurBlockQuoteDirective)
     return dict(version=__version__)
