@@ -6,48 +6,52 @@ Examples
 
 This page shows several example use cases for the extension.
 
-Embedded Albums
-===============
+Embedded Items
+==============
 
-With Details
-------------
+Embed Imgur albums or images using their JavaScript option. This is the same as the "Embed album" link when you view
+an album on imgur.com.
 
-.. code-block:: rst
-
-    .. imgur-album:: hWyW0
-
-.. imgur-album:: hWyW0
-
-Without Details
----------------
+Album With Details
+------------------
 
 .. code-block:: rst
 
-    .. imgur-album:: 9YZHA
+    .. imgur-embed:: hWyW0
+        :album: True
+
+.. imgur-embed:: hWyW0
+    :album: True
+
+Album Without Details
+---------------------
+
+.. code-block:: rst
+
+    .. imgur-embed:: 9YZHA
+        :album: True
         :hide_post_details: True
 
-.. imgur-album:: 9YZHA
+.. imgur-embed:: 9YZHA
+    :album: True
     :hide_post_details: True
 
-Embedded Images
-===============
-
-With Details
-------------
+Image With Details
+------------------
 
 .. code-block:: rst
 
-    .. imgur-image:: 7WTPx0v
+    .. imgur-embed:: 7WTPx0v
 
-.. imgur-image:: 7WTPx0v
+.. imgur-embed:: 7WTPx0v
 
-Without Details
----------------
+Image Without Details
+---------------------
 
 .. code-block:: rst
 
-    .. imgur-image:: Srt4owo
+    .. imgur-embed:: Srt4owo
         :hide_post_details: True
 
-.. imgur-image:: Srt4owo
+.. imgur-embed:: Srt4owo
     :hide_post_details: True

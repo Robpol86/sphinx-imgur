@@ -33,17 +33,19 @@ TEST_CASES = [
 ]
 
 
-@pytest.mark.parametrize('directive', ['imgur-album', 'imgur-image'])
+@pytest.mark.parametrize('is_album', [True, False])
 @pytest.mark.parametrize('test_case', TEST_CASES)
-def test(monkeypatch, tmpdir, directive, test_case):
+def test(monkeypatch, tmpdir, is_album, test_case):
     """Test valid and invalid values."""
     conf_py, index_rst = tmpdir.join('conf.py'), tmpdir.join('index.rst')
     conf_py.write(BASE_CONFIG.format(py.path.local(__file__).join('..', '..')))
     if test_case['hpd_conf'] is not None:
         conf_py.write('imgur_hide_post_details = "{}"'.format(test_case['hpd_conf']), mode='a')
-    index_rst.write('====\nMain\n====\n\n.. toctree::\n    :maxdepth: 2\n.. {}::'.format(directive))
+    index_rst.write('====\nMain\n====\n\n.. toctree::\n    :maxdepth: 2\n.. imgur-embed::')
     if test_case['id'] is not None:
         index_rst.write(' {}'.format(test_case['id']), mode='a')
+    if is_album:
+        index_rst.write('\n    :album: True', mode='a')
     if test_case['hpd_option'] is not None:
         index_rst.write('\n    :hide_post_details: True', mode='a')
     monkeypatch.setattr(directives, '_directives', getattr(directives, '_directives').copy())
@@ -61,7 +63,7 @@ def test(monkeypatch, tmpdir, directive, test_case):
         scripts = re.findall(r'(<script[^>]* src="//s.imgur.com/min/embed.js"[^>]*>)', html_body)
         assert 1 == len(blockquotes)
         assert 1 == len(scripts)
-        if directive == 'imgur-album':
+        if is_album:
             assert 'data-id="a/Valid123"' in blockquotes[0]
         else:
             assert 'data-id="Valid123"' in blockquotes[0]

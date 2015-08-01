@@ -40,7 +40,7 @@ class ImgurJavaScriptNode(nodes.General, nodes.Element):
         spht.body.append('</script>')
 
 
-class ImgurBlockQuoteNode(nodes.General, nodes.Element):
+class ImgurEmbedNode(nodes.General, nodes.Element):
     """Imgur <blockquote><a /></blockquote> node for Sphinx/docutils."""
 
     def __init__(self, imgur_id, is_album, hide_post_details):
@@ -50,7 +50,7 @@ class ImgurBlockQuoteNode(nodes.General, nodes.Element):
         :param bool is_album: Whether this block quote embeds an image or an album.
         :param bool hide_post_details: Hide title and image descriptions in embedded albums or images.
         """
-        super(ImgurBlockQuoteNode, self).__init__()
+        super(ImgurEmbedNode, self).__init__()
         self.imgur_id = imgur_id
         self.is_album = is_album
         self.hide_post_details = hide_post_details
@@ -72,12 +72,12 @@ class ImgurBlockQuoteNode(nodes.General, nodes.Element):
         spht.body.extend(['</a>', '</blockquote>'])
 
 
-class ImgurBlockQuoteDirective(Directive):
-    """Imgur ".. imgur-album::" or ".. imgur-image::" rst directive for embedded albums/images."""
+class ImgurEmbedDirective(Directive):
+    """Imgur ".. imgur-embed::" rst directive for embedding albums/images with Imgur's JavaScript."""
 
     required_arguments = 1
-    optional_arguments = 1
-    option_spec = dict(hide_post_details=lambda i: i.lower() == 'true')
+    optional_arguments = 2
+    option_spec = dict(album=lambda i: i.lower() == 'true', hide_post_details=lambda i: i.lower() == 'true')
 
     def get_id(self):
         """Validate and return the Imgur ID argument value.
@@ -103,13 +103,13 @@ class ImgurBlockQuoteDirective(Directive):
     def run(self):
         """Called by Sphinx.
 
-        :returns: Single ImgurBlockQuoteNode instance with config values passed as arguments.
+        :returns: ImgurEmbedNode and ImgurJavaScriptNode instances with config values passed as arguments.
         :rtype: list
         """
         imgur_id = self.get_id()
         hide_post_details = self.get_hide_post_details()
-        is_album = self.name == 'imgur-album'
-        return [ImgurBlockQuoteNode(imgur_id, is_album, hide_post_details), ImgurJavaScriptNode()]
+        is_album = self.options.get('album')
+        return [ImgurEmbedNode(imgur_id, is_album, hide_post_details), ImgurJavaScriptNode()]
 
 
 def setup(app):
@@ -122,7 +122,6 @@ def setup(app):
     """
     app.add_config_value('imgur_hide_post_details', False, True)
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
-    app.add_node(ImgurBlockQuoteNode, html=(ImgurBlockQuoteNode.visit, ImgurBlockQuoteNode.depart))
-    app.add_directive('imgur-album', ImgurBlockQuoteDirective)
-    app.add_directive('imgur-image', ImgurBlockQuoteDirective)
+    app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.visit, ImgurEmbedNode.depart))
+    app.add_directive('imgur-embed', ImgurEmbedDirective)
     return dict(version=__version__)
