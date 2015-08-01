@@ -25,6 +25,21 @@ class ImgurError(SphinxError):
     category = 'Imgur option error'
 
 
+class ImgurJavaScriptNode(nodes.General, nodes.Element):
+    """JavaScript node required after each embedded album because Imgur sucks at JavaScript."""
+
+    @staticmethod
+    def visit(spht, node):
+        """Append opening tags to document body list."""
+        html_attrs_bq = {'async': '', 'src': '//s.imgur.com/min/embed.js', 'charset': 'utf-8'}
+        spht.body.append(spht.starttag(node, 'script', '', **html_attrs_bq))
+
+    @staticmethod
+    def depart(spht, _):
+        """Append closing tags to document body list."""
+        spht.body.append('</script>')
+
+
 class ImgurBlockQuoteNode(nodes.General, nodes.Element):
     """Imgur <blockquote><a /></blockquote> node for Sphinx/docutils."""
 
@@ -91,22 +106,7 @@ class ImgurBlockQuoteDirective(Directive):
         """
         imgur_id = self.get_id()
         hide_post_details = self.get_hide_post_details()
-        return [ImgurBlockQuoteNode(imgur_id, hide_post_details)]
-
-
-class EventHandlers(object):
-    """Hold Sphinx event handlers as static methods."""
-
-    @staticmethod
-    def insert_javascript(app):
-        """Insert Imgur embedded album javascript into the document body during the builder-inited event.
-
-        http://sphinx-doc.org/extdev/appapi.html#event-builder-inited
-        From: https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/mathjax.py
-
-        :param app: Sphinx application object.
-        """
-        app.add_javascript('//s.imgur.com/min/embed.js')
+        return [ImgurBlockQuoteNode(imgur_id, hide_post_details), ImgurJavaScriptNode()]
 
 
 def setup(app):
@@ -118,7 +118,7 @@ def setup(app):
     :rtype: dict
     """
     app.add_config_value('imgur_hide_post_details', False, True)
+    app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
     app.add_node(ImgurBlockQuoteNode, html=(ImgurBlockQuoteNode.visit, ImgurBlockQuoteNode.depart))
     app.add_directive('imgur-album', ImgurBlockQuoteDirective)
-    app.connect('builder-inited', EventHandlers.insert_javascript)
     return dict(version=__version__)
