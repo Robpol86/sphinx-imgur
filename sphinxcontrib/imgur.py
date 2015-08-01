@@ -91,7 +91,7 @@ class ImgurBlockQuoteDirective(Directive):
         return imgur_id
 
     def get_hide_post_details(self):
-        """Handles both the config setting `imgur_hide_post_details` and directive option `hide_post_details`.
+        """Handle both the config setting `imgur_hide_post_details` and directive option `hide_post_details`.
 
         :returns: Hide post details value.
         :rtype: bool
@@ -101,7 +101,7 @@ class ImgurBlockQuoteDirective(Directive):
         return self.state.document.settings.env.config.imgur_hide_post_details
 
     def run(self):
-        """Executed by Sphinx.
+        """Called by Sphinx.
 
         :returns: Single ImgurBlockQuoteNode instance with config values passed as arguments.
         :rtype: list
