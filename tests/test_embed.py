@@ -8,7 +8,7 @@ from docutils.parsers.rst import directives, roles
 from sphinx import application
 from sphinx.errors import SphinxWarning
 
-from sphinxcontrib.imgur import ImgurError
+from sphinxcontrib.imgur.directives import ImgurError
 
 BASE_CONFIG = """\
 import sys

@@ -38,7 +38,7 @@ PACKAGE = True
 REQUIRES_INSTALL = ['sphinx']
 REQUIRES_TEST = ['pytest-cov']
 REQUIRES_ALL = REQUIRES_INSTALL + REQUIRES_TEST
-VERSION_FILE = os.path.join(NAME_FILE, 'imgur.py') if PACKAGE else '{0}.py'.format(NAME_FILE)
+VERSION_FILE = os.path.join(NAME_FILE, 'imgur', '__init__.py') if PACKAGE else '{0}.py'.format(NAME_FILE)
 
 
 def _safe_read(path, length):
