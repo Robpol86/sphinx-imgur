@@ -6,8 +6,8 @@ Examples
 
 This page shows several example use cases for the extension.
 
-Embedded Items
-==============
+Embedded Directives
+===================
 
 Embed Imgur albums or images using their JavaScript option. This is the same as the "Embed album" link when you view
 an album on imgur.com.
@@ -17,23 +17,19 @@ Album With Details
 
 .. code-block:: rst
 
-    .. imgur-embed:: hWyW0
-        :album: True
+    .. imgur-embed:: a/hWyW0
 
-.. imgur-embed:: hWyW0
-    :album: True
+.. imgur-embed:: a/hWyW0
 
 Album Without Details
 ---------------------
 
 .. code-block:: rst
 
-    .. imgur-embed:: 9YZHA
-        :album: True
+    .. imgur-embed:: a/9YZHA
         :hide_post_details: True
 
-.. imgur-embed:: 9YZHA
-    :album: True
+.. imgur-embed:: a/9YZHA
     :hide_post_details: True
 
 Image With Details

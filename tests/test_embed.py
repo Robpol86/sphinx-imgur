@@ -37,17 +37,22 @@ TEST_CASES = [
 @pytest.mark.parametrize('test_case', TEST_CASES)
 def test(monkeypatch, tmpdir, is_album, test_case):
     """Test valid and invalid values."""
-    conf_py, index_rst = tmpdir.join('conf.py'), tmpdir.join('index.rst')
+    # Write conf.py.
+    conf_py = tmpdir.join('conf.py')
     conf_py.write(BASE_CONFIG.format(py.path.local(__file__).join('..', '..')))
     if test_case['hpd_conf'] is not None:
         conf_py.write('imgur_hide_post_details = "{}"'.format(test_case['hpd_conf']), mode='a')
+
+    # Write index.rst.
+    index_rst = tmpdir.join('index.rst')
     index_rst.write('====\nMain\n====\n\n.. toctree::\n    :maxdepth: 2\n.. imgur-embed::')
-    if test_case['id'] is not None:
+    if test_case['id'] is not None and is_album:
+        index_rst.write(' a/{}'.format(test_case['id']), mode='a')
+    elif test_case['id'] is not None:
         index_rst.write(' {}'.format(test_case['id']), mode='a')
-    if is_album:
-        index_rst.write('\n    :album: True', mode='a')
     if test_case['hpd_option'] is not None:
         index_rst.write('\n    :hide_post_details: True', mode='a')
+
     monkeypatch.setattr(directives, '_directives', getattr(directives, '_directives').copy())
     monkeypatch.setattr(roles, '_roles', getattr(roles, '_roles').copy())
 
@@ -72,7 +77,7 @@ def test(monkeypatch, tmpdir, is_album, test_case):
     if test_case['id'] is not None:
         with pytest.raises(ImgurError) as exc:
             app.builder.build_all()
-        expected_error = 'Invalid Imgur ID specified. Must be 5-10 letters and numbers.'
+        expected_error = 'Invalid Imgur ID specified. Must be 5-10 letters and numbers. Albums prefixed with "a/".'
         assert expected_error == exc.value.args[0]
         return
 

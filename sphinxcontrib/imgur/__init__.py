@@ -5,8 +5,7 @@ https://github.com/Robpol86/sphinxcontrib-imgur
 https://pypi.python.org/pypi/sphinxcontrib-imgur
 """
 
-from sphinxcontrib.imgur.directives import ImgurEmbedDirective
-from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurJavaScriptNode
+from sphinxcontrib.imgur import directives, nodes
 
 __author__ = '@Robpol86'
 __license__ = 'MIT'
@@ -22,7 +21,7 @@ def setup(app):
     :rtype: dict
     """
     app.add_config_value('imgur_hide_post_details', False, True)
-    app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
-    app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.visit, ImgurEmbedNode.depart))
-    app.add_directive('imgur-embed', ImgurEmbedDirective)
+    app.add_directive('imgur-embed', directives.ImgurEmbedDirective)
+    app.add_node(nodes.ImgurEmbedNode, html=(nodes.ImgurEmbedNode.visit, nodes.ImgurEmbedNode.depart))
+    app.add_node(nodes.ImgurJavaScriptNode, html=(nodes.ImgurJavaScriptNode.visit, nodes.ImgurJavaScriptNode.depart))
     return dict(version=__version__)
