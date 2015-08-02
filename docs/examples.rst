@@ -16,7 +16,8 @@ Include text entries inline in your paragraphs. These work with images and album
     * Imgur title of the album below: :imgur-title:`a/hWyW0`
     * And the description of the animated image below: :imgur-description:`7WTPx0v`
 
-* TODO
+* Imgur title of the album below: :imgur-title:`a/hWyW0`
+* And the description of the animated image below: :imgur-description:`7WTPx0v`
 
 Embedded Directives
 ===================

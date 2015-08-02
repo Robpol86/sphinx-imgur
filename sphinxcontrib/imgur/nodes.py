@@ -50,12 +50,14 @@ class ImgurEmbedNode(General, Element):
 class ImgurDescriptionNode(General, Element):
     """Imgur text node for image/album descriptions. To be replaced with docutils.nodes.Text."""
 
+    IMGUR_API = True
+
     def __init__(self, imgur_id):
         """Constructor.
 
         :param str imgur_id: Imgur album or image ID for later lookup.
         """
-        super().__init__()
+        super(ImgurDescriptionNode, self).__init__()
         self.imgur_id = imgur_id
 
 

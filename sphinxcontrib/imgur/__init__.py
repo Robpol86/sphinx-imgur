@@ -14,24 +14,51 @@ __license__ = 'MIT'
 __version__ = '0.1.0'
 
 
-def cleanup_imgur_cache(app, doctree):
-    """Sphinx event handler. Prunes orphaned Imgur entries from Sphinx cache and queues new entries.
+def event_discover_new_ids(app, doctree):
+    """Sphinx event handler. Called once for each Sphinx document.
+
+    Add new Imgur IDs to the cache or adds docname to existing IDs.
 
     :param app: Sphinx application object.
     :param doctree: Tree of docutils nodes.
     """
-    # Get all Imgur IDs used.
-    api_enabled_nodes_classes = [
-        nodes.ImgurDescriptionNode,
-        nodes.ImgurTitleNode,
-    ]
-    imgur_ids = api.discover_imgur_ids_used(doctree, api_enabled_nodes_classes)
-    # Clean up persistent cache and queue new entries.
-    api.purge_orphaned_entries(app.env, imgur_ids)
-    api.queue_new_imgur_ids(app.env, imgur_ids)
+    if not hasattr(app.builder.env, 'imgur_api_cache'):
+        app.builder.env.imgur_api_cache = dict()
+
+    imgur_ids = set()
+    for node_class in (c for c in vars(nodes).values() if hasattr(c, 'IMGUR_API') and c.IMGUR_API):
+        for node in doctree.traverse(node_class):
+            imgur_ids.add(node.imgur_id)
+    api.queue_new_imgur_ids_or_add_docname(app.builder.env, imgur_ids, app.builder.env.docname)
 
 
-def update_imgur_nodes(app, doctree, _):
+def event_merge_info(_, env, docnames, other):
+    """Sphinx event handler. Called only during parallel processing to handle storing persisted cache data.
+
+    :param env: Sphinx build environment.
+    :param docnames: Unused.
+    :param other: Parallel Sphinx build environment to merge from.
+    """
+    assert docnames  # PyCharm.
+    if not hasattr(other, 'imgur_api_cache'):
+        return
+    if not hasattr(env, 'imgur_api_cache'):
+        env.imgur_api_cache = dict()
+    env.imgur_api_cache.update(other.imgur_api_cache)
+
+
+def event_purge_orphaned_ids(_, env, docname):
+    """Sphinx event handler. Called when a document is removed/cleaned from the environment.
+
+    Removes any image/album Imgur IDs that aren't used anywhere else.
+
+    :param env: Sphinx build environment.
+    :param str docname: Sphinx document name being removed.
+    """
+    api.purge_orphaned_entries(env, docname)
+
+
+def event_update_imgur_nodes(app, doctree, _):
     """Sphinx event handler. Replace temporary Imgur rst nodes with data from the Sphinx cache.
 
     This final Imgur event is called after cache is pruned and updated with API queries. This function is called once
@@ -65,6 +92,8 @@ def setup(app):
     app.add_node(nodes.ImgurJavaScriptNode, html=(nodes.ImgurJavaScriptNode.visit, nodes.ImgurJavaScriptNode.depart))
     app.add_role('imgur-description', roles.imgur_role)
     app.add_role('imgur-title', roles.imgur_role)
-    app.connect('doctree-read', cleanup_imgur_cache)
-    app.connect('doctree-resolved', update_imgur_nodes)
+    app.connect('doctree-read', event_discover_new_ids)
+    app.connect('doctree-resolved', event_update_imgur_nodes)
+    app.connect('env-merge-info', event_merge_info)
+    app.connect('env-purge-doc', event_purge_orphaned_ids)
     return dict(version=__version__)

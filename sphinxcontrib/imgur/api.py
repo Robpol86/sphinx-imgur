@@ -1,6 +1,7 @@
 """Interfaces with the Imgur REST API and the Sphinx cache."""
 
 DATA_MODEL = dict(
+    _docnames=(),  # Tuple of Sphinx doc names using this ID.
     _mod_time=0,  # Epoch.
     description='',
     images=(),  # Tuple of image IDs (populated in albums only).
@@ -8,56 +9,50 @@ DATA_MODEL = dict(
 )
 
 
-def discover_imgur_ids_used(doctree, node_classes):
-    """Find Imgur image and album IDs used in all Sphinx documents.
-
-    :param doctree: Tree of docutils nodes.
-    :param node_classes: List of Imgur-related node classes to traverse.
-
-    :return: Imgur IDs.
-    :rtype: set
-    """
-    imgur_ids = set()
-    for node in (n for c in node_classes for n in doctree.traverse(c)):
-        if hasattr(node, 'imgur_id'):
-            imgur_ids.add(node.imgur_id)
-    return imgur_ids
-
-
-def purge_orphaned_entries(env, used_ids):
+def purge_orphaned_entries(env, docname):
     """Remove orphaned Imgur cached entries from the Sphinx build environment. They are no longer used anywhere.
 
-    :param env: Sphinx persistent build environment object.
-    :param set used_ids: Imgur image/album IDs still used in all documents.
+    :param env: Sphinx build environment.
+    :param str docname: Sphinx document name being removed.
     """
     if not hasattr(env, 'imgur_api_cache'):
         return
 
-    # Handle albums first.
-    for imgur_id, metadata in [(k, v) for k, v in env.imgur_api_cache.items() if k.startswith('a/')]:
-        if imgur_id not in used_ids:
+    imgur_ids_used_by_doc = {k for k, v in env.imgur_api_cache.items() if docname in v['_docnames']}
+
+    # First remove the docname from all imgur_api_cache entries.
+    for imgur_id in imgur_ids_used_by_doc:
+        docnames = env.imgur_api_cache[imgur_id]['_docnames']
+        env.imgur_api_cache[imgur_id]['_docnames'] = tuple(d for d in docnames if d != docname)
+
+    # Next prune albums with no docnames.
+    for imgur_id in (i for i in imgur_ids_used_by_doc if i.startswith('a/')):
+        if not env.imgur_api_cache[imgur_id]['_docnames']:
             env.imgur_api_cache.pop(imgur_id)
 
-    # Handle images.
+    # Finally prune images with BOTH no docnames and no albums.
     used_in_albums = {i for a in env.imgur_api_cache.values() for i in a['images']}
-    for imgur_id, metadata in [(k, v) for k, v in env.imgur_api_cache.items() if not k.startswith('a/')]:
-        if imgur_id not in used_ids and imgur_id not in used_in_albums:
+    for imgur_id in (i for i in imgur_ids_used_by_doc if not i.startswith('a/')):
+        if not env.imgur_api_cache[imgur_id]['_docnames'] and imgur_id not in used_in_albums:
             env.imgur_api_cache.pop(imgur_id)
 
 
-def queue_new_imgur_ids(env, used_ids):
-    """Queue/schedule new album (starting with a/) or image IDs.
+def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname):
+    """Add new image/album IDs to the cache or add the docname to existing cache entries.
 
     New entries have a _mod_time of 0, which makes them expired. query_imgur_api() will handle them.
 
     :param env: Sphinx persistent build environment object.
-    :param set used_ids: Imgur image/album IDs still used in all documents.
+    :param set imgur_ids: Imgur image/album IDs to refresh.
+    :param str docname: Sphinx document name being removed.
     """
-    if not hasattr(env, 'imgur_api_cache'):
-        env.imgur_api_cache = dict()
-    for imgur_id in used_ids:
+    for imgur_id in imgur_ids:
         if imgur_id not in env.imgur_api_cache:
             env.imgur_api_cache[imgur_id] = DATA_MODEL.copy()
+        elif docname not in env.imgur_api_cache[imgur_id]['_docnames']:
+            docnames = set(env.imgur_api_cache[imgur_id]['_docnames'])
+            docnames.add(docname)
+            env.imgur_api_cache[imgur_id]['_docnames'] = tuple(docnames)
 
 
 def query_imgur_api(env, client_id, ttl):
