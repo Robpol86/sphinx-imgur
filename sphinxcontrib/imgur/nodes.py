@@ -45,3 +45,21 @@ class ImgurEmbedNode(General, Element):
     def depart(spht, _):
         """Append closing tags to document body list."""
         spht.body.extend(['</a>', '</blockquote>'])
+
+
+class ImgurDescriptionNode(General, Element):
+    """Imgur text node for image/album descriptions. To be replaced with docutils.nodes.Text."""
+
+    def __init__(self, imgur_id):
+        """Constructor.
+
+        :param str imgur_id: Imgur album or image ID for later lookup.
+        """
+        super().__init__()
+        self.imgur_id = imgur_id
+
+
+class ImgurTitleNode(ImgurDescriptionNode):
+    """Imgur text node for image/album titles. To be replaced with docutils.nodes.Text."""
+
+    pass

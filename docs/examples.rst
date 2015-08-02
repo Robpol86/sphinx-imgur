@@ -6,6 +6,18 @@ Examples
 
 This page shows several example use cases for the extension.
 
+Inline Roles
+============
+
+Include text entries inline in your paragraphs. These work with images and albums.
+
+.. code-block:: rst
+
+    * Imgur title of the album below: :imgur-title:`a/hWyW0`
+    * And the description of the animated image below: :imgur-description:`7WTPx0v`
+
+* TODO
+
 Embedded Directives
 ===================
 
