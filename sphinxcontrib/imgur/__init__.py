@@ -15,9 +15,9 @@ __version__ = '0.1.0'
 
 
 def event_discover_new_ids(app, doctree):
-    """Sphinx event handler. Called once for each Sphinx document.
+    """Event handler that adds new Imgur IDs to the cache or adds docname to existing IDs.
 
-    Add new Imgur IDs to the cache or adds docname to existing IDs.
+    Called once for each Sphinx document.
 
     :param app: Sphinx application object.
     :param doctree: Tree of docutils nodes.
@@ -48,9 +48,9 @@ def event_merge_info(_, env, docnames, other):
 
 
 def event_purge_orphaned_ids(_, env, docname):
-    """Sphinx event handler. Called when a document is removed/cleaned from the environment.
+    """Event handler that removes any image/album Imgur IDs that aren't used anywhere else.
 
-    Removes any image/album Imgur IDs that aren't used anywhere else.
+    Called when a document is removed/cleaned from the environment. Called once for each Sphinx document.
 
     :param env: Sphinx build environment.
     :param str docname: Sphinx document name being removed.
@@ -58,8 +58,18 @@ def event_purge_orphaned_ids(_, env, docname):
     api.purge_orphaned_entries(env, docname)
 
 
+def event_query_api_update_cache(app, env):
+    """Event handler that queries the Imgur API and updates the Sphinx cache.
+
+    Called once for the entire sphinx-build session.
+    """
+    pass  # TODO implement this.
+
+
 def event_update_imgur_nodes(app, doctree, _):
-    """Sphinx event handler. Replace temporary Imgur rst nodes with data from the Sphinx cache.
+    """Event handler that replaces temporary Imgur rst nodes with data from the Sphinx cache.
+
+    Called once for each Sphinx document.
 
     This final Imgur event is called after cache is pruned and updated with API queries. This function is called once
     for each Sphinx document.
@@ -96,4 +106,5 @@ def setup(app):
     app.connect('doctree-resolved', event_update_imgur_nodes)
     app.connect('env-merge-info', event_merge_info)
     app.connect('env-purge-doc', event_purge_orphaned_ids)
+    app.connect('env-updated', event_query_api_update_cache)
     return dict(version=__version__)
