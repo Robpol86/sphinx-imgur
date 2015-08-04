@@ -1,14 +1,29 @@
 """Test Sphinx event handlers call order and count."""
 
+from functools import wraps
 from textwrap import dedent
 
-import docutils.nodes
 import py
 import pytest
 from docutils.parsers.rst import directives, roles
 from sphinx import application
 
 from sphinxcontrib import imgur
+
+
+def track_call(call_list, func):
+    """Decorator that appends to list the function name before calling said function.
+
+    :param list call_list: List to append to.
+    :param func: Function to call.
+
+    :return: Wrapped function.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        call_list.append(func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
 
 
 def create_first_env(tmpdir):
@@ -58,32 +73,20 @@ def create_first_env(tmpdir):
 @pytest.mark.parametrize('parallel', [0, 1, 2])
 def test(monkeypatch, tmpdir, parallel):
     """Test when sphinx-build runs for the first time."""
-    create_first_env(tmpdir)
     monkeypatch.setattr(directives, '_directives', getattr(directives, '_directives').copy())
     monkeypatch.setattr(roles, '_roles', getattr(roles, '_roles').copy())
-
+    create_first_env(tmpdir)
     srcdir = confdir = str(tmpdir)
     outdir = tmpdir.join('_build', 'html')
-    doctreedir = outdir.join('doctrees').ensure(dir=True, rec=True)
+    doctree = outdir.join('doctrees').ensure(dir=True, rec=True)
+    calls = list()
+    monkeypatch.setattr(imgur, 'event_discover_new_ids', track_call(calls, imgur.event_discover_new_ids))
+    monkeypatch.setattr(imgur, 'event_merge_info', track_call(calls, imgur.event_merge_info))
+    monkeypatch.setattr(imgur, 'event_purge_orphaned_ids', track_call(calls, imgur.event_purge_orphaned_ids))
+    monkeypatch.setattr(imgur, 'event_query_api_update_cache', track_call(calls, imgur.event_query_api_update_cache))
+    monkeypatch.setattr(imgur, 'event_update_imgur_nodes', track_call(calls, imgur.event_update_imgur_nodes))
 
-    func_calls = list()
-
-    def euin(*args):
-        """Handle testing event_update_imgur_nodes()."""
-        func_calls.append('event_update_imgur_nodes')
-        for node_class in (imgur.nodes.ImgurDescriptionNode, imgur.nodes.ImgurTitleNode):
-            for node in args[1].traverse(node_class):
-                node.replace_self([docutils.nodes.Text('Placeholder')])
-
-    monkeypatch.setattr(imgur, 'event_discover_new_ids', lambda *_: func_calls.append('event_discover_new_ids'))
-    monkeypatch.setattr(imgur, 'event_merge_info', lambda *_: func_calls.append('event_merge_info'))
-    monkeypatch.setattr(imgur, 'event_purge_orphaned_ids', lambda *_: func_calls.append('event_purge_orphaned_ids'))
-    monkeypatch.setattr(imgur, 'event_query_api_update_cache',
-                        lambda *_: func_calls.append('event_query_api_update_cache'))
-    monkeypatch.setattr(imgur, 'event_update_imgur_nodes', euin)
-
-    app = application.Sphinx(srcdir, confdir, str(outdir), str(doctreedir), 'html', warningiserror=True,
-                             parallel=parallel)
+    app = application.Sphinx(srcdir, confdir, str(outdir), str(doctree), 'html', warningiserror=True, parallel=parallel)
     app.builder.build_all()
 
     expected = [
@@ -98,4 +101,4 @@ def test(monkeypatch, tmpdir, parallel):
         'event_update_imgur_nodes',
         'event_update_imgur_nodes'
     ]
-    assert expected == func_calls
+    assert expected == calls

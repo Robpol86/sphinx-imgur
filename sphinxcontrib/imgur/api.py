@@ -1,5 +1,9 @@
 """Interfaces with the Imgur REST API and the Sphinx cache."""
 
+import json
+import time
+import urllib
+
 DATA_MODEL = dict(
     _docnames=(),  # Tuple of Sphinx doc names using this ID.
     _mod_time=0,  # Epoch.
@@ -55,7 +59,7 @@ def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname):
             env.imgur_api_cache[imgur_id]['_docnames'] = tuple(docnames)
 
 
-def query_imgur_api(env, client_id, ttl):
+def query_imgur_api(env, client_id, ttl, response):
     """Refresh cache by querying the Imgur API.
 
     Album API queries returns metadata of all images. If one of those images is also used in the Sphinx documentation
@@ -64,5 +68,29 @@ def query_imgur_api(env, client_id, ttl):
     :param env: Sphinx persistent build environment object.
     :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
     :param int ttl: Number of seconds cache entries can age before being considered expired.
+    :param dict response: Use this dict instead of actually querying the API (for testing).
     """
-    pass
+    return  # TODO
+    url_base = 'https://api.imgur.com/3/{aoi}/{id}'
+    for imgur_id, data in sorted(env.imgur_api_cache.items(), key=lambda i: (0, i) if i[0][:2] == 'a/' else (1, i)):
+        if time.time() - data['_mod_time'] < ttl:
+            continue
+        if response:
+            raise NotImplementedError
+        if imgur_id.startswith('a/'):
+            url = url_base.format(aoi='album', id=imgur_id[2:])
+        else:
+            url = url_base.format(aoi='image', id=imgur_id)
+        request = urllib.request.Request(url)
+        request.add_header('Authorization', 'Client-ID {}'.format(client_id))
+        handle = urllib.request.urlopen(request)
+        raw_json = handle.read(409600)
+        response = json.loads(raw_json.decode('utf-8'))['data']
+        data['description'] = response['description']
+        data['title'] = response['title']
+        for image in response.get('images', ()):
+            image_data = env.imgur_api_cache[image['id']]
+            image_data['description'] = image['description']
+            image_data['title'] = image['title']
+            image_data['_mod_time'] = int(time.time())
+        data['_mod_time'] = int(time.time())

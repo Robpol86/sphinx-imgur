@@ -63,7 +63,10 @@ def event_query_api_update_cache(app, env):
 
     Called once for the entire sphinx-build session.
     """
-    pass  # TODO implement this.
+    client_id = app.config['imgur_client_id']
+    ttl = app.config['imgur_api_cache_ttl']
+    response = app.config['imgur_api_test_response']
+    api.query_imgur_api(env, client_id, ttl, response)
 
 
 def event_update_imgur_nodes(app, doctree, _):
@@ -95,6 +98,7 @@ def setup(app):
     """
     app.add_config_value('imgur_allow_html', False, True)
     app.add_config_value('imgur_api_cache_ttl', 172800, False)
+    app.add_config_value('imgur_api_test_response', None, False)
     app.add_config_value('imgur_client_id', None, False)
     app.add_config_value('imgur_hide_post_details', False, True)
     app.add_directive('imgur-embed', directives.ImgurEmbedDirective)
