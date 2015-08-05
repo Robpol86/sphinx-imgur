@@ -1,8 +1,15 @@
 """Interfaces with the Imgur REST API and the Sphinx cache."""
 
 import json
+import re
 import time
-import urllib
+
+try:
+    import urllib.request as urllib_request
+except ImportError:
+    import urllib2 as urllib_request
+
+from sphinx.errors import ExtensionError
 
 
 def purge_orphaned_entries(env, docname):
@@ -28,7 +35,7 @@ def purge_orphaned_entries(env, docname):
         env.imgur_api_cache.pop(imgur_id)
 
 
-def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname):
+def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname=None):
     """Add new image/album IDs to the cache or add the docname to existing cache entries.
 
     New entries have a _mod_time of 0, which makes them expired. query_imgur_api() will handle them.
@@ -40,13 +47,13 @@ def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname):
     for imgur_id in imgur_ids:
         if imgur_id not in env.imgur_api_cache:
             env.imgur_api_cache[imgur_id] = dict(
-                _docnames={docname},  # Set of Sphinx doc names using this ID.
+                _docnames={docname} if docname else set(),  # Set of Sphinx doc names using this ID.
                 _mod_time=0,  # Epoch.
                 description='',
                 images=set(),  # Set of image IDs (populated in albums only).
                 title='',
             )
-        elif docname not in env.imgur_api_cache[imgur_id]['_docnames']:
+        elif docname and docname not in env.imgur_api_cache[imgur_id]['_docnames']:
             env.imgur_api_cache[imgur_id]['_docnames'].add(docname)
 
 
@@ -63,25 +70,55 @@ def query_imgur_api(env, client_id, ttl, response):
     """
     return  # TODO
     url_base = 'https://api.imgur.com/3/{aoi}/{id}'
-    for imgur_id, data in sorted(env.imgur_api_cache.items(), key=lambda i: (0, i) if i[0][:2] == 'a/' else (1, i)):
-        if time.time() - data['_mod_time'] < ttl:
-            continue
-        if response:
-            raise NotImplementedError
+    now = int(time.time())
+    imgur_ids_expired = {k for k, v in env.imgur_api_cache.items() if now - v['_mod_time'] < ttl}
+    if not imgur_ids_expired:
+        return
+
+    # Optimize: if an image is in some album, request album instead of image.
+    album_lookup = {i: a for a in env.imgur_api_cache for i in a['images'] if i in imgur_ids_expired}
+    for image, album in album_lookup.items():
+        imgur_ids_expired.remove(image)
+        imgur_ids_expired.add(album)
+    imgur_ids = sorted(imgur_ids_expired, key=lambda i: (0, i) if i[:2] == 'a/' else (1, i))
+
+    # Handle response argument if set.
+    if response:
+        for imgur_id in imgur_ids:
+            env.imgur_api_cache[imgur_id]['description'] = response[imgur_id]['description']
+            env.imgur_api_cache[imgur_id]['title'] = response[imgur_id]['title']
+            for response_image in response[imgur_id].get('images', ()) if imgur_id.startswith('a/') else ():
+                if response_image['id'] not in env.imgur_api_cache:
+                    queue_new_imgur_ids_or_add_docname(env, {response_image['id']})
+                env.imgur_api_cache[response_image['id']]['description'] = response_image['description']
+                env.imgur_api_cache[response_image['id']]['title'] = response_image['title']
+                env.imgur_api_cache[response_image['id']]['_mod_time'] = now
+            env.imgur_api_cache[imgur_id]['_mod_time'] = now
+        return
+
+    if not client_id:
+        raise ExtensionError('imgur_client_id config value must be set for Imgur API calls.')
+    if not re.match(r'^[a-f0-9]{5,30}$', client_id):
+        raise ExtensionError('imgur_client_id config value must be 5-30 lower case letters and numbers only.')
+
+    # Actually hit the API.
+    for imgur_id in imgur_ids:
         if imgur_id.startswith('a/'):
             url = url_base.format(aoi='album', id=imgur_id[2:])
         else:
             url = url_base.format(aoi='image', id=imgur_id)
-        request = urllib.request.Request(url)
+        request = urllib_request.Request(url)
         request.add_header('Authorization', 'Client-ID {}'.format(client_id))
-        handle = urllib.request.urlopen(request)
+        handle = urllib_request.urlopen(request)
         raw_json = handle.read(409600)
         response = json.loads(raw_json.decode('utf-8'))['data']
-        data['description'] = response['description']
-        data['title'] = response['title']
-        for image in response.get('images', ()):
-            image_data = env.imgur_api_cache[image['id']]
-            image_data['description'] = image['description']
-            image_data['title'] = image['title']
-            image_data['_mod_time'] = int(time.time())
-        data['_mod_time'] = int(time.time())
+
+        env.imgur_api_cache[imgur_id]['description'] = response['description']
+        env.imgur_api_cache[imgur_id]['title'] = response['title']
+        for response_image in response.get('images', ()) if imgur_id.startswith('a/') else ():
+            if response_image['id'] not in env.imgur_api_cache:
+                queue_new_imgur_ids_or_add_docname(env, {response_image['id']})
+            env.imgur_api_cache[response_image['id']]['description'] = response_image['description']
+            env.imgur_api_cache[response_image['id']]['title'] = response_image['title']
+            env.imgur_api_cache[response_image['id']]['_mod_time'] = now
+        env.imgur_api_cache[imgur_id]['_mod_time'] = now

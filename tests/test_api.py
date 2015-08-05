@@ -4,6 +4,7 @@ from sphinxcontrib.imgur import api
 
 
 def test_purge_orphaned_entries():
+    """Test."""
     # Do nothing on empty.
     env = type('FakeEnv', (), {})()
     api.purge_orphaned_entries(env, 'TestDoc')
@@ -37,6 +38,7 @@ def test_purge_orphaned_entries():
 
 
 def test_queue_new_imgur_ids_or_add_docname():
+    """Test."""
     env = type('FakeEnv', (), {})()
     env.imgur_api_cache = dict()
     imgur_ids = {'image'}
