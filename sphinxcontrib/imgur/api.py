@@ -4,14 +4,6 @@ import json
 import time
 import urllib
 
-DATA_MODEL = dict(
-    _docnames=(),  # Tuple of Sphinx doc names using this ID.
-    _mod_time=0,  # Epoch.
-    description='',
-    images=(),  # Tuple of image IDs (populated in albums only).
-    title='',
-)
-
 
 def purge_orphaned_entries(env, docname):
     """Remove orphaned Imgur cached entries from the Sphinx build environment. They are no longer used anywhere.
@@ -22,23 +14,18 @@ def purge_orphaned_entries(env, docname):
     if not hasattr(env, 'imgur_api_cache'):
         return
 
-    imgur_ids_used_by_doc = {k for k, v in env.imgur_api_cache.items() if docname in v['_docnames']}
-
     # First remove the docname from all imgur_api_cache entries.
-    for imgur_id in imgur_ids_used_by_doc:
-        docnames = env.imgur_api_cache[imgur_id]['_docnames']
-        env.imgur_api_cache[imgur_id]['_docnames'] = tuple(d for d in docnames if d != docname)
+    for imgur_id in [k for k, v in env.imgur_api_cache.items() if docname in v['_docnames']]:
+        env.imgur_api_cache[imgur_id]['_docnames'].remove(docname)
 
     # Next prune albums with no docnames.
-    for imgur_id in (i for i in imgur_ids_used_by_doc if i.startswith('a/')):
-        if not env.imgur_api_cache[imgur_id]['_docnames']:
-            env.imgur_api_cache.pop(imgur_id)
+    for imgur_id in [k for k, v in env.imgur_api_cache.items() if k.startswith('a/') and not v['_docnames']]:
+        env.imgur_api_cache.pop(imgur_id)
 
     # Finally prune images with BOTH no docnames and no albums.
     used_in_albums = {i for a in env.imgur_api_cache.values() for i in a['images']}
-    for imgur_id in (i for i in imgur_ids_used_by_doc if not i.startswith('a/')):
-        if not env.imgur_api_cache[imgur_id]['_docnames'] and imgur_id not in used_in_albums:
-            env.imgur_api_cache.pop(imgur_id)
+    for imgur_id in [k for k, v in env.imgur_api_cache.items() if k not in used_in_albums and not v['_docnames']]:
+        env.imgur_api_cache.pop(imgur_id)
 
 
 def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname):
@@ -52,11 +39,15 @@ def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname):
     """
     for imgur_id in imgur_ids:
         if imgur_id not in env.imgur_api_cache:
-            env.imgur_api_cache[imgur_id] = DATA_MODEL.copy()
+            env.imgur_api_cache[imgur_id] = dict(
+                _docnames={docname},  # Set of Sphinx doc names using this ID.
+                _mod_time=0,  # Epoch.
+                description='',
+                images=set(),  # Set of image IDs (populated in albums only).
+                title='',
+            )
         elif docname not in env.imgur_api_cache[imgur_id]['_docnames']:
-            docnames = set(env.imgur_api_cache[imgur_id]['_docnames'])
-            docnames.add(docname)
-            env.imgur_api_cache[imgur_id]['_docnames'] = tuple(docnames)
+            env.imgur_api_cache[imgur_id]['_docnames'].add(docname)
 
 
 def query_imgur_api(env, client_id, ttl, response):

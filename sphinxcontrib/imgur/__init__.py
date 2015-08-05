@@ -29,6 +29,8 @@ def event_discover_new_ids(app, doctree):
     for node_class in (c for c in vars(nodes).values() if hasattr(c, 'IMGUR_API') and c.IMGUR_API):
         for node in doctree.traverse(node_class):
             imgur_ids.add(node.imgur_id)
+    if not imgur_ids:
+        return
     api.queue_new_imgur_ids_or_add_docname(app.builder.env, imgur_ids, app.builder.env.docname)
 
 
