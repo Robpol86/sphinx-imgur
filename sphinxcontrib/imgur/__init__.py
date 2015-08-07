@@ -68,7 +68,7 @@ def event_query_api_update_cache(app, env):
     client_id = app.config['imgur_client_id']
     ttl = app.config['imgur_api_cache_ttl']
     response = app.config['imgur_api_test_response']
-    api.query_imgur_api(env, client_id, ttl, response)
+    api.query_imgur_api(app, env, client_id, ttl, response)
 
 
 def event_update_imgur_nodes(app, doctree, _):

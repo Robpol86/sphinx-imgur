@@ -16,6 +16,9 @@ sys.path.append('{}')
 extensions = ['sphinxcontrib.imgur']
 master_doc = 'index'
 nitpicky = True
+imgur_api_test_response = {{
+    'Valid123': dict(title='Title2', description='Desc2'),
+}}
 """
 
 TEST_CASES = [

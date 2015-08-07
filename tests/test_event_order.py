@@ -36,6 +36,10 @@ def create_first_env(tmpdir):
         extensions = ['sphinxcontrib.imgur']
         master_doc = 'index'
         nitpicky = True
+        imgur_api_test_response = {{
+            'a/abc1234': dict(title='Title', description='Desc'),
+            '1234abc': dict(title='Title2', description='Desc2'),
+        }}
         """).format(py.path.local(__file__).join('..', '..')))
 
     # Write rst files.
