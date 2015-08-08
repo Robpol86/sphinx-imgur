@@ -113,4 +113,4 @@ def setup(app):
     app.connect('env-merge-info', event_merge_info)
     app.connect('env-purge-doc', event_purge_orphaned_ids)
     app.connect('env-updated', event_query_api_update_cache)
-    return dict(version=__version__)
+    return dict(parallel_read_safe=True, version=__version__)
