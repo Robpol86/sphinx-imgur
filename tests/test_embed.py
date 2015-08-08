@@ -2,24 +2,13 @@
 
 import re
 
-import py
 import pytest
 from docutils.parsers.rst import directives, roles
 from sphinx import application
 from sphinx.errors import SphinxWarning
 
 from sphinxcontrib.imgur.directives import ImgurError
-
-BASE_CONFIG = """\
-import sys
-sys.path.append('{}')
-extensions = ['sphinxcontrib.imgur']
-master_doc = 'index'
-nitpicky = True
-imgur_api_test_response = {{
-    'Valid123': dict(title='Title2', description='Desc2'),
-}}
-"""
+from tests.helpers import BASE_CONFIG
 
 TEST_CASES = [
     dict(id='Valid123', hpd_conf=None, hpd_option=None),
@@ -42,7 +31,7 @@ def test(monkeypatch, tmpdir, is_album, test_case):
     """Test valid and invalid values."""
     # Write conf.py.
     conf_py = tmpdir.join('conf.py')
-    conf_py.write(BASE_CONFIG.format(py.path.local(__file__).join('..', '..')))
+    conf_py.write(BASE_CONFIG)
     if test_case['hpd_conf'] is not None:
         conf_py.write('imgur_hide_post_details = "{}"'.format(test_case['hpd_conf']), mode='a')
 
