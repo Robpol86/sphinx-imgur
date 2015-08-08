@@ -1,6 +1,7 @@
 """Common/helper code for all test modules."""
 
 import os
+import re
 from functools import wraps
 from textwrap import dedent
 
@@ -47,8 +48,8 @@ def init_sample_docs(tmpdir):
         Albums Go Here
         ==============
 
-        The title is: :imgur-title:`a/abc1234`.
-        And the description: :imgur-description:`a/abc1234`
+        | The title is: :imgur-title:`a/abc1234`.
+        | And the description: :imgur-description:`a/abc1234`
         """))
     doc2_rst.write(dedent("""\
         .. _doc2:
@@ -56,8 +57,40 @@ def init_sample_docs(tmpdir):
         Images Go Here
         ==============
 
-        The title is: :imgur-title:`1234abc`.
+        | The title is: :imgur-title:`1234abc`.
         """))
+
+
+def change_doc(tmpdir):
+    """Change one document and conf.py.
+
+    :param tmpdir: PyTest builtin tmpdir fixture (py.path instance).
+    """
+    conf_py = tmpdir.join('conf.py').read()
+    new_conf = re.sub(r"(a/abc1234': dict\(title=')\w+'", r"\1New Title'", conf_py)
+    tmpdir.join('conf.py').write(new_conf)
+    tmpdir.join('doc1.rst').write(dedent("""\
+        .. _doc1:
+
+        Albums Go Here
+        ==============
+
+        | The title is now: :imgur-title:`a/abc1234`.
+        | And the description: :imgur-description:`a/abc1234`
+        """))
+
+
+def remove_doc(tmpdir, outdir):
+    """Remove one document.
+
+    :param tmpdir: PyTest builtin tmpdir fixture (py.path instance).
+    :param outdir: py.path instance to output directory.
+    """
+    index_rst = tmpdir.join('index.rst').read()
+    new_index = '\n'.join(index_rst.splitlines()[:-1])
+    tmpdir.join('index.rst').write(new_index)
+    tmpdir.join('doc2.rst').remove()
+    outdir.join('doc2.html').remove()
 
 
 def track_call(call_list, func):

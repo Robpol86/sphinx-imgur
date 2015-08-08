@@ -61,7 +61,15 @@ class ImgurDescriptionNode(General, Element):
         self.imgur_id = imgur_id
 
 
-class ImgurTitleNode(ImgurDescriptionNode):
+class ImgurTitleNode(General, Element):
     """Imgur text node for image/album titles. To be replaced with docutils.nodes.Text."""
 
-    pass
+    IMGUR_API = True
+
+    def __init__(self, imgur_id):
+        """Constructor.
+
+        :param str imgur_id: Imgur album or image ID for later lookup.
+        """
+        super(ImgurTitleNode, self).__init__()
+        self.imgur_id = imgur_id
