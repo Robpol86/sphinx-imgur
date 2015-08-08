@@ -7,36 +7,38 @@ from sphinx import application
 from sphinxcontrib import imgur
 from tests.helpers import init_sample_docs, track_call
 
+EXPECTED = list()
+EXPECTED.append([
+    'event_purge_orphaned_ids',
+    'event_discover_new_ids',
+    'event_purge_orphaned_ids',
+    'event_discover_new_ids',
+    'event_purge_orphaned_ids',
+    'event_discover_new_ids',
+    'event_query_api_update_cache',
+    'event_update_imgur_nodes',
+    'event_update_imgur_nodes',
+    'event_update_imgur_nodes'
+])
 
-@pytest.mark.parametrize('parallel', [0, 1, 2])
-def test(monkeypatch, tmpdir, parallel):
-    """Test when sphinx-build runs for the first time."""
+
+@pytest.mark.parametrize('iteration', range(1))
+def test(monkeypatch, tmpdir_module, iteration):
+    """Test when sphinx-build runs multiple times."""
+    calls = list()
+    for func_name, func in ((f, getattr(imgur, f)) for f in dir(imgur) if f.startswith('event_')):
+        monkeypatch.setattr(imgur, func_name, track_call(calls, func))
+
     monkeypatch.setattr(directives, '_directives', getattr(directives, '_directives').copy())
     monkeypatch.setattr(roles, '_roles', getattr(roles, '_roles').copy())
-    init_sample_docs(tmpdir)
-    srcdir = confdir = str(tmpdir)
-    outdir = tmpdir.join('_build', 'html')
-    doctree = outdir.join('doctrees').ensure(dir=True, rec=True)
-    calls = list()
-    monkeypatch.setattr(imgur, 'event_discover_new_ids', track_call(calls, imgur.event_discover_new_ids))
-    monkeypatch.setattr(imgur, 'event_merge_info', track_call(calls, imgur.event_merge_info))
-    monkeypatch.setattr(imgur, 'event_purge_orphaned_ids', track_call(calls, imgur.event_purge_orphaned_ids))
-    monkeypatch.setattr(imgur, 'event_query_api_update_cache', track_call(calls, imgur.event_query_api_update_cache))
-    monkeypatch.setattr(imgur, 'event_update_imgur_nodes', track_call(calls, imgur.event_update_imgur_nodes))
+    srcdir = confdir = str(tmpdir_module)
+    outdir = tmpdir_module.join('_build', 'html')
+    doctree = outdir.join('doctrees')
+    if not iteration:  # First run.
+        init_sample_docs(tmpdir_module)
+        doctree.ensure_dir()
 
-    app = application.Sphinx(srcdir, confdir, str(outdir), str(doctree), 'html', warningiserror=True, parallel=parallel)
+    app = application.Sphinx(srcdir, confdir, str(outdir), str(doctree), 'html', warningiserror=True)
     app.builder.build_all()
 
-    expected = [
-        'event_purge_orphaned_ids',
-        'event_discover_new_ids',
-        'event_purge_orphaned_ids',
-        'event_discover_new_ids',
-        'event_purge_orphaned_ids',
-        'event_discover_new_ids',
-        'event_query_api_update_cache',
-        'event_update_imgur_nodes',
-        'event_update_imgur_nodes',
-        'event_update_imgur_nodes'
-    ]
-    assert expected == calls
+    assert EXPECTED[iteration] == calls
