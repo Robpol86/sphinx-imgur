@@ -87,9 +87,6 @@ def test(monkeypatch, tmpdir_module, iteration):
 
     if iteration < 4:
         assert EXPECTED[iteration] == calls
-    else:
-        # Lists, queues, etc are not multiprocessor safe. Only checking for event_merge_info being called.
-        assert 'event_merge_info' in calls
 
     if iteration < 2:
         assert 'The title is: Title.' in out_doc1_html
