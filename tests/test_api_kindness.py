@@ -68,3 +68,31 @@ def test_add_new_rst_file(tmpdir_module):
     assert 'And the description: Desc' in out_doc1_html
     assert 'The title is: Title2.' in out_doc2_html
     assert 'Test title: Title2.' in out_doc3_html
+
+
+def test_single_id_update(tmpdir_module):
+    """Make sure that only needed IDs are queried."""
+    time.sleep(2)
+    tmpdir_module.join('doc3.rst').write(dedent("""\
+        .. _doc3:
+
+        More Images
+        ===========
+
+        | Test title: :imgur-title:`1234abc1`.
+        """))
+    tmpdir_module.join('conf.py').write(
+        "imgur_api_test_response = {'1234abc1': dict(title='ABC', description='123')}\n",
+        mode='a'
+    )
+
+    check_output(COMMAND, cwd=str(tmpdir_module), stderr=STDOUT)
+
+    outdir = tmpdir_module.join('_build', 'html')
+    out_doc1_html = outdir.join('doc1.html').read()
+    out_doc2_html = outdir.join('doc2.html').read()
+    out_doc3_html = outdir.join('doc3.html').read()
+    assert 'The title is still: Title.' in out_doc1_html
+    assert 'And the description: Desc' in out_doc1_html
+    assert 'The title is: Title2.' in out_doc2_html
+    assert 'Test title: ABC.' in out_doc3_html
