@@ -3,6 +3,7 @@
 import re
 import time
 from subprocess import check_output, STDOUT
+from textwrap import dedent
 
 from tests.helpers import change_doc, init_sample_docs
 
@@ -39,3 +40,31 @@ def test_remove_imgur_api_test_response(tmpdir_module):
     assert 'The title is still: Title.' in out_doc1_html
     assert 'And the description: Desc' in out_doc1_html
     assert 'The title is: Title2.' in out_doc2_html
+
+
+def test_add_new_rst_file(tmpdir_module):
+    """Add a new document but use a pre-existing Imgur ID."""
+    tmpdir_module.join('doc3.rst').write(dedent("""\
+        .. _doc3:
+
+        More Images
+        ===========
+
+        | Test title: :imgur-title:`1234abc`.
+        """))
+    index_rst = tmpdir_module.join('index.rst').read().strip().splitlines()
+    index_rst.extend(['    doc3', ''])
+    tmpdir_module.join('index.rst').write('\n'.join(index_rst))
+
+    time.sleep(2)
+    change_doc(tmpdir_module)
+    check_output(COMMAND, cwd=str(tmpdir_module), stderr=STDOUT)
+
+    outdir = tmpdir_module.join('_build', 'html')
+    out_doc1_html = outdir.join('doc1.html').read()
+    out_doc2_html = outdir.join('doc2.html').read()
+    out_doc3_html = outdir.join('doc3.html').read()
+    assert 'The title is still: Title.' in out_doc1_html
+    assert 'And the description: Desc' in out_doc1_html
+    assert 'The title is: Title2.' in out_doc2_html
+    assert 'Test title: Title2.' in out_doc3_html
