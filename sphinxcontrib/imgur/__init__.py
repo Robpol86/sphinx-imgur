@@ -15,7 +15,7 @@ __version__ = '0.1.0'
 
 
 def event_discover_new_ids(app, doctree):
-    """Event handler that adds new Imgur IDs to the cache or adds docname to existing IDs.
+    """Event handler that adds new Imgur IDs to the cache.
 
     Called once for each Sphinx document.
 
@@ -31,7 +31,7 @@ def event_discover_new_ids(app, doctree):
             imgur_ids.add(node.imgur_id)
     if not imgur_ids:
         return
-    api.queue_new_imgur_ids_or_add_docname(app.builder.env, imgur_ids, app.builder.env.docname)
+    api.queue_new_imgur_ids(app.builder.env, imgur_ids)
 
 
 def event_query_api_update_cache(app, env):

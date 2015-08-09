@@ -23,5 +23,5 @@ def test(tmpdir):
         }
         """))
 
-    command = ['sphinx-build', '-a', '-E', '-n', '-N', '-W', '-b', 'html', '.', '_build/html']
+    command = ['sphinx-build', '-a', '-E', '-n', '-N', '-W', '.', '_build/html']
     check_output(command, cwd=str(tmpdir), stderr=STDOUT)

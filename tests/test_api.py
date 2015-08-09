@@ -9,17 +9,13 @@ from sphinx.errors import ExtensionError
 from sphinxcontrib.imgur import api
 
 
-def test_queue_new_imgur_ids_or_add_docname():
+def test_queue_new_imgur_ids():
     """Test."""
     env = type('FakeEnv', (), {})()
     env.imgur_api_cache = dict()
     imgur_ids = {'image'}
-
-    api.queue_new_imgur_ids_or_add_docname(env, imgur_ids, 'TestDoc')
-    assert env.imgur_api_cache['image']['_docnames'] == {'TestDoc'}
-
-    api.queue_new_imgur_ids_or_add_docname(env, imgur_ids, 'TestDoc2')
-    assert env.imgur_api_cache['image']['_docnames'] == {'TestDoc', 'TestDoc2'}
+    api.queue_new_imgur_ids(env, imgur_ids)
+    assert env.imgur_api_cache['image']
 
 
 def test_query_imgur_api_imgur_api_test_response(monkeypatch):
@@ -46,7 +42,7 @@ def test_query_imgur_api_imgur_api_test_response(monkeypatch):
         ]),
     }
     env.imgur_api_cache = dict()
-    api.queue_new_imgur_ids_or_add_docname(env, {'image', 'a/album'})
+    api.queue_new_imgur_ids(env, {'image', 'a/album'})
     assert sorted(env.imgur_api_cache.keys()) == ['a/album', 'image']
     assert not env.imgur_api_cache['image']['_mod_time']
     assert not env.imgur_api_cache['a/album']['_mod_time']
@@ -89,7 +85,7 @@ def test_query_imgur_api(monkeypatch, tmpdir):
     app.debug2 = app.warn = app.debug
     env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
     response = dict()
-    api.queue_new_imgur_ids_or_add_docname(env, {'image', 'a/album'})
+    api.queue_new_imgur_ids(env, {'image', 'a/album'})
 
     # Test bad client_id.
     client_id = ''

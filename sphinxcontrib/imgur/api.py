@@ -13,26 +13,22 @@ except ImportError:
 from sphinx.errors import ExtensionError
 
 
-def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname=None):
-    """Add new image/album IDs to the cache or add the docname to existing cache entries.
+def queue_new_imgur_ids(env, imgur_ids):
+    """Add new image/album IDs to the cache.
 
     New entries have a _mod_time of 0, which makes them expired. query_imgur_api() will handle them.
 
     :param env: Sphinx persistent build environment object.
     :param set imgur_ids: Imgur image/album IDs to refresh.
-    :param str docname: Sphinx document name being removed.
     """
     for imgur_id in imgur_ids:
         if imgur_id not in env.imgur_api_cache:
             env.imgur_api_cache[imgur_id] = dict(
-                _docnames={docname} if docname else set(),  # Set of Sphinx doc names using this ID.
                 _mod_time=0,  # Epoch.
                 description='',
                 images=set(),  # Set of image IDs (populated in albums only).
                 title='',
             )
-        elif docname and docname not in env.imgur_api_cache[imgur_id]['_docnames']:
-            env.imgur_api_cache[imgur_id]['_docnames'].add(docname)
 
 
 def query_imgur_api(app, env, client_id, ttl, response):
@@ -69,7 +65,7 @@ def query_imgur_api(app, env, client_id, ttl, response):
             env.imgur_api_cache[imgur_id]['title'] = response[imgur_id]['title']
             for response_image in response[imgur_id].get('images', ()) if imgur_id.startswith('a/') else ():
                 if response_image['id'] not in env.imgur_api_cache:
-                    queue_new_imgur_ids_or_add_docname(env, {response_image['id']})
+                    queue_new_imgur_ids(env, {response_image['id']})
                 env.imgur_api_cache[imgur_id]['images'].add(response_image['id'])
                 env.imgur_api_cache[response_image['id']]['description'] = response_image['description']
                 env.imgur_api_cache[response_image['id']]['title'] = response_image['title']
@@ -107,7 +103,7 @@ def query_imgur_api(app, env, client_id, ttl, response):
         env.imgur_api_cache[imgur_id]['title'] = response['title']
         for response_image in response.get('images', ()) if imgur_id.startswith('a/') else ():
             if response_image['id'] not in env.imgur_api_cache:
-                queue_new_imgur_ids_or_add_docname(env, {response_image['id']})
+                queue_new_imgur_ids(env, {response_image['id']})
             env.imgur_api_cache[imgur_id]['images'].add(response_image['id'])
             env.imgur_api_cache[response_image['id']]['description'] = response_image['description']
             env.imgur_api_cache[response_image['id']]['title'] = response_image['title']
