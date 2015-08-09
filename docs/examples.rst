@@ -11,6 +11,9 @@ Inline Roles
 
 Include text entries inline in your paragraphs. These work with images and albums.
 
+Titles and Descriptions
+-----------------------
+
 .. code-block:: rst
 
     * Imgur title of the album below: :imgur-title:`a/hWyW0`

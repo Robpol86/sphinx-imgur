@@ -20,7 +20,7 @@ EXPECTED.append([
     'event_update_imgur_nodes',
 ])
 EXPECTED.append([
-    'event_query_api_update_cache',  # TODO remove
+    'event_query_api_update_cache',
     'event_update_imgur_nodes',
     'event_update_imgur_nodes',
     'event_update_imgur_nodes',

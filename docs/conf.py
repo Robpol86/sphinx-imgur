@@ -26,3 +26,13 @@ version = release
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_title = project
+
+
+# Options for extensions.
+imgur_client_id = '13d3c73555f2190'
+
+
+# Enable the `confval` directive.
+def setup(app):
+    """Called by Sphinx."""
+    app.add_object_type('confval', 'confval', objname='configuration value', indextemplate='pair: %s; config value')

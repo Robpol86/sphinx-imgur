@@ -2,7 +2,7 @@
 Imgur Sphinx Extension
 ======================
 
-Todo
+Use `Imgur <http://imgur.com/>`_ images and albums in your Sphinx documents instead of hosting them locally. Save millions on hosting costs!
 
 Project Links
 =============
@@ -18,4 +18,5 @@ Contents
 .. toctree::
     :maxdepth: 2
 
+    usage
     examples

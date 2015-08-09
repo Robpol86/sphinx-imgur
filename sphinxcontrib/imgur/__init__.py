@@ -11,7 +11,7 @@ from sphinxcontrib.imgur import api, directives, nodes, roles
 
 __author__ = '@Robpol86'
 __license__ = 'MIT'
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 
 
 def event_discover_new_ids(app, doctree):
@@ -69,7 +69,6 @@ def setup(app):
     :returns: Extension version.
     :rtype: dict
     """
-    app.add_config_value('imgur_allow_html', False, True)
     app.add_config_value('imgur_api_cache_ttl', 172800, False)
     app.add_config_value('imgur_api_test_response', None, False)
     app.add_config_value('imgur_client_id', None, False)

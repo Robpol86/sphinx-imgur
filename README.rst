@@ -44,7 +44,7 @@ Changelog
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-1.0.0 - Unreleased
+1.0.0 - 2015-08-09
 ------------------
 
 * Initial release.
