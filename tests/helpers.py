@@ -1,7 +1,6 @@
 """Common/helper code for all test modules."""
 
 import os
-import re
 from functools import wraps
 from textwrap import dedent
 
@@ -62,20 +61,17 @@ def init_sample_docs(tmpdir):
 
 
 def change_doc(tmpdir):
-    """Change one document and conf.py.
+    """Change one document.
 
     :param tmpdir: PyTest builtin tmpdir fixture (py.path instance).
     """
-    conf_py = tmpdir.join('conf.py').read()
-    new_conf = re.sub(r"(a/abc1234': dict\(title=')\w+'", r"\1New Title'", conf_py)
-    tmpdir.join('conf.py').write(new_conf)
     tmpdir.join('doc1.rst').write(dedent("""\
         .. _doc1:
 
         Albums Go Here
         ==============
 
-        | The title is now: :imgur-title:`a/abc1234`.
+        | The title is still: :imgur-title:`a/abc1234`.
         | And the description: :imgur-description:`a/abc1234`
         """))
 

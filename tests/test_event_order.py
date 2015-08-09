@@ -11,11 +11,8 @@ from tests.helpers import change_doc, init_sample_docs, remove_doc, track_call
 
 EXPECTED = list()
 EXPECTED.append([
-    'event_purge_orphaned_ids',
     'event_discover_new_ids',
-    'event_purge_orphaned_ids',
     'event_discover_new_ids',
-    'event_purge_orphaned_ids',
     'event_discover_new_ids',
     'event_query_api_update_cache',
     'event_update_imgur_nodes',
@@ -29,7 +26,6 @@ EXPECTED.append([
     'event_update_imgur_nodes',
 ])
 EXPECTED.append([
-    'event_purge_orphaned_ids',
     'event_discover_new_ids',
     'event_query_api_update_cache',
     'event_update_imgur_nodes',
@@ -37,8 +33,6 @@ EXPECTED.append([
     'event_update_imgur_nodes',
 ])
 EXPECTED.append([
-    'event_purge_orphaned_ids',  # Purge IDs for removed file.
-    'event_purge_orphaned_ids',  # index.rst changed too, this and next line is because of that.
     'event_discover_new_ids',
     'event_query_api_update_cache',
     'event_update_imgur_nodes',
@@ -87,11 +81,10 @@ def test(monkeypatch, tmpdir_module, iteration):
         assert 'The title is: Title.' in out_doc1_html
         assert 'And the description: Desc' in out_doc1_html
         assert 'The title is: Title2.' in out_doc2_html
-    elif iteration == 2:
-        assert 'The title is now: New Title.' in out_doc1_html
-        assert 'And the description: Desc' in out_doc1_html
+        return
+    assert 'The title is still: Title.' in out_doc1_html
+    assert 'And the description: Desc' in out_doc1_html
+    if iteration < 3:
         assert 'The title is: Title2.' in out_doc2_html
-    elif iteration == 3:
-        assert 'The title is now: New Title.' in out_doc1_html
-        assert 'And the description: Desc' in out_doc1_html
+    else:
         assert out_doc2_html is False

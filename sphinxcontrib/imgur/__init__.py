@@ -34,17 +34,6 @@ def event_discover_new_ids(app, doctree):
     api.queue_new_imgur_ids_or_add_docname(app.builder.env, imgur_ids, app.builder.env.docname)
 
 
-def event_purge_orphaned_ids(_, env, docname):
-    """Event handler that removes any image/album Imgur IDs that aren't used anywhere else.
-
-    Called when a document is removed/cleaned from the environment. Called once for each Sphinx document.
-
-    :param env: Sphinx build environment.
-    :param str docname: Sphinx document name being removed.
-    """
-    api.purge_orphaned_entries(env, docname)
-
-
 def event_query_api_update_cache(app, env):
     """Event handler that queries the Imgur API and updates the Sphinx cache.
 
@@ -95,6 +84,5 @@ def setup(app):
     app.add_role('imgur-title', roles.imgur_role)
     app.connect('doctree-read', event_discover_new_ids)
     app.connect('doctree-resolved', event_update_imgur_nodes)
-    app.connect('env-purge-doc', event_purge_orphaned_ids)
     app.connect('env-updated', event_query_api_update_cache)
     return dict(parallel_read_safe=False, version=__version__)

@@ -13,29 +13,6 @@ except ImportError:
 from sphinx.errors import ExtensionError
 
 
-def purge_orphaned_entries(env, docname):
-    """Remove orphaned Imgur cached entries from the Sphinx build environment. They are no longer used anywhere.
-
-    :param env: Sphinx build environment.
-    :param str docname: Sphinx document name being removed.
-    """
-    if not hasattr(env, 'imgur_api_cache'):
-        return
-
-    # First remove the docname from all imgur_api_cache entries.
-    for imgur_id in [k for k, v in env.imgur_api_cache.items() if docname in v['_docnames']]:
-        env.imgur_api_cache[imgur_id]['_docnames'].remove(docname)
-
-    # Next prune albums with no docnames.
-    for imgur_id in [k for k, v in env.imgur_api_cache.items() if k.startswith('a/') and not v['_docnames']]:
-        env.imgur_api_cache.pop(imgur_id)
-
-    # Finally prune images with BOTH no docnames and no albums.
-    used_in_albums = {i for a in env.imgur_api_cache.values() for i in a['images']}
-    for imgur_id in [k for k, v in env.imgur_api_cache.items() if k not in used_in_albums and not v['_docnames']]:
-        env.imgur_api_cache.pop(imgur_id)
-
-
 def queue_new_imgur_ids_or_add_docname(env, imgur_ids, docname=None):
     """Add new image/album IDs to the cache or add the docname to existing cache entries.
 
