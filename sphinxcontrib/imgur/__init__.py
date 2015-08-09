@@ -34,21 +34,6 @@ def event_discover_new_ids(app, doctree):
     api.queue_new_imgur_ids_or_add_docname(app.builder.env, imgur_ids, app.builder.env.docname)
 
 
-def event_merge_info(_, env, docnames, other):
-    """Sphinx event handler. Called only during parallel processing to handle storing persisted cache data.
-
-    :param env: Sphinx build environment.
-    :param docnames: Unused.
-    :param other: Parallel Sphinx build environment to merge from.
-    """
-    assert docnames  # PyCharm.
-    if not hasattr(other, 'imgur_api_cache'):
-        return
-    if not hasattr(env, 'imgur_api_cache'):
-        env.imgur_api_cache = dict()
-    env.imgur_api_cache.update(other.imgur_api_cache)
-
-
 def event_purge_orphaned_ids(_, env, docname):
     """Event handler that removes any image/album Imgur IDs that aren't used anywhere else.
 
@@ -110,7 +95,6 @@ def setup(app):
     app.add_role('imgur-title', roles.imgur_role)
     app.connect('doctree-read', event_discover_new_ids)
     app.connect('doctree-resolved', event_update_imgur_nodes)
-    app.connect('env-merge-info', event_merge_info)
     app.connect('env-purge-doc', event_purge_orphaned_ids)
     app.connect('env-updated', event_query_api_update_cache)
-    return dict(parallel_read_safe=True, version=__version__)
+    return dict(parallel_read_safe=False, version=__version__)

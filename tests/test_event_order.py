@@ -7,7 +7,7 @@ from docutils.parsers.rst import directives, roles
 from sphinx import application
 
 from sphinxcontrib import imgur
-from tests.helpers import add_five_docs, change_doc, init_sample_docs, remove_doc, track_call
+from tests.helpers import change_doc, init_sample_docs, remove_doc, track_call
 
 EXPECTED = list()
 EXPECTED.append([
@@ -46,7 +46,7 @@ EXPECTED.append([
 ])
 
 
-@pytest.mark.parametrize('iteration', range(5))
+@pytest.mark.parametrize('iteration', range(4))
 def test(monkeypatch, tmpdir_module, iteration):
     """Test when sphinx-build runs multiple times.
 
@@ -55,7 +55,6 @@ def test(monkeypatch, tmpdir_module, iteration):
     1: No changes.
     2: One file changed.
     3: One file removed.
-    4: Five new files to trigger Sphinx's parallel feature.
     """
     calls = list()
     for func_name, func in ((f, getattr(imgur, f)) for f in dir(imgur) if f.startswith('event_')):
@@ -76,17 +75,13 @@ def test(monkeypatch, tmpdir_module, iteration):
     elif iteration == 3:
         time.sleep(2)
         remove_doc(tmpdir_module, outdir)
-    elif iteration == 4:
-        time.sleep(2)
-        add_five_docs(tmpdir_module)
 
-    app = application.Sphinx(srcdir, confdir, str(outdir), str(doctree), 'html', warningiserror=True, parallel=2)
+    app = application.Sphinx(srcdir, confdir, str(outdir), str(doctree), 'html', warningiserror=True)
     app.builder.build_all()
     out_doc1_html = outdir.join('doc1.html').read()
     out_doc2_html = outdir.join('doc2.html').read() if iteration < 3 else outdir.join('doc2.html').check()
 
-    if iteration < 4:
-        assert EXPECTED[iteration] == calls
+    assert EXPECTED[iteration] == calls
 
     if iteration < 2:
         assert 'The title is: Title.' in out_doc1_html

@@ -93,24 +93,6 @@ def remove_doc(tmpdir, outdir):
     outdir.join('doc2.html').remove()
 
 
-def add_five_docs(tmpdir):
-    """Add five new docs.
-
-    :param tmpdir: PyTest builtin tmpdir fixture (py.path instance).
-    """
-    for i in range(5):
-        tmpdir.join('doc1{}.rst'.format(i)).write(dedent("""\
-            .. _doc1{}:
-
-            Albums Go Here
-            ==============
-
-            | The title is: :imgur-title:`a/abc1234`.
-            | And the description: :imgur-description:`a/abc1234`
-            """.format(i)))
-        tmpdir.join('index.rst').write('\n    doc1{}'.format(i), mode='a')
-
-
 def track_call(call_list, func):
     """Decorator that appends to list the function name before calling said function.
 
