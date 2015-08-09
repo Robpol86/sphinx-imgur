@@ -25,10 +25,7 @@ def event_discover_new_ids(app, doctree):
     if not hasattr(app.builder.env, 'imgur_api_cache'):
         app.builder.env.imgur_api_cache = dict()
 
-    imgur_ids = set()
-    for node_class in (c for c in vars(nodes).values() if hasattr(c, 'IMGUR_API') and c.IMGUR_API):
-        for node in doctree.traverse(node_class):
-            imgur_ids.add(node.imgur_id)
+    imgur_ids = api.get_imgur_ids_from_doctree(doctree)
     if not imgur_ids:
         return
     api.queue_new_imgur_ids(app.builder.env, imgur_ids)

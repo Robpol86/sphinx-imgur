@@ -96,3 +96,32 @@ def test_single_id_update(tmpdir_module):
     assert 'And the description: Desc' in out_doc1_html
     assert 'The title is: Title2.' in out_doc2_html
     assert 'Test title: ABC.' in out_doc3_html
+
+
+def test_expire_everything_single_update(tmpdir_module):
+    """Test that only one API query is done when only one document is updated even though other entries are old."""
+    time.sleep(2)
+    tmpdir_module.join('doc3.rst').write(dedent("""\
+        .. _doc3:
+
+        More Images
+        ===========
+
+        | Test description: :imgur-description:`1234abc1`.
+        """))
+    conf_py = tmpdir_module.join('conf.py').read()
+    new_conf_py = re.sub(r'\nimgur_api_test_response [^}]+\n}', '', conf_py).strip()
+    new_conf_py += "\nimgur_api_test_response = {'1234abc1': dict(title='ABC', description='1234')}\n"
+    new_conf_py += 'imgur_api_cache_ttl = 1\n'
+    tmpdir_module.join('conf.py').write(new_conf_py)
+
+    check_output(COMMAND, cwd=str(tmpdir_module), stderr=STDOUT)
+
+    outdir = tmpdir_module.join('_build', 'html')
+    out_doc1_html = outdir.join('doc1.html').read()
+    out_doc2_html = outdir.join('doc2.html').read()
+    out_doc3_html = outdir.join('doc3.html').read()
+    assert 'The title is still: Title.' in out_doc1_html
+    assert 'And the description: Desc' in out_doc1_html
+    assert 'The title is: Title2.' in out_doc2_html
+    assert 'Test description: 1234.' in out_doc3_html

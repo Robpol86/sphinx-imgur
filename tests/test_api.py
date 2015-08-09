@@ -22,6 +22,7 @@ def test_query_imgur_api_imgur_api_test_response(monkeypatch):
     """Test with predefined test data."""
     now = int(time.time())
     monkeypatch.setattr('time.time', lambda: now)
+    monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'image2', 'a/album'})
 
     # Do nothing on empty or none expired.
     app = type('FakeApp', (), {'debug': lambda *_: None})()
@@ -81,6 +82,7 @@ def test_query_imgur_api_imgur_api_test_response(monkeypatch):
 
 def test_query_imgur_api(monkeypatch, tmpdir):
     """Test with mocked urllib responses."""
+    monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'a/album'})
     app = type('FakeApp', (), {'debug': lambda *args, **kwargs: None})()
     app.debug2 = app.warn = app.debug
     env = type('FakeEnv', (), {'imgur_api_cache': dict()})()

@@ -12,6 +12,40 @@ except ImportError:
 
 from sphinx.errors import ExtensionError
 
+from sphinxcontrib.imgur import nodes
+
+
+def get_imgur_ids_from_doctree(doctree):
+    """Return a set of Imgur IDs mentioned in API-enabled nodes in a specific document.
+
+    :param doctree: Tree of docutils nodes.
+
+    :return: Set of Imgur IDs.
+    :rtype: set
+    """
+    imgur_ids = set()
+    for node_class in (c for c in vars(nodes).values() if hasattr(c, 'IMGUR_API') and c.IMGUR_API):
+        for node in doctree.traverse(node_class):
+            imgur_ids.add(node.imgur_id)
+    return imgur_ids
+
+
+def get_targeted_ids(app, env):
+    """Find Imgur IDs in API-enabled nodes in changed/added documents.
+
+    :param app: Sphinx application object.
+    :param env: Sphinx persistent build environment object.
+
+    :return: Set of Imgur IDs.
+    :rtype: set
+    """
+    targeted_ids = set()
+    for docname in app.builder.get_outdated_docs():
+        doctree = env.get_doctree(docname)
+        imgur_ids = get_imgur_ids_from_doctree(doctree)
+        targeted_ids |= imgur_ids
+    return targeted_ids
+
 
 def queue_new_imgur_ids(env, imgur_ids):
     """Add new image/album IDs to the cache.
@@ -46,7 +80,8 @@ def query_imgur_api(app, env, client_id, ttl, response):
     :param dict response: Use this dict instead of actually querying the API (for testing).
     """
     now = int(time.time())
-    imgur_ids_expired = {k for k, v in env.imgur_api_cache.items() if now - v['_mod_time'] > ttl}
+    targeted_ids = get_targeted_ids(app, env)
+    imgur_ids_expired = {k for k, v in env.imgur_api_cache.items() if k in targeted_ids and now - v['_mod_time'] > ttl}
     if not imgur_ids_expired:
         return
 
@@ -63,6 +98,8 @@ def query_imgur_api(app, env, client_id, ttl, response):
             app.debug('loading Imgur ID %s from imgur_api_test_response config dict.', imgur_id)
             env.imgur_api_cache[imgur_id]['description'] = response[imgur_id]['description']
             env.imgur_api_cache[imgur_id]['title'] = response[imgur_id]['title']
+            if imgur_id.startswith('a/'):
+                env.imgur_api_cache[imgur_id]['images'].clear()
             for response_image in response[imgur_id].get('images', ()) if imgur_id.startswith('a/') else ():
                 if response_image['id'] not in env.imgur_api_cache:
                     queue_new_imgur_ids(env, {response_image['id']})
@@ -101,6 +138,8 @@ def query_imgur_api(app, env, client_id, ttl, response):
 
         env.imgur_api_cache[imgur_id]['description'] = response['description']
         env.imgur_api_cache[imgur_id]['title'] = response['title']
+        if imgur_id.startswith('a/'):
+            env.imgur_api_cache[imgur_id]['images'].clear()
         for response_image in response.get('images', ()) if imgur_id.startswith('a/') else ():
             if response_image['id'] not in env.imgur_api_cache:
                 queue_new_imgur_ids(env, {response_image['id']})
