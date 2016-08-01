@@ -47,7 +47,7 @@ Here is a sample file with the two things you need to do for advanced features:
 All Config Options
 ==================
 
-.. confval:: imgur_api_cache_ttl
+.. attribute:: imgur_api_cache_ttl
 
     *Default: 172800 seconds (2 days)*
 
@@ -55,7 +55,7 @@ All Config Options
     simple things like getting an image's title) so this extension caches API replies. This lets you keep making
     multiple changes in your documentation without bombarding the API. Does not apply to embedded albums/images.
 
-.. confval:: imgur_api_test_response
+.. attribute:: imgur_api_test_response
 
     Unless you're developing a Sphinx extension you won't need this.
 
@@ -64,11 +64,11 @@ All Config Options
     this option is defined, the Imgur API will always be skipped and any missing Imgur IDs will cause ``KeyError`` to be
     raised.
 
-.. confval:: imgur_client_id
+.. attribute:: imgur_client_id
 
     Imgur API Client ID to include in request headers. Required for API calls. More information in the section above.
 
-.. confval:: imgur_hide_post_details
+.. attribute:: imgur_hide_post_details
 
     *Default: False*
 

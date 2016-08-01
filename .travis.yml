@@ -5,9 +5,28 @@ sudo: false
 
 # Run.
 install: pip install appveyor-artifacts coveralls tox
-script: tox -e lint,py34,py33,pypy,py27
+script: tox -e lint,py34,py33,pypy,py27,docs
 after_success:
   - mv .coverage .coverage.travis
   - appveyor-artifacts -mi download
   - coverage combine
   - coveralls
+
+# Deploy.
+deploy:
+  provider: pypi
+  user: Robpol86
+  password:
+    secure:
+      "Iy2sJXgoM4Ej4SAmLJ62M5Al4M7GhwlOearHjv4qixe/E/RB2zmCPeEyqaUsivR8nass+vU\
+      CLWKA6zbOSJIA2t2yE0qbxWuzWAEkAD/jAS2oEHY5yOTCKf4hXmZGdcASReTJYhmCR6vSlsw\
+      c+yKULjUk3GuplOI8rTIIZ5zbzE605mkXgGW8Dj5jb3ZgpJbnmcbtkZNWdAhEggdTqClX5N1\
+      zItWeUXONoYMqzLU1OmwglMY3kKvXiaqBHHrAkoUyukL4p0sWXZGUoMS1jP1qH/sxfAmjK1q\
+      93XYFKmPK7hWlpRUDoO4ny4C/h4b7gfBQiYurz9xD6IwLgEVQsfneebG4vNQPwzCG+M7WtIy\
+      fClgnXg3WISNpypJHJPqjKgxrRSNxceAh0hY8k9fj3CBc5REy5x5+6yNh5iChiiRJpcLI2gU\
+      e7w0za4nISgmwMHwGWAd6cF6AI79RG61d9sq0UZjkx88wgQpLhl5X2ptBlUUfw4ELe9vmUD9\
+      SvuRD0jEwkTQ4dRchgTsu/CaUJtIQWnAmL49cpjlpWjT2EdP8ouyjAe4GQrI+A40z5O8hSh7\
+      oGE+OvNx8CYl3sylG5KRrc7KdovVHaKa1YgzijPbg8tA83V9VRFaG66Lg1iNvGsoP47NFomP\
+      rMGfqhoeeDFQaLe8aO+w3JppVHQymLjH00Zw="
+  on:
+    tags: true

@@ -15,17 +15,13 @@ Embed `Imgur <http://imgur.com/>`_ images, albums, and their metadata in documen
     :target: https://travis-ci.org/Robpol86/sphinxcontrib-imgur
     :alt: Build Status
 
-.. image:: https://img.shields.io/codecov/c/github/Robpol86/sphinxcontrib-imgur/master.svg?style=flat-square&label=Codecov
-    :target: https://codecov.io/github/Robpol86/sphinxcontrib-imgur
+.. image:: https://img.shields.io/coveralls/Robpol86/sphinxcontrib-imgur/master.svg?style=flat-square&label=Coveralls
+    :target: https://coveralls.io/github/Robpol86/sphinxcontrib-imgur
     :alt: Coverage Status
 
 .. image:: https://img.shields.io/pypi/v/sphinxcontrib-imgur.svg?style=flat-square&label=Latest
-    :target: https://pypi.python.org/pypi/sphinxcontrib-imgur/
+    :target: https://pypi.python.org/pypi/sphinxcontrib-imgur
     :alt: Latest Version
-
-.. image:: https://img.shields.io/pypi/dm/sphinxcontrib-imgur.svg?style=flat-square&label=PyPI%20Downloads
-    :target: https://pypi.python.org/pypi/sphinxcontrib-imgur/
-    :alt: Downloads
 
 Quickstart
 ==========
@@ -39,6 +35,8 @@ Install:
 For more information on how to use the extension please read the documentation at:
 https://sphinxcontrib-imgur.readthedocs.org
 
+.. changelog-section-start
+
 Changelog
 =========
 
@@ -48,3 +46,5 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ------------------
 
 * Initial release.
+
+.. changelog-section-end
