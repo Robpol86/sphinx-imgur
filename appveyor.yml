@@ -1,10 +1,8 @@
+# Configure.
+artifacts:
+  - path: .coverage
+
 # Run.
 init: set PATH=C:\Python34-x64;C:\Python34-x64\Scripts;%PATH%
-build_script: pip install codecov tox
-test_script:
-  - tox -e flake8,check,requirements,py27x64,py27
-  - tox -e combine py27x64 py27
-
-after_test:
-  - mv tests/.coverage .
-  - codecov || exit /B 0
+build_script: pip install tox
+test_script: tox -e lint,py34,py33,py27,py34x64,py33x64,py27x64

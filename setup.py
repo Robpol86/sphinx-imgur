@@ -1,76 +1,108 @@
 #!/usr/bin/env python
 """Setup script for the project."""
 
+from __future__ import print_function
+
 import codecs
 import os
 import re
 
-import setuptools
+from setuptools import Command, setup
 
-_PACKAGES = lambda: [os.path.join(r, s) for r, d, _ in os.walk(NAME_FILE) for s in d if s != '__pycache__']
-_VERSION_RE = re.compile(r"^__(version|author|license)__ = '([\w\.@]+)'$", re.MULTILINE)
-
-CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable',
-    'Environment :: MacOS X',
-    'Environment :: Plugins',
-    'Environment :: Win32 (MS Windows)',
-    'Framework :: Sphinx :: Extension',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: MIT License',
-    'Operating System :: MacOS :: MacOS X',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: POSIX :: Linux',
-    'Operating System :: POSIX',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: Implementation :: PyPy',
-    'Topic :: Documentation :: Sphinx',
-    'Topic :: Software Development :: Documentation',
-]
-DESCRIPTION = 'Sphinx extension that embeds Imgur images, albums, and their metadata in documents.'
-HERE = os.path.abspath(os.path.dirname(__file__))
-KEYWORDS = 'sphinx imgur'
+IMPORT = 'sphinxcontrib.imgur'
+INSTALL_REQUIRES = ['sphinx']
+LICENSE = 'MIT'
 NAME = 'sphinxcontrib-imgur'
-NAME_FILE = NAME.split('-', 1)[0]
-PACKAGE = True
-REQUIRES_INSTALL = ['sphinx==1.3.1']
-REQUIRES_TEST = ['pytest-cov']
-REQUIRES_ALL = REQUIRES_INSTALL + REQUIRES_TEST
-VERSION_FILE = os.path.join(NAME_FILE, 'imgur', '__init__.py') if PACKAGE else '{0}.py'.format(NAME_FILE)
+VERSION = '1.0.0'
 
 
-def _safe_read(path, length):
-    """Read file contents."""
-    if not os.path.exists(os.path.join(HERE, path)):
+def readme(path='README.rst'):
+    """Try to read README.rst or return empty string if failed.
+
+    :param str path: Path to README file.
+
+    :return: File contents.
+    :rtype: str
+    """
+    path = os.path.realpath(os.path.join(os.path.dirname(__file__), path))
+    handle = None
+    url_prefix = 'https://raw.githubusercontent.com/Robpol86/{name}/v{version}/'.format(name=NAME, version=VERSION)
+    try:
+        handle = codecs.open(path, encoding='utf-8')
+        return handle.read(131072).replace('.. image:: docs', '.. image:: {0}docs'.format(url_prefix))
+    except IOError:
         return ''
-    file_handle = codecs.open(os.path.join(HERE, path), encoding='utf-8')
-    contents = file_handle.read(length)
-    file_handle.close()
-    return contents
+    finally:
+        getattr(handle, 'close', lambda: None)()
 
 
-ALL_DATA = dict(
+class CheckVersion(Command):
+    """Make sure version strings and other metadata match here, in module/package, tox, and other places."""
+
+    description = 'verify consistent version/etc strings in project'
+    user_options = []
+
+    @classmethod
+    def initialize_options(cls):
+        """Required by distutils."""
+        pass
+
+    @classmethod
+    def finalize_options(cls):
+        """Required by distutils."""
+        pass
+
+    @classmethod
+    def run(cls):
+        """Check variables."""
+        project = __import__(IMPORT, fromlist=[''])
+        for expected, var in [('@Robpol86', '__author__'), (LICENSE, '__license__'), (VERSION, '__version__')]:
+            if getattr(project, var) != expected:
+                raise SystemExit('Mismatch: {0}'.format(var))
+        # Check changelog.
+        if not re.compile(r'^%s - \d{4}-\d{2}-\d{2}$' % VERSION, re.MULTILINE).search(readme()):
+            raise SystemExit('Version not found in readme/changelog file.')
+        # Check tox.
+        if INSTALL_REQUIRES:
+            section = re.compile(r'\ninstall_requires =\n(.+?)\n\w', re.DOTALL).findall(readme('tox.ini'))
+            if not section:
+                raise SystemExit('Missing install_requires section in tox.ini.')
+            in_tox = re.findall(r'    ([^=]+)==[\w\d.-]+', section[0])
+            if INSTALL_REQUIRES != in_tox:
+                raise SystemExit('Missing/unordered pinned dependencies in tox.ini.')
+
+
+setup(
+    author='@Robpol86',
     author_email='robpol86@gmail.com',
-    classifiers=CLASSIFIERS,
-    description=DESCRIPTION,
-    install_requires=REQUIRES_INSTALL,
-    keywords=KEYWORDS,
-    long_description=_safe_read('README.rst', 15000),
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: MacOS X',
+        'Environment :: Plugins',
+        'Environment :: Win32 (MS Windows)',
+        'Framework :: Sphinx :: Extension',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: POSIX',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Topic :: Documentation :: Sphinx',
+        'Topic :: Software Development :: Documentation',
+    ],
+    cmdclass=dict(check_version=CheckVersion),
+    description='Sphinx extension that embeds Imgur images, albums, and their metadata in documents.',
+    install_requires=INSTALL_REQUIRES,
+    keywords='sphinx imgur',
+    license=LICENSE,
+    long_description=readme(),
     name=NAME,
-    tests_require=REQUIRES_TEST,
-    url='https://github.com/Robpol86/{0}'.format(NAME),
+    packages=['sphinxcontrib', os.path.join('sphinxcontrib', 'imgur')],
+    url='https://github.com/Robpol86/' + NAME,
+    version=VERSION,
     zip_safe=True,
 )
-
-
-# noinspection PyTypeChecker
-ALL_DATA.update(dict(_VERSION_RE.findall(_safe_read(VERSION_FILE, 1500).replace('\r\n', '\n'))))
-ALL_DATA.update(dict(py_modules=[NAME_FILE]) if not PACKAGE else dict(packages=[NAME_FILE] + _PACKAGES()))
-
-
-if __name__ == '__main__':
-    if not all((ALL_DATA['author'], ALL_DATA['license'], ALL_DATA['version'])):
-        raise ValueError('Failed to obtain metadata from package/module.')
-    setuptools.setup(**ALL_DATA)
