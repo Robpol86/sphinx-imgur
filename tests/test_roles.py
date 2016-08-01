@@ -16,9 +16,15 @@ TEST_CASES = [
 ]
 
 
+@pytest.mark.usefixtures('reset_sphinx')
 @pytest.mark.parametrize('test_case', TEST_CASES)
 def test(monkeypatch, tmpdir, test_case):
-    """Test valid and invalid values."""
+    """Test valid and invalid values.
+
+    :param monkeypatch: pytest fixture.
+    :param tmpdir: pytest fixture.
+    :param dict test_case: Dict from TEST_CASES list.
+    """
     # Write conf.py.
     conf_py = tmpdir.join('conf.py')
     conf_py.write(BASE_CONFIG + dedent("""\

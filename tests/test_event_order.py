@@ -40,6 +40,7 @@ EXPECTED.append([
 ])
 
 
+@pytest.mark.usefixtures('reset_sphinx')
 @pytest.mark.parametrize('iteration', range(4))
 def test(monkeypatch, tmpdir_module, iteration):
     """Test when sphinx-build runs multiple times.
@@ -49,6 +50,10 @@ def test(monkeypatch, tmpdir_module, iteration):
     1: No changes.
     2: One file changed.
     3: One file removed.
+
+    :param monkeypatch: pytest fixture.
+    :param tmpdir_module: conftest fixture.
+    :param int iteration: Scenario to test.
     """
     calls = list()
     for func_name, func in ((f, getattr(imgur, f)) for f in dir(imgur) if f.startswith('event_')):

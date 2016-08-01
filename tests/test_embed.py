@@ -25,15 +25,22 @@ TEST_CASES = [
 ]
 
 
+@pytest.mark.usefixtures('reset_sphinx')
 @pytest.mark.parametrize('is_album', [True, False])
 @pytest.mark.parametrize('test_case', TEST_CASES)
 def test(monkeypatch, tmpdir, is_album, test_case):
-    """Test valid and invalid values."""
+    """Test valid and invalid values.
+
+    :param monkeypatch: pytest fixture.
+    :param tmpdir: pytest fixture.
+    :param bool is_album: Test with Imgur album vs image.
+    :param dict test_case: Dict from TEST_CASES list.
+    """
     # Write conf.py.
     conf_py = tmpdir.join('conf.py')
     conf_py.write(BASE_CONFIG)
     if test_case['hpd_conf'] is not None:
-        conf_py.write('imgur_hide_post_details = "{}"'.format(test_case['hpd_conf']), mode='a')
+        conf_py.write('imgur_hide_post_details = {}'.format(test_case['hpd_conf']), mode='a')
 
     # Write index.rst.
     index_rst = tmpdir.join('index.rst')
