@@ -35,7 +35,7 @@ KEYWORDS = 'sphinx imgur'
 NAME = 'sphinxcontrib-imgur'
 NAME_FILE = NAME.split('-', 1)[0]
 PACKAGE = True
-REQUIRES_INSTALL = ['sphinx']
+REQUIRES_INSTALL = ['sphinx==1.3.1']
 REQUIRES_TEST = ['pytest-cov']
 REQUIRES_ALL = REQUIRES_INSTALL + REQUIRES_TEST
 VERSION_FILE = os.path.join(NAME_FILE, 'imgur', '__init__.py') if PACKAGE else '{0}.py'.format(NAME_FILE)
@@ -59,7 +59,6 @@ ALL_DATA = dict(
     keywords=KEYWORDS,
     long_description=_safe_read('README.rst', 15000),
     name=NAME,
-    requires=REQUIRES_INSTALL,
     tests_require=REQUIRES_TEST,
     url='https://github.com/Robpol86/{0}'.format(NAME),
     zip_safe=True,
