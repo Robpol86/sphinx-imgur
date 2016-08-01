@@ -1,11 +1,11 @@
 # Configure.
 language: python
-python: 3.4
+python: 3.5
 sudo: false
 
 # Run.
 install: pip install appveyor-artifacts coveralls tox
-script: tox -e lint,py34,py33,pypy,py27,docs
+script: tox -e lint,py35,py34,py33,pypy,py27,docs
 after_success:
   - mv .coverage .coverage.travis
   - appveyor-artifacts -mi download

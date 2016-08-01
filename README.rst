@@ -4,8 +4,8 @@ sphinxcontrib-imgur
 
 Embed `Imgur <http://imgur.com/>`_ images, albums, and their metadata in documents.
 
-* Python 2.7, PyPy, 3.3, and 3.4 supported on Linux and OS X.
-* Python 2.7 supported on Windows (both 32 and 64 bit versions of Python).
+* Python 2.7, PyPy, 3.3, 3.4, and 3.5 supported on Linux and OS X.
+* Python 2.7, 3.3, 3.4, and 3.5 supported on Windows (both 32 and 64 bit versions of Python).
 
 .. image:: https://img.shields.io/appveyor/ci/Robpol86/sphinxcontrib-imgur/master.svg?style=flat-square&label=AppVeyor%20CI
     :target: https://ci.appveyor.com/project/Robpol86/sphinxcontrib-imgur

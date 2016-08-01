@@ -28,6 +28,22 @@ Embedded Directives
 Embed Imgur albums or images using their JavaScript option. This is the same as the "Embed album" link when you view
 an album on imgur.com.
 
+.. note::
+
+    If you're viewing these docs locally (e.g. the URL starts with ``file://``), then the albums/images below won't
+    load. The Imgur JavaScript is loaded from **//s.imgur.com/min/embed.js** so when viewing locally it tries and fails
+    to find file://s.imgur.com/min/embed.js.
+
+    A work around for this is to view these docs from a local HTTP server. You can quickly fire one up with one of these
+    two commands:
+
+    .. code-block:: bash
+
+        cd docs/_build/html && python2.7 -m SimpleHTTPServer 8080
+        cd docs/_build/html && python3.4 -m http.server 8080
+
+    Then browse to: http://localhost:8080/
+
 Album With Details
 ------------------
 
