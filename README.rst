@@ -41,6 +41,12 @@ Changelog
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+Unreleased
+----------
+
+Added
+    * Python 3.5 support (Linux/OS X and Windows).
+
 1.0.0 - 2015-08-09
 ------------------
 
