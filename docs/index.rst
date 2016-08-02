@@ -8,7 +8,7 @@ millions on hosting costs!
 Project Links
 =============
 
-* Documentation: https://sphinxcontrib-imgur.readthedocs.org
+* Documentation: https://robpol86.github.io/sphinxcontrib-imgur
 * Source code: https://github.com/Robpol86/sphinxcontrib-imgur
 * PyPI homepage: https://pypi.python.org/pypi/sphinxcontrib-imgur
 

@@ -7,6 +7,8 @@ Embed `Imgur <http://imgur.com/>`_ images, albums, and their metadata in documen
 * Python 2.7, PyPy, 3.3, 3.4, and 3.5 supported on Linux and OS X.
 * Python 2.7, 3.3, 3.4, and 3.5 supported on Windows (both 32 and 64 bit versions of Python).
 
+📖 Full documentation: https://robpol86.github.io/sphinxcontrib-imgur
+
 .. image:: https://img.shields.io/appveyor/ci/Robpol86/sphinxcontrib-imgur/master.svg?style=flat-square&label=AppVeyor%20CI
     :target: https://ci.appveyor.com/project/Robpol86/sphinxcontrib-imgur
     :alt: Build Status Windows
@@ -32,21 +34,12 @@ Install:
 
     pip install sphinxcontrib-imgur
 
-For more information on how to use the extension please read the documentation at:
-https://sphinxcontrib-imgur.readthedocs.org
-
 .. changelog-section-start
 
 Changelog
 =========
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
-
-Unreleased
-----------
-
-Added
-    * Python 3.5 support (Linux/OS X and Windows).
 
 1.0.0 - 2015-08-09
 ------------------
