@@ -33,6 +33,6 @@ Lastly you can also just clone the repo and install from it. Usually you only ne
 
 .. code-block:: bash
 
-    git clone git@github.com:Robpol86/sphinxcontrib-imgur.git
+    git clone https://github.com/Robpol86/sphinxcontrib-imgur.git
     cd sphinxcontrib-imgur
     python setup.py install
