@@ -6,14 +6,7 @@ Usage
 
 This page documents how to get started with the extension.
 
-Installation
-============
-
-Install the extension with pip:
-
-.. code:: bash
-
-    pip install sphinxcontrib-imgur
+Make sure that you've already :ref:`installed <install>` it.
 
 Configuration
 =============
@@ -73,3 +66,25 @@ All Config Options
     *Default: False*
 
     The default value of ``hide_post_details`` in embedded albums/images. Overridden in the directive.
+
+Roles and Directives
+====================
+
+These are the available Sphinx/RST roles and `directives <http://www.sphinx-doc.org/en/stable/rest.html#directives>`_.
+To see them in action visit the :ref:`Examples` section.
+
+.. rst:role:: imgur-title
+
+    Display an Imgur image or album's title inline.
+
+.. rst:role:: imgur-description
+
+    Display an Imgur image or album's description text inline.
+
+.. rst:directive:: imgur-embed
+
+    Embed an Imgur image or album using Imgur's fancy javascript.
+
+    .. attribute:: hide_post_details
+
+        Overrides :attr:`imgur_hide_post_details` for this specific embed.
