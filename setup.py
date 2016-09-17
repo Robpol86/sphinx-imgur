@@ -60,11 +60,12 @@ class CheckVersion(Command):
             if getattr(project, var) != expected:
                 raise SystemExit('Mismatch: {0}'.format(var))
         # Check changelog.
-        if not re.compile(r'^%s - \d{4}-\d{2}-\d{2}$' % VERSION, re.MULTILINE).search(readme()):
+        if not re.compile(r'^%s - \d{4}-\d{2}-\d{2}[\r\n]' % VERSION, re.MULTILINE).search(readme()):
             raise SystemExit('Version not found in readme/changelog file.')
         # Check tox.
         if INSTALL_REQUIRES:
-            section = re.compile(r'\ninstall_requires =\n(.+?)\n\w', re.DOTALL).findall(readme('tox.ini'))
+            contents = readme('tox.ini')
+            section = re.compile(r'[\r\n]+install_requires =[\r\n]+(.+?)[\r\n]+\w', re.DOTALL).findall(contents)
             if not section:
                 raise SystemExit('Missing install_requires section in tox.ini.')
             in_tox = re.findall(r'    ([^=]+)==[\w\d.-]+', section[0])
@@ -72,37 +73,38 @@ class CheckVersion(Command):
                 raise SystemExit('Missing/unordered pinned dependencies in tox.ini.')
 
 
-setup(
-    author='@Robpol86',
-    author_email='robpol86@gmail.com',
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: MacOS X',
-        'Environment :: Plugins',
-        'Environment :: Win32 (MS Windows)',
-        'Framework :: Sphinx :: Extension',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX :: Linux',
-        'Operating System :: POSIX',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        'Topic :: Documentation :: Sphinx',
-        'Topic :: Software Development :: Documentation',
-    ],
-    cmdclass=dict(check_version=CheckVersion),
-    description='Sphinx extension that embeds Imgur images, albums, and their metadata in documents.',
-    install_requires=INSTALL_REQUIRES,
-    keywords='sphinx imgur',
-    license=LICENSE,
-    long_description=readme(),
-    name=NAME,
-    packages=['sphinxcontrib', os.path.join('sphinxcontrib', 'imgur')],
-    url='https://github.com/Robpol86/' + NAME,
-    version=VERSION,
-    zip_safe=True,
-)
+if __name__ == '__main__':
+    setup(
+        author='@Robpol86',
+        author_email='robpol86@gmail.com',
+        classifiers=[
+            'Development Status :: 5 - Production/Stable',
+            'Environment :: MacOS X',
+            'Environment :: Plugins',
+            'Environment :: Win32 (MS Windows)',
+            'Framework :: Sphinx :: Extension',
+            'Intended Audience :: Developers',
+            'License :: OSI Approved :: MIT License',
+            'Operating System :: MacOS :: MacOS X',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX :: Linux',
+            'Operating System :: POSIX',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3.3',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: Implementation :: PyPy',
+            'Topic :: Documentation :: Sphinx',
+            'Topic :: Software Development :: Documentation',
+        ],
+        cmdclass=dict(check_version=CheckVersion),
+        description='Sphinx extension that embeds Imgur images, albums, and their metadata in documents.',
+        install_requires=INSTALL_REQUIRES,
+        keywords='sphinx imgur',
+        license=LICENSE,
+        long_description=readme(),
+        name=NAME,
+        packages=['sphinxcontrib', os.path.join('sphinxcontrib', 'imgur')],
+        url='https://github.com/Robpol86/' + NAME,
+        version=VERSION,
+        zip_safe=True,
+    )
