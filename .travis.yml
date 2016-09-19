@@ -1,4 +1,5 @@
 # Configure.
+env: TOX_ENV=py
 language: python
 matrix:
   include:
@@ -26,7 +27,7 @@ sudo: false
 
 # Run.
 install: pip install tox
-script: tox -e ${TOX_ENV:-py}
+script: tox -e $TOX_ENV
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 
