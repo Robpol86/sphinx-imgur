@@ -10,7 +10,7 @@ import re
 from setuptools import Command, setup
 
 IMPORT = 'sphinxcontrib.imgur'
-INSTALL_REQUIRES = ['sphinx']
+INSTALL_REQUIRES = ['requests', 'sphinx']
 LICENSE = 'MIT'
 NAME = 'sphinxcontrib-imgur'
 VERSION = '1.0.0'

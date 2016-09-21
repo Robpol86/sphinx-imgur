@@ -1,12 +1,15 @@
 """Test imgur.api functions."""
 
 import json
+import re
 import time
 
+import httpretty
 import pytest
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur import api
+from sphinxcontrib.imgur.imgur_api import API_URL
 
 
 def test_queue_new_imgur_ids():
@@ -18,14 +21,17 @@ def test_queue_new_imgur_ids():
     assert env.imgur_api_cache['image']
 
 
-def test_query_imgur_api_imgur_api_test_response(monkeypatch):
-    """Test with predefined test data."""
+def test_query_imgur_api_imgur_api_test_response(monkeypatch, app):
+    """Test with predefined test data.
+
+    :param monkeypatch: pytest fixture.
+    :param app: conftest fixture.
+    """
     now = int(time.time())
     monkeypatch.setattr('time.time', lambda: now)
     monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'image2', 'a/album'})
 
     # Do nothing on empty or none expired.
-    app = type('FakeApp', (), {'debug': lambda *_: None})()
     env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
     response = dict()
     api.query_imgur_api(app, env, '', 100, response)
@@ -80,16 +86,17 @@ def test_query_imgur_api_imgur_api_test_response(monkeypatch):
     assert env.imgur_api_cache['a/album']['title'] == 'The Test Album'
 
 
-def test_query_imgur_api(monkeypatch, tmpdir):
-    """Test with mocked urllib responses."""
+def test_query_imgur_api_bad_client_id(monkeypatch, app):
+    """Test with bad client_id value.
+
+    :param monkeypatch: pytest fixture.
+    :param app: conftest fixture.
+    """
     monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'a/album'})
-    app = type('FakeApp', (), {'debug': lambda *args, **kwargs: None})()
-    app.debug2 = app.warn = app.debug
     env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
     response = dict()
     api.queue_new_imgur_ids(env, {'image', 'a/album'})
 
-    # Test bad client_id.
     client_id = ''
     with pytest.raises(ExtensionError) as exc:
         api.query_imgur_api(app, env, client_id, 100, response)
@@ -99,17 +106,41 @@ def test_query_imgur_api(monkeypatch, tmpdir):
         api.query_imgur_api(app, env, client_id, 100, response)
     assert exc.value.args[0] == 'imgur_client_id config value must be 5-30 lower case letters and numbers only.'
 
+
+@pytest.mark.httpretty
+def test_query_imgur_api_http_error(monkeypatch, app):
+    """Test HTTPError handling.
+
+    :param monkeypatch: pytest fixture.
+    :param app: conftest fixture.
+    """
+    monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'a/album'})
+    env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
+    response = dict()
+    api.queue_new_imgur_ids(env, {'image', 'a/album'})
+
     # Test just HTTPError.
-    def fake_urlopen(_):
-        raise api.urllib_request.HTTPError('http://localhost/api.html', 0, '', dict(), tmpdir.join('x.txt').open('w'))
-    monkeypatch.setattr(api.urllib_request, 'urlopen', fake_urlopen)
-    client_id = 'abc123abc123'
-    api.query_imgur_api(app, env, client_id, 100, response)
+    httpretty.register_uri(httpretty.GET, API_URL.format(type='album', id='album'), body='{}', status=500)
+    httpretty.register_uri(httpretty.GET, API_URL.format(type='image', id='image'), body='{}', status=500)
+    api.query_imgur_api(app, env, 'abc123abc123', 100, response)
     assert not env.imgur_api_cache['image']['_mod_time']
     assert not env.imgur_api_cache['a/album']['_mod_time']
 
+
+@pytest.mark.httpretty
+def test_query_imgur_api(monkeypatch, app):
+    """Test with mocked urllib responses.
+
+    :param monkeypatch: pytest fixture.
+    :param app: conftest fixture.
+    """
+    monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'a/album'})
+    env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
+    response = dict()
+    api.queue_new_imgur_ids(env, {'image', 'a/album'})
+
     # Test JSON response.
-    def fake_urlopen(request):
+    def body(_, url, headers):
         rsp_all = {
             'image': dict(description='This is a test image.', title='Test Image'),
             'album': dict(description='This is a test album.', title='Test Album', images=[
@@ -117,13 +148,11 @@ def test_query_imgur_api(monkeypatch, tmpdir):
                 dict(id='image3', description='This image is also in an album.', title='Another Sub Image'),
             ]),
         }
-        url = request.get_full_url()
         rsp = [v for k, v in rsp_all.items() if url.endswith(k)][0]
-        rsp_encoded = json.dumps(dict(data=rsp)).encode('utf-8')
-        setattr(fake_urlopen, 'read', lambda _: rsp_encoded)
-        return fake_urlopen
-    monkeypatch.setattr(api.urllib_request, 'urlopen', fake_urlopen)
-    api.query_imgur_api(app, env, client_id, 100, response)
+        rsp_encoded = json.dumps(dict(data=rsp, success=True)).encode('utf-8')
+        return 200, headers, rsp_encoded
+    httpretty.register_uri(httpretty.GET, re.compile(API_URL.format(type='[^/]+', id=r'\w+')), body=body)
+    api.query_imgur_api(app, env, 'abc123abc123', 100, response)
     assert sorted(env.imgur_api_cache.keys()) == ['a/album', 'image', 'image2', 'image3']
     assert env.imgur_api_cache['image']['_mod_time'] > 1438916421
     assert env.imgur_api_cache['a/album']['_mod_time'] > 1438916421

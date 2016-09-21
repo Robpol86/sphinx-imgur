@@ -1,18 +1,12 @@
 """Interfaces with the Imgur REST API and the Sphinx cache."""
 
-import inspect
-import json
 import re
 import time
-
-try:
-    import urllib.request as urllib_request
-except ImportError:
-    import urllib2 as urllib_request
 
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur import nodes
+from sphinxcontrib.imgur.imgur_api import APIError, query_api
 
 
 def get_imgur_ids_from_doctree(doctree):
@@ -116,25 +110,15 @@ def query_imgur_api(app, env, client_id, ttl, response):
         raise ExtensionError('imgur_client_id config value must be 5-30 lower case letters and numbers only.')
 
     # Actually hit the API.
-    url_base = 'https://api.imgur.com/3/{aoi}/{id}'
     for imgur_id in imgur_ids:
-        if imgur_id.startswith('a/'):
-            url = url_base.format(aoi='album', id=imgur_id[2:])
-        else:
-            url = url_base.format(aoi='image', id=imgur_id)
-        app.debug('querying %s', url)
-        request = urllib_request.Request(url)
-        request.add_header('Authorization', 'Client-ID {}'.format(client_id))
         try:
-            handle = urllib_request.urlopen(request)
-        except urllib_request.HTTPError as exc:
-            exc_lineno = inspect.currentframe().f_back.f_lineno - 2
-            app.warn('{}: {}'.format(exc.url, str(exc)), location='{}:{}'.format(__file__, exc_lineno))
+            if imgur_id.startswith('a/'):
+                raw_json_decoded = query_api(app, client_id, imgur_id[2:], is_album=True)
+            else:
+                raw_json_decoded = query_api(app, client_id, imgur_id, is_album=False)
+        except APIError:
             continue
-        raw_json = handle.read(409600)
-        raw_json_decoded = raw_json.decode('utf-8')
-        app.debug2('Imgur API responded with: %s', raw_json_decoded)
-        response = json.loads(raw_json_decoded)['data']
+        response = raw_json_decoded['data']
 
         env.imgur_api_cache[imgur_id]['description'] = response['description']
         env.imgur_api_cache[imgur_id]['title'] = response['title']
