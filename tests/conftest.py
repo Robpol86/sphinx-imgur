@@ -1,11 +1,18 @@
 """PyTest fixtures."""
 
+import json
 import logging
+import os
 import sys
 
 import httpretty
+import py
 import pytest
 import requests.packages
+
+from sphinxcontrib.imgur.imgur_api import API_URL
+
+CACHED_RESPONSES = dict()
 
 
 class FakeApp(object):
@@ -92,3 +99,16 @@ def reset_sphinx(request):
                 if 'imgur' in attr.lower():
                     delattr(obj, attr)
     request.addfinalizer(finalizer)
+
+
+@pytest.fixture
+def httpretty_common_mock():
+    """Common mock Imgur data."""
+    if not CACHED_RESPONSES:
+        for path in py.path.local(__file__).dirpath().visit('response_*_*.json'):
+            kind, imgur_id = os.path.splitext(path.basename)[0].split('_')[1:]
+            url = API_URL.format(type=kind, id=imgur_id)
+            body = json.dumps(json.load(path))  # Verify valid JSON here.
+            CACHED_RESPONSES[url] = body
+    for url, body in CACHED_RESPONSES.items():
+        httpretty.register_uri(httpretty.GET, url, body=body)

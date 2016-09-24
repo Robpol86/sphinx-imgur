@@ -1,13 +1,14 @@
 """Test Sphinx event handlers call order and count."""
 
 import time
+from functools import wraps
 
 import pytest
 from docutils.parsers.rst import directives, roles
 from sphinx import application
 
 from sphinxcontrib import imgur
-from tests.helpers import change_doc, init_sample_docs, remove_doc, track_call
+from tests.helpers import change_doc, init_sample_docs
 
 EXPECTED = list()
 EXPECTED.append([
@@ -38,6 +39,34 @@ EXPECTED.append([
     'event_update_imgur_nodes',
     'event_update_imgur_nodes',
 ])
+
+
+def remove_doc(tmpdir, outdir):
+    """Remove one document.
+
+    :param tmpdir: PyTest builtin tmpdir fixture (py.path instance).
+    :param outdir: py.path instance to output directory.
+    """
+    index_rst = tmpdir.join('index.rst').read()
+    new_index = '\n'.join(index_rst.splitlines()[:-1])
+    tmpdir.join('index.rst').write(new_index)
+    tmpdir.join('doc2.rst').remove()
+    outdir.join('doc2.html').remove()
+
+
+def track_call(call_list, func):
+    """Decorator that appends to list the function name before calling said function.
+
+    :param list call_list: List to append to.
+    :param func: Function to call.
+
+    :return: Wrapped function.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        call_list.append(func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
 
 
 @pytest.mark.usefixtures('reset_sphinx')

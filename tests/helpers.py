@@ -1,7 +1,6 @@
 """Common/helper code for all test modules."""
 
 import os
-from functools import wraps
 from textwrap import dedent
 
 
@@ -74,31 +73,3 @@ def change_doc(tmpdir):
         | The title is still: :imgur-title:`a/abc1234`.
         | And the description: :imgur-description:`a/abc1234`
         """))
-
-
-def remove_doc(tmpdir, outdir):
-    """Remove one document.
-
-    :param tmpdir: PyTest builtin tmpdir fixture (py.path instance).
-    :param outdir: py.path instance to output directory.
-    """
-    index_rst = tmpdir.join('index.rst').read()
-    new_index = '\n'.join(index_rst.splitlines()[:-1])
-    tmpdir.join('index.rst').write(new_index)
-    tmpdir.join('doc2.rst').remove()
-    outdir.join('doc2.html').remove()
-
-
-def track_call(call_list, func):
-    """Decorator that appends to list the function name before calling said function.
-
-    :param list call_list: List to append to.
-    :param func: Function to call.
-
-    :return: Wrapped function.
-    """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        call_list.append(func.__name__)
-        return func(*args, **kwargs)
-    return wrapper
