@@ -65,8 +65,8 @@ def test_query_api_non_json(app):
     assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:59$', app.messages[-1][2])
 
 
-@pytest.mark.httpretty
 @pytest.mark.parametrize('bad_json', [False, True])
+@pytest.mark.httpretty
 def test_query_api_not_success(app, bad_json):
     """Test non-successful replies or unexpected JSON data.
 

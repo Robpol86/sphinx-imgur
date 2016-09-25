@@ -29,7 +29,7 @@ class FakeApp(object):
         """
         if args or kwargs:
             message = message % (args or kwargs)
-        self.messages.append(['debug2', message])
+        self.messages.append(['debug', message])
 
     def debug2(self, message, *args, **kwargs):
         """Debug2 'logger'.

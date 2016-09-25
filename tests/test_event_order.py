@@ -12,32 +12,32 @@ from tests.helpers import change_doc, init_sample_docs
 
 EXPECTED = list()
 EXPECTED.append([
-    'event_discover_new_ids',
-    'event_discover_new_ids',
-    'event_discover_new_ids',
-    'event_query_api_update_cache',
-    'event_update_imgur_nodes',
-    'event_update_imgur_nodes',
-    'event_update_imgur_nodes',
+    'event_doctree_read',
+    'event_doctree_read',
+    'event_doctree_read',
+    'event_env_updated',
+    'event_doctree_resolved',
+    'event_doctree_resolved',
+    'event_doctree_resolved',
 ])
 EXPECTED.append([
-    'event_query_api_update_cache',
-    'event_update_imgur_nodes',
-    'event_update_imgur_nodes',
-    'event_update_imgur_nodes',
+    'event_env_updated',
+    'event_doctree_resolved',
+    'event_doctree_resolved',
+    'event_doctree_resolved',
 ])
 EXPECTED.append([
-    'event_discover_new_ids',
-    'event_query_api_update_cache',
-    'event_update_imgur_nodes',
-    'event_update_imgur_nodes',
-    'event_update_imgur_nodes',
+    'event_doctree_read',
+    'event_env_updated',
+    'event_doctree_resolved',
+    'event_doctree_resolved',
+    'event_doctree_resolved',
 ])
 EXPECTED.append([
-    'event_discover_new_ids',
-    'event_query_api_update_cache',
-    'event_update_imgur_nodes',
-    'event_update_imgur_nodes',
+    'event_doctree_read',
+    'event_env_updated',
+    'event_doctree_resolved',
+    'event_doctree_resolved',
 ])
 
 

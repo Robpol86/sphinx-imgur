@@ -15,7 +15,7 @@ def test_queue_new_imgur_ids():
     env = type('FakeEnv', (), {})()
     env.imgur_api_cache = dict()
     imgur_ids = {'image'}
-    api.queue_new_imgur_ids(env, imgur_ids)
+    api.queue_new_imgur_ids(env.imgur_api_cache, imgur_ids)
     assert env.imgur_api_cache['image']
 
 
@@ -47,7 +47,7 @@ def test_query_imgur_api_imgur_api_test_response(monkeypatch, app):
         ]),
     }
     env.imgur_api_cache = dict()
-    api.queue_new_imgur_ids(env, {'image', 'a/album'})
+    api.queue_new_imgur_ids(env.imgur_api_cache, {'image', 'a/album'})
     assert sorted(env.imgur_api_cache.keys()) == ['a/album', 'image']
     assert not env.imgur_api_cache['image']['_mod_time']
     assert not env.imgur_api_cache['a/album']['_mod_time']
@@ -93,7 +93,7 @@ def test_query_imgur_api_bad_client_id(monkeypatch, app):
     monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'a/album'})
     env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
     response = dict()
-    api.queue_new_imgur_ids(env, {'image', 'a/album'})
+    api.queue_new_imgur_ids(env.imgur_api_cache, {'image', 'a/album'})
 
     client_id = ''
     with pytest.raises(ExtensionError) as exc:
@@ -115,7 +115,7 @@ def test_query_imgur_api_http_error(monkeypatch, app):
     monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'a/album'})
     env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
     response = dict()
-    api.queue_new_imgur_ids(env, {'image', 'a/album'})
+    api.queue_new_imgur_ids(env.imgur_api_cache, {'image', 'a/album'})
 
     # Test just HTTPError.
     httpretty.register_uri(httpretty.GET, API_URL.format(type='album', id='album'), body='{}', status=500)
@@ -125,8 +125,8 @@ def test_query_imgur_api_http_error(monkeypatch, app):
     assert not env.imgur_api_cache['a/album']['_mod_time']
 
 
-@pytest.mark.httpretty
 @pytest.mark.usefixtures('httpretty_common_mock')
+@pytest.mark.httpretty
 def test_query_imgur_api(monkeypatch, app):
     """Test with mocked urllib responses.
 
@@ -136,7 +136,7 @@ def test_query_imgur_api(monkeypatch, app):
     monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'611EovQ', 'a/V76cJ'})
     env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
     response = dict()
-    api.queue_new_imgur_ids(env, {'611EovQ', 'a/V76cJ'})
+    api.queue_new_imgur_ids(env.imgur_api_cache, {'611EovQ', 'a/V76cJ'})
 
     # Test JSON response.
     api.query_imgur_api(app, env, 'abc123abc123', 100, response)
