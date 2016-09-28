@@ -44,8 +44,9 @@ def event_env_updated(app, env):
     """
     client_id = app.config['imgur_client_id']
     ttl = app.config['imgur_api_cache_ttl']
-    response = app.config['imgur_api_test_response']
-    query_imgur_api(app, env, client_id, ttl, response)
+    response = list((app.config['imgur_api_test_response_albums'] or dict()).items())
+    response += list((app.config['imgur_api_test_response_images'] or dict()).items())
+    query_imgur_api(app, env, client_id, ttl, dict(response))
 
 
 def event_doctree_resolved(app, doctree, _):
@@ -76,7 +77,8 @@ def setup(app):
     :rtype: dict
     """
     app.add_config_value('imgur_api_cache_ttl', 172800, False)
-    app.add_config_value('imgur_api_test_response', None, False)
+    app.add_config_value('imgur_api_test_response_albums', None, False)
+    app.add_config_value('imgur_api_test_response_images', None, False)
     app.add_config_value('imgur_client_id', None, False)
     app.add_config_value('imgur_hide_post_details', False, True)
 

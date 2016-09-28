@@ -19,7 +19,7 @@ def test_queue_new_imgur_ids():
     assert env.imgur_api_cache['image']
 
 
-def test_query_imgur_api_imgur_api_test_response(monkeypatch, app):
+def test_query_imgur_api_imgur_api_test_response_albums(monkeypatch, app):
     """Test with predefined test data.
 
     :param monkeypatch: pytest fixture.

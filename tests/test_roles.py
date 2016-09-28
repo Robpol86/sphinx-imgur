@@ -28,7 +28,7 @@ def test(monkeypatch, tmpdir, test_case):
     # Write conf.py.
     conf_py = tmpdir.join('conf.py')
     conf_py.write(BASE_CONFIG + dedent("""\
-        imgur_api_test_response = {
+        imgur_api_test_response_albums = {
             'a/valid': dict(title='!!One!!', description='!!Two!!'),
             'valid': dict(title='!!Three!!', description='!!Four!!'),
         }

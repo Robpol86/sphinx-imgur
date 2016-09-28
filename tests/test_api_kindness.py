@@ -23,12 +23,12 @@ def test_first_run(tmpdir_module):
     assert 'The title is: Title2.' in out_doc2_html
 
 
-def test_remove_imgur_api_test_response(tmpdir_module):
-    """Remove imgur_api_test_response from conf.py. Extension should only use cached data."""
+def test_remove_imgur_api_test_response_albums(tmpdir_module):
+    """Remove imgur_api_test_response_albums from conf.py. Extension should only use cached data."""
     conf_py = tmpdir_module.join('conf.py').read()
-    new_conf_py = re.sub(r'\nimgur_api_test_response [^}]+\n}', '', conf_py).strip()
+    new_conf_py = re.sub(r'\nimgur_api_test_response_albums [^}]+\n}', '', conf_py).strip()
     tmpdir_module.join('conf.py').write(new_conf_py + '\n')
-    assert 'imgur_api_test_response' not in new_conf_py
+    assert 'imgur_api_test_response_albums' not in new_conf_py
 
     time.sleep(2)
     change_doc(tmpdir_module)
@@ -82,7 +82,7 @@ def test_single_id_update(tmpdir_module):
         | Test title: :imgur-title:`1234abc1`.
         """))
     tmpdir_module.join('conf.py').write(
-        "imgur_api_test_response = {'1234abc1': dict(title='ABC', description='123')}\n",
+        "imgur_api_test_response_albums = {'1234abc1': dict(title='ABC', description='123')}\n",
         mode='a'
     )
 
@@ -110,8 +110,8 @@ def test_expire_everything_single_update(tmpdir_module):
         | Test description: :imgur-description:`1234abc1`.
         """))
     conf_py = tmpdir_module.join('conf.py').read()
-    new_conf_py = re.sub(r'\nimgur_api_test_response [^}]+\n}', '', conf_py).strip()
-    new_conf_py += "\nimgur_api_test_response = {'1234abc1': dict(title='ABC', description='1234')}\n"
+    new_conf_py = re.sub(r'\nimgur_api_test_response_albums [^}]+\n}', '', conf_py).strip()
+    new_conf_py += "\nimgur_api_test_response_albums = {'1234abc1': dict(title='ABC', description='1234')}\n"
     new_conf_py += 'imgur_api_cache_ttl = 1\n'
     tmpdir_module.join('conf.py').write(new_conf_py)
 

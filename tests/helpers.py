@@ -21,7 +21,7 @@ def init_sample_docs(tmpdir):
     # Write conf.py.
     conf_py = tmpdir.join('conf.py')
     conf_py.write(BASE_CONFIG + dedent("""\
-        imgur_api_test_response = {
+        imgur_api_test_response_albums = {
             'a/abc1234': dict(title='Title', description='Desc'),
             '1234abc': dict(title='Title2', description='Desc2'),
         }

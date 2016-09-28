@@ -33,7 +33,7 @@ def test_query_api_timeout_connection_error(monkeypatch, request, app, timeout):
 
     # Test.
     with pytest.raises(APIError):
-            query_api(app, 'client_id', 'imgur_id', False)
+        query_api(app, 'client_id', 'imgur_id', False)
 
     # Verify log.
     if timeout:
@@ -56,7 +56,7 @@ def test_query_api_non_json(app):
 
     # Test.
     with pytest.raises(APIError):
-            query_api(app, 'client_id', 'imgur_id', False)
+        query_api(app, 'client_id', 'imgur_id', False)
 
     # Verify log.
     assert app.messages[0] == ['info', 'querying {}'.format(url)]
@@ -88,7 +88,7 @@ def test_query_api_not_success(app, bad_json):
 
     # Test.
     with pytest.raises(APIError):
-            query_api(app, 'client_id', 'imgur_id', True)
+        query_api(app, 'client_id', 'imgur_id', True)
 
     # Verify log.
     assert app.messages[0] == ['info', 'querying {}'.format(url)]
@@ -97,22 +97,16 @@ def test_query_api_not_success(app, bad_json):
     assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:65$', app.messages[-1][2])
 
 
+@pytest.mark.usefixtures('httpretty_common_mock')
 @pytest.mark.httpretty
 def test_query_api_valid(app):
     """Test working response.
 
     :param app: conftest fixture.
     """
-    body = '{"data": {"id": "imgur_id","title": null,"datetime": 1341533193},"success": true,"status": 200}'
-    url = API_URL.format(type='album', id='imgur_id')
-    httpretty.register_uri(httpretty.GET, url, body=body)
+    actual = query_api(app, 'client_id', 'V76cJ', True)
 
-    # Test.
-    actual = query_api(app, 'client_id', 'imgur_id', True)
-
-    expected = dict(
-        data=dict(datetime=1341533193, id='imgur_id', title=None),
-        status=200,
-        success=True,
-    )
-    assert actual == expected
+    assert actual['status'] == 200
+    assert actual['success'] is True
+    assert actual['data']['id'] == 'V76cJ'
+    assert actual['data']['title'] == '2010 JSW, 2012 Projects'

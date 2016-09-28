@@ -89,7 +89,7 @@ def query_imgur_api(app, env, client_id, ttl, response):
     # Handle response argument if set.
     if response:
         for imgur_id in imgur_ids:
-            app.debug('loading Imgur ID %s from imgur_api_test_response config dict.', imgur_id)
+            app.debug('loading Imgur ID %s from imgur_api_test_response_albums/images config dicts.', imgur_id)
             env.imgur_api_cache[imgur_id]['description'] = response[imgur_id]['description']
             env.imgur_api_cache[imgur_id]['title'] = response[imgur_id]['title']
             if imgur_id.startswith('a/'):
