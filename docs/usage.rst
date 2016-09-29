@@ -53,7 +53,7 @@ All Config Options
     Unless you're developing a Sphinx extension you won't need this.
 
     If defined, should be a nested dictionary. Keys are Imgur album IDs, values are the parsed JSON dictionaries whose
-    keys are "title", "description", and other API reply fields. If this option is defined, the Imgur API will always be
+    keys are "data", "status", and other API reply fields. If this option is defined, the Imgur API will always be
     skipped and any missing Imgur IDs will cause ``KeyError`` to be raised.
 
 .. attribute:: imgur_api_test_response_images

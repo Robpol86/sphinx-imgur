@@ -2,6 +2,7 @@
 
 import inspect
 import sys
+import time
 
 import requests
 import requests.exceptions
@@ -65,3 +66,85 @@ def query_api(app, client_id, imgur_id, is_album):
         raise APIError('query unsuccessful from {}: {}'.format(url, parsed.get('data', {}).get('error', 'N/A')), app)
 
     return parsed
+
+
+class Image(object):
+    """Imgur image metadata.
+
+    :ivar int mod_time: Time of API query.
+    :ivar str imgur_id: The Imgur ID to query.
+    :ivar str title: Image title text.
+    :ivar str description: Image description text.
+    """
+
+    TYPE = 'image'
+
+    def __init__(self, imgur_id, data=None):
+        """Constructor.
+
+        :param str imgur_id: The Imgur ID to query.
+        :param dict data: Parsed JSON response from API.
+        """
+        self.mod_time = 0
+        self.imgur_id = imgur_id
+        self.title = str()
+        self.description = str()
+        if data:
+            self._parse(data)
+
+    def _parse(self, data):
+        """Parse API response.
+
+        :param dict data: Parsed JSON response from API 'data' key.
+        """
+        self.mod_time = int(time.time())
+        self.title = data['title']
+        self.description = data['description']
+
+
+class Album(Image):
+    """Imgur album metadata.
+
+    :ivar int mod_time: Time of API query.
+    :ivar str imgur_id: The Imgur ID to query.
+    :ivar str title: Album title text.
+    :ivar str description: Album description text.
+    :ivar list image_ids: List of Imgur image IDs for images in this album.
+    """
+
+    TYPE = 'album'
+
+    def __init__(self, imgur_id, data=None):
+        """Constructor.
+
+        :param str imgur_id: The Imgur ID to query.
+        :param dict data: Parsed JSON response from API.
+        """
+        self.image_ids = list()
+        super(Album, self).__init__(imgur_id, data)
+
+    def __contains__(self, item):
+        """Search for images in this album.
+
+        :param item: Imgur ID string or Image instance to search for in self.images.
+
+        :return: If image is in this album.
+        :rtype: bool
+        """
+        if hasattr(item, 'imgur_id'):
+            # item is an Image instance.
+            return item.imgur_id in self.image_ids
+        return item in self.image_ids
+
+    def _parse(self, data):
+        """Parse API response.
+
+        :param dict data: Parsed JSON response from API 'data' key.
+
+        :return: Image instances.
+        :rtype: list.
+        """
+        super(Album, self)._parse(data)
+        images = [Image(i['id'], i) for i in data['images']]
+        self.image_ids[:] = [i.imgur_id for i in images]
+        return images

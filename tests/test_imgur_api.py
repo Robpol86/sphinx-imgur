@@ -40,7 +40,7 @@ def test_query_api_timeout_connection_error(monkeypatch, request, app, timeout):
         assert app.messages[-1][1].startswith('timed out waiting for reply from http')
     else:
         assert app.messages[-1][1].startswith('unable to connect to http')
-    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:50', app.messages[-1][2])
+    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:51', app.messages[-1][2])
 
 
 @pytest.mark.httpretty
@@ -62,7 +62,7 @@ def test_query_api_non_json(app):
     assert app.messages[0] == ['info', 'querying {}'.format(url)]
     assert app.messages[1] == ['debug2', 'Imgur API responded with: <html></html>']
     assert app.messages[2][:2] == ['warn', 'failed to parse JSON from {}'.format(url)]
-    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:59$', app.messages[-1][2])
+    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:60$', app.messages[-1][2])
 
 
 @pytest.mark.parametrize('bad_json', [False, True])
@@ -94,7 +94,7 @@ def test_query_api_not_success(app, bad_json):
     assert app.messages[0] == ['info', 'querying {}'.format(url)]
     assert app.messages[1] == ['debug2', 'Imgur API responded with: %s' % body]
     assert app.messages[2][:2] == ['warn', 'query unsuccessful from {}: {}'.format(url, error)]
-    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:65$', app.messages[-1][2])
+    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:66$', app.messages[-1][2])
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')

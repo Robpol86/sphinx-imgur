@@ -6,7 +6,7 @@ import time
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur import nodes
-from sphinxcontrib.imgur.imgur_api import APIError, query_api
+from sphinxcontrib.imgur.imgur_api import Album, APIError, Image, query_api
 
 
 def get_imgur_ids_from_doctree(doctree):
@@ -44,19 +44,14 @@ def get_targeted_ids(app, env):
 def queue_new_imgur_ids(cache, imgur_ids):
     """Add new image/album IDs to the cache.
 
-    New entries have a _mod_time of 0, which makes them expired. query_imgur_api() will handle them.
+    New entries have a mod_time of 0, which makes them expired. query_imgur_api() will handle them.
 
     :param dict cache: Sphinx Imgur cache in env.
     :param set imgur_ids: Imgur image/album IDs to refresh.
     """
     for imgur_id in imgur_ids:
         if imgur_id not in cache:
-            cache[imgur_id] = dict(
-                _mod_time=0,  # Epoch.
-                description='',
-                images=set(),  # Set of image IDs (populated in albums only).
-                title='',
-            )
+            cache[imgur_id] = Album(imgur_id[2:]) if imgur_id.startswith('a/') else Image(imgur_id)
 
 
 def query_imgur_api(app, env, client_id, ttl, response):
@@ -75,12 +70,13 @@ def query_imgur_api(app, env, client_id, ttl, response):
     """
     now = int(time.time())
     targeted_ids = get_targeted_ids(app, env)
-    imgur_ids_expired = {k for k, v in env.imgur_api_cache.items() if k in targeted_ids and now - v['_mod_time'] > ttl}
+    imgur_ids_expired = {k for k, v in env.imgur_api_cache.items() if k in targeted_ids and now - v.mod_time > ttl}
     if not imgur_ids_expired:
         return
 
     # Optimize: if an image is in some album, request album instead of image.
-    album_lookup = {i: k for k, v in env.imgur_api_cache.items() for i in v['images'] if i in imgur_ids_expired}
+    album_lookup = {i: k for k, v in env.imgur_api_cache.items()
+                    for i in getattr(v, 'image_ids', ()) if i in imgur_ids_expired}
     for image, album in album_lookup.items():
         imgur_ids_expired.remove(image)
         imgur_ids_expired.add(album)
@@ -90,18 +86,18 @@ def query_imgur_api(app, env, client_id, ttl, response):
     if response:
         for imgur_id in imgur_ids:
             app.debug('loading Imgur ID %s from imgur_api_test_response_albums/images config dicts.', imgur_id)
-            env.imgur_api_cache[imgur_id]['description'] = response[imgur_id]['description']
-            env.imgur_api_cache[imgur_id]['title'] = response[imgur_id]['title']
+            env.imgur_api_cache[imgur_id].description = response[imgur_id]['description']
+            env.imgur_api_cache[imgur_id].title = response[imgur_id]['title']
             if imgur_id.startswith('a/'):
-                env.imgur_api_cache[imgur_id]['images'].clear()
+                env.imgur_api_cache[imgur_id].image_ids[:] = list()
             for response_image in response[imgur_id].get('images', ()) if imgur_id.startswith('a/') else ():
                 if response_image['id'] not in env.imgur_api_cache:
                     queue_new_imgur_ids(env.imgur_api_cache, {response_image['id']})
-                env.imgur_api_cache[imgur_id]['images'].add(response_image['id'])
-                env.imgur_api_cache[response_image['id']]['description'] = response_image['description']
-                env.imgur_api_cache[response_image['id']]['title'] = response_image['title']
-                env.imgur_api_cache[response_image['id']]['_mod_time'] = now
-            env.imgur_api_cache[imgur_id]['_mod_time'] = now
+                env.imgur_api_cache[imgur_id].image_ids.append(response_image['id'])
+                env.imgur_api_cache[response_image['id']].description = response_image['description']
+                env.imgur_api_cache[response_image['id']].title = response_image['title']
+                env.imgur_api_cache[response_image['id']].mod_time = now
+            env.imgur_api_cache[imgur_id].mod_time = now
         return
 
     if not client_id:
@@ -120,15 +116,15 @@ def query_imgur_api(app, env, client_id, ttl, response):
             continue
         response = raw_json_decoded['data']
 
-        env.imgur_api_cache[imgur_id]['description'] = response['description']
-        env.imgur_api_cache[imgur_id]['title'] = response['title']
+        env.imgur_api_cache[imgur_id].description = response['description']
+        env.imgur_api_cache[imgur_id].title = response['title']
         if imgur_id.startswith('a/'):
-            env.imgur_api_cache[imgur_id]['images'].clear()
+            env.imgur_api_cache[imgur_id].image_ids[:] = list()
         for response_image in response.get('images', ()) if imgur_id.startswith('a/') else ():
             if response_image['id'] not in env.imgur_api_cache:
                 queue_new_imgur_ids(env.imgur_api_cache, {response_image['id']})
-            env.imgur_api_cache[imgur_id]['images'].add(response_image['id'])
-            env.imgur_api_cache[response_image['id']]['description'] = response_image['description']
-            env.imgur_api_cache[response_image['id']]['title'] = response_image['title']
-            env.imgur_api_cache[response_image['id']]['_mod_time'] = now
-        env.imgur_api_cache[imgur_id]['_mod_time'] = now
+            env.imgur_api_cache[imgur_id].image_ids.append(response_image['id'])
+            env.imgur_api_cache[response_image['id']].description = response_image['description']
+            env.imgur_api_cache[response_image['id']].title = response_image['title']
+            env.imgur_api_cache[response_image['id']].mod_time = now
+        env.imgur_api_cache[imgur_id].mod_time = now

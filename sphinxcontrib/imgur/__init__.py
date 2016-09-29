@@ -64,7 +64,7 @@ def event_doctree_resolved(app, doctree, _):
     for node_class, key in ((ImgurDescriptionNode, 'description'), (ImgurTitleNode, 'title')):
         for node in doctree.traverse(node_class):
             imgur_id = node.imgur_id
-            text = app.env.imgur_api_cache[imgur_id][key]
+            text = getattr(app.env.imgur_api_cache[imgur_id], key)
             node.replace_self([docutils.nodes.Text(text)])
 
 
