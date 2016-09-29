@@ -101,6 +101,44 @@ class Image(object):
         self.title = data['title']
         self.description = data['description']
 
+    def seconds_remaining(self, ttl):
+        """Return number of seconds left before Imgur API needs to be queried for this instance.
+
+        :param int ttl: Number of seconds before this is considered out of date.
+
+        :return: Seconds left before this is expired. 0 indicated update needed (no negatives).
+        :rtype: int
+        """
+        return max(0, ttl - (int(time.time()) - self.mod_time))
+
+    def refresh(self, app, client_id, ttl):
+        """Query the API to update this instance.
+
+        :raise APIError: When Imgur responds with errors or unexpected data.
+
+        :param sphinx.application.Sphinx app: Sphinx application object.
+        :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
+        :param int ttl: Number of seconds before this is considered out of date.
+        """
+        remaining = self.seconds_remaining(ttl)
+        if remaining:
+            app.debug2('Imgur ID %s still has %d seconds before needing refresh. Skipping.', self.imgur_id, remaining)
+            return
+
+        # Retrieve data.
+        test_key = 'imgur_api_test_response_albums' if self.TYPE == 'album' else 'imgur_api_test_response_images'
+        if app.config[test_key]:
+            app.debug('loading mock response for %s from %s config value.', self.imgur_id, test_key)
+            response = app.config[test_key][self.imgur_id]
+        else:
+            response = query_api(app, client_id, self.imgur_id, self.TYPE == 'album')
+
+        # Parse.
+        try:
+            return self._parse(response['data'])
+        except KeyError as exc:
+            raise APIError('unexpected JSON for {}: {}'.format(self.imgur_id, repr(exc)), app)
+
 
 class Album(Image):
     """Imgur album metadata.
@@ -148,3 +186,17 @@ class Album(Image):
         images = [Image(i['id'], i) for i in data['images']]
         self.image_ids[:] = [i.imgur_id for i in images]
         return images
+
+    def refresh(self, app, client_id, ttl):
+        """Query the API to update this instance.
+
+        :raise APIError: When Imgur responds with errors or unexpected data.
+
+        :param sphinx.application.Sphinx app: Sphinx application object.
+        :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
+        :param int ttl: Number of seconds before this is considered out of date.
+
+        :return: self._parse() return value.
+        :rtype: list
+        """
+        return super(Album, self).refresh(app, client_id, ttl) or list()

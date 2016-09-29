@@ -9,6 +9,7 @@ import httpretty
 import py
 import pytest
 import requests.packages
+from freezegun import freeze_time
 
 from sphinxcontrib.imgur.imgur_api import API_URL
 
@@ -20,6 +21,7 @@ class FakeApp(object):
 
     def __init__(self):
         """Constructor."""
+        self.config = dict(imgur_api_test_response_albums=dict(), imgur_api_test_response_images=dict())
         self.messages = list()
 
     def debug(self, message, *args, **kwargs):
@@ -74,6 +76,13 @@ def config_requests():
     if sys.version_info[:3] < (2, 7, 9):
         requests.packages.urllib3.disable_warnings()
     logging.getLogger('requests').setLevel(logging.WARNING)
+
+
+@pytest.yield_fixture
+def freezer():
+    """Mock a specific tine."""
+    with freeze_time('2016-09-20') as frozen_datetime:
+        yield frozen_datetime
 
 
 @pytest.fixture(scope='module')

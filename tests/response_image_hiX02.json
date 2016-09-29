@@ -1,0 +1,26 @@
+{
+  "data": {
+    "in_gallery": false,
+    "nsfw": null,
+    "account_url": null,
+    "section": null,
+    "datetime": 1339116420,
+    "width": 1280,
+    "size": 284503,
+    "bandwidth": 1138012,
+    "is_ad": false,
+    "views": 4,
+    "vote": null,
+    "id": "hiX02",
+    "link": "http://i.imgur.com/hiX02.png",
+    "type": "image/png",
+    "animated": false,
+    "description": null,
+    "favorite": false,
+    "account_id": null,
+    "height": 800,
+    "title": null
+  },
+  "success": true,
+  "status": 200
+}

@@ -6,7 +6,8 @@ import time
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur import nodes
-from sphinxcontrib.imgur.imgur_api import Album, APIError, Image, query_api
+from sphinxcontrib.imgur.cache import update_cache
+from sphinxcontrib.imgur.imgur_api import Album, Image
 
 
 def get_imgur_ids_from_doctree(doctree):
@@ -106,25 +107,4 @@ def query_imgur_api(app, env, client_id, ttl, response):
         raise ExtensionError('imgur_client_id config value must be 5-30 lower case letters and numbers only.')
 
     # Actually hit the API.
-    for imgur_id in imgur_ids:
-        try:
-            if imgur_id.startswith('a/'):
-                raw_json_decoded = query_api(app, client_id, imgur_id[2:], is_album=True)
-            else:
-                raw_json_decoded = query_api(app, client_id, imgur_id, is_album=False)
-        except APIError:
-            continue
-        response = raw_json_decoded['data']
-
-        env.imgur_api_cache[imgur_id].description = response['description']
-        env.imgur_api_cache[imgur_id].title = response['title']
-        if imgur_id.startswith('a/'):
-            env.imgur_api_cache[imgur_id].image_ids[:] = list()
-        for response_image in response.get('images', ()) if imgur_id.startswith('a/') else ():
-            if response_image['id'] not in env.imgur_api_cache:
-                queue_new_imgur_ids(env.imgur_api_cache, {response_image['id']})
-            env.imgur_api_cache[imgur_id].image_ids.append(response_image['id'])
-            env.imgur_api_cache[response_image['id']].description = response_image['description']
-            env.imgur_api_cache[response_image['id']].title = response_image['title']
-            env.imgur_api_cache[response_image['id']].mod_time = now
-        env.imgur_api_cache[imgur_id].mod_time = now
+    update_cache(env.imgur_api_cache, app, client_id, ttl, targeted_ids)
