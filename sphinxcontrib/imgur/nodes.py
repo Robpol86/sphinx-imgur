@@ -50,8 +50,6 @@ class ImgurEmbedNode(General, Element):
 class ImgurDescriptionNode(General, Element):
     """Imgur text node for image/album descriptions. To be replaced with docutils.nodes.Text."""
 
-    IMGUR_API = True
-
     def __init__(self, imgur_id):
         """Constructor.
 
@@ -59,12 +57,11 @@ class ImgurDescriptionNode(General, Element):
         """
         super(ImgurDescriptionNode, self).__init__()
         self.imgur_id = imgur_id
+        self.key = 'description'
 
 
 class ImgurTitleNode(General, Element):
     """Imgur text node for image/album titles. To be replaced with docutils.nodes.Text."""
-
-    IMGUR_API = True
 
     def __init__(self, imgur_id):
         """Constructor.
@@ -73,3 +70,4 @@ class ImgurTitleNode(General, Element):
         """
         super(ImgurTitleNode, self).__init__()
         self.imgur_id = imgur_id
+        self.key = 'title'

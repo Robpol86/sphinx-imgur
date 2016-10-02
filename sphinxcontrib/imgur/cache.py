@@ -22,6 +22,40 @@ def initialize(cache, albums, images):
     return cache
 
 
+def prune_cache(cache, app, doctree_imgur_ids=None):
+    """Remove Images and Albums from the cache if they are no longer used.
+
+    :param dict cache: Update this. Keys are Imgur IDs, values are Image or Album instances.
+    :param sphinx.application.Sphinx app: Sphinx application object.
+    :param iter doctree_imgur_ids: Imgur image or album IDs used in all Sphinx docs.
+    """
+    # Prune invalid types.
+    for key in [k for k, v in cache.items() if not hasattr(v, 'TYPE') or not hasattr(v, 'imgur_id')]:
+        app.debug("removing %s from Imgur cache since value isn't Album/Image instance.", key)
+        cache.pop(key)
+
+    # Prune key mismatches.
+    for key in [k for k, v in cache.items() if v.imgur_id != k]:
+        app.debug("removing %s from Imgur cache since imgur_id doesn't match.", key)
+        cache.pop(key)
+
+    if doctree_imgur_ids is None:
+        return
+
+    # Now prune albums.
+    for album_id in [k for k, v in cache.items() if v.TYPE == 'album']:
+        if album_id not in doctree_imgur_ids:
+            app.debug("removing %s from Imgur cache since it's not in the doctree.", album_id)
+            cache.pop(album_id)
+
+    # Finally prune images not in doctree and not in any album.
+    used_ids = list(doctree_imgur_ids) + [i for v in cache.values() if v.TYPE == 'album' for i in v.image_ids]
+    for image_id in [k for k, v in cache.items() if v.TYPE == 'image']:
+        if image_id not in used_ids:
+            app.debug("removing %s from Imgur cache since it's not in the doctree nor any album.", image_id)
+            cache.pop(image_id)
+
+
 def update_cache(cache, app, client_id, ttl, whitelist):
     """Update cache items with expired TTLs.
 

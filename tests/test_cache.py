@@ -5,7 +5,7 @@ import time
 import httpretty
 import pytest
 
-from sphinxcontrib.imgur.cache import initialize, update_cache
+from sphinxcontrib.imgur.cache import initialize, prune_cache, update_cache
 from sphinxcontrib.imgur.imgur_api import API_URL
 
 
@@ -35,6 +35,51 @@ def test_initialize_not_dict(cache_in):
     assert sorted(cache) == ['album1', 'image1']
     assert cache['album1'].title == ''
     assert cache['image1'].title == ''
+
+
+def test_prune_cache_prune_nothing(app):
+    """Test with nothing to prune.
+
+    :param app: conftest fixture.
+    """
+    cache = initialize(dict(), ['album1'], ['image1', 'image2', 'image3'])
+    cache['album1'].image_ids = ['image3']
+    doctree_imgur_ids = ['album1', 'image1', 'image2']
+    prune_cache(cache, app, doctree_imgur_ids)
+    assert sorted(cache) == ['album1', 'image1', 'image2', 'image3']
+
+
+def test_prune_cache_prune_albums_images(app):
+    """Test pruning albums and images.
+
+    :param app: conftest fixture.
+    """
+    cache = initialize(dict(), ['album1', 'album2'], ['image1', 'image2', 'image3'])
+    cache['album1'].image_ids = ['image1']
+    cache['album2'].image_ids = ['image2']
+    doctree_imgur_ids = ['album1', 'image3']
+    prune_cache(cache, app, doctree_imgur_ids)
+    assert sorted(cache) == ['album1', 'image1', 'image3']
+
+
+@pytest.mark.parametrize('doctree_none', [False, True])
+def test_prune_cache_bad_types(app, doctree_none):
+    """Test pruning v1.0.0/invalid items from cache.
+
+    :param app: conftest fixture.
+    :param bool doctree_none: Test with None value for last argument.
+    """
+    cache = initialize(dict(), ['album1'], ['image1', 'willBeBad1', 'willBeBad1'])
+    doctree_imgur_ids = None if doctree_none else list(cache)  # Same effect.
+    for key in ('album2', 0, False, None, ''):
+        cache[key] = cache['album1']
+        if not doctree_none:
+            doctree_imgur_ids.append(key)
+    cache['willBeBad1'] = None
+    cache['willBeBad1'] = str()
+
+    prune_cache(cache, app, doctree_imgur_ids)
+    assert sorted(cache) == ['album1', 'image1']
 
 
 @pytest.mark.httpretty
