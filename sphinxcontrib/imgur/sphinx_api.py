@@ -1,17 +1,29 @@
 """Interface with Sphinx."""
 
+import re
+
+from sphinx.errors import ExtensionError
+
 from sphinxcontrib.imgur.cache import initialize
+
+RE_CLIENT_ID = re.compile(r'^[a-f0-9]{5,30}$')
 
 
 def event_before_read_docs(app, env, _):
     """Called by Sphinx before phase 1 (reading).
 
-    Initialize the cache dict before reading any docs with an empty dictionary if not exists.
+    * Verify config.
+    * Initialize the cache dict before reading any docs with an empty dictionary if not exists.
 
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param sphinx.environment.BuildEnvironment env: Sphinx build environment.
     :param _: Not used.
     """
+    client_id = app.config['imgur_client_id']
+    if not client_id:
+        raise ExtensionError('imgur_client_id config value must be set for Imgur API calls.')
+    if not RE_CLIENT_ID.match(client_id):
+        raise ExtensionError('imgur_client_id config value must be 5-30 lower case hexadecimal characters only.')
     env.imgur_api_cache = initialize(getattr(env, 'imgur_api_cache', None), (), ())
     assert app
 

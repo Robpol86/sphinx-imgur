@@ -1,9 +1,6 @@
 """Interfaces with the Imgur REST API and the Sphinx cache."""
 
-import re
 import time
-
-from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur import nodes
 from sphinxcontrib.imgur.cache import update_cache
@@ -100,11 +97,6 @@ def query_imgur_api(app, env, client_id, ttl, response):
                 env.imgur_api_cache[response_image['id']].mod_time = now
             env.imgur_api_cache[imgur_id].mod_time = now
         return
-
-    if not client_id:
-        raise ExtensionError('imgur_client_id config value must be set for Imgur API calls.')
-    if not re.match(r'^[a-f0-9]{5,30}$', client_id):
-        raise ExtensionError('imgur_client_id config value must be 5-30 lower case letters and numbers only.')
 
     # Actually hit the API.
     update_cache(env.imgur_api_cache, app, client_id, ttl, targeted_ids)
