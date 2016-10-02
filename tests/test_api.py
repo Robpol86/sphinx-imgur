@@ -4,7 +4,6 @@ import time
 
 import httpretty
 import pytest
-from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur import api
 from sphinxcontrib.imgur.imgur_api import API_URL, Image
@@ -83,27 +82,6 @@ def test_query_imgur_api_imgur_api_test_response_albums(monkeypatch, app):
     assert env.imgur_api_cache['image2'].mod_time == now
     assert env.imgur_api_cache['image3'].mod_time == now
     assert env.imgur_api_cache['a/album'].title == 'The Test Album'
-
-
-def test_query_imgur_api_bad_client_id(monkeypatch, app):
-    """Test with bad client_id value.
-
-    :param monkeypatch: pytest fixture.
-    :param app: conftest fixture.
-    """
-    monkeypatch.setattr(api, 'get_targeted_ids', lambda *_: {'image', 'a/album'})
-    env = type('FakeEnv', (), {'imgur_api_cache': dict()})()
-    response = dict()
-    api.queue_new_imgur_ids(env.imgur_api_cache, {'image', 'a/album'})
-
-    client_id = ''
-    with pytest.raises(ExtensionError) as exc:
-        api.query_imgur_api(app, env, client_id, 100, response)
-    assert exc.value.args[0] == 'imgur_client_id config value must be set for Imgur API calls.'
-    client_id = 'inv@lid'
-    with pytest.raises(ExtensionError) as exc:
-        api.query_imgur_api(app, env, client_id, 100, response)
-    assert exc.value.args[0] == 'imgur_client_id config value must be 5-30 lower case letters and numbers only.'
 
 
 @pytest.mark.httpretty

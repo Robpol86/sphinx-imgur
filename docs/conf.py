@@ -1,18 +1,18 @@
 """Sphinx configuration file."""
 
 import os
+import sys
 import time
-
-from setup import NAME, VERSION
 
 
 # General configuration.
+sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
 author = '@Robpol86'
 copyright = '{}, {}'.format(time.strftime('%Y'), author)
 master_doc = 'index'
-project = NAME
+project = __import__('setup').NAME
 pygments_style = 'friendly'
-release = version = VERSION
+release = version = __import__('setup').VERSION
 templates_path = ['_templates']
 extensions = list()
 

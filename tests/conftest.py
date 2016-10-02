@@ -112,7 +112,11 @@ def reset_sphinx(request):
 
 @pytest.fixture
 def httpretty_common_mock():
-    """Common mock Imgur data."""
+    """Common mock Imgur data.
+
+    :return: CACHED_RESPONSES.
+    :rtype: dict
+    """
     if not CACHED_RESPONSES:
         for path in py.path.local(__file__).dirpath().visit('response_*_*.json'):
             kind, imgur_id = os.path.splitext(path.basename)[0].split('_')[1:]
@@ -121,3 +125,4 @@ def httpretty_common_mock():
             CACHED_RESPONSES[url] = body
     for url, body in CACHED_RESPONSES.items():
         httpretty.register_uri(httpretty.GET, url, body=body)
+    return CACHED_RESPONSES

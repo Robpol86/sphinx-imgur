@@ -7,6 +7,7 @@ https://pypi.python.org/pypi/sphinxcontrib-imgur
 
 import docutils.nodes
 
+from sphinxcontrib.imgur import sphinx_api
 from sphinxcontrib.imgur.api import get_imgur_ids_from_doctree, query_imgur_api, queue_new_imgur_ids
 from sphinxcontrib.imgur.directives import ImgurEmbedDirective
 from sphinxcontrib.imgur.nodes import ImgurDescriptionNode, ImgurEmbedNode, ImgurJavaScriptNode, ImgurTitleNode
@@ -25,9 +26,6 @@ def event_doctree_read(app, doctree):
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     """
-    if not hasattr(app.builder.env, 'imgur_api_cache'):
-        app.builder.env.imgur_api_cache = dict()
-
     imgur_ids = get_imgur_ids_from_doctree(doctree)
     if not imgur_ids:
         return
@@ -76,12 +74,6 @@ def setup(app):
     :returns: Extension version.
     :rtype: dict
     """
-    app.add_config_value('imgur_api_cache_ttl', 172800, False)
-    app.add_config_value('imgur_api_test_response_albums', None, False)
-    app.add_config_value('imgur_api_test_response_images', None, False)
-    app.add_config_value('imgur_client_id', None, False)
-    app.add_config_value('imgur_hide_post_details', False, True)
-
     app.add_directive('imgur-embed', ImgurEmbedDirective)
     app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.visit, ImgurEmbedNode.depart))
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
@@ -91,4 +83,5 @@ def setup(app):
     app.connect('doctree-read', event_doctree_read)
     app.connect('doctree-resolved', event_doctree_resolved)
     app.connect('env-updated', event_env_updated)
-    return dict(parallel_read_safe=False, version=__version__)
+
+    return sphinx_api.setup(app, __version__)
