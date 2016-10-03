@@ -1,4 +1,8 @@
-"""Interface with Sphinx."""
+"""Interface with Sphinx.
+
+Note about the two env variables: app.builder.env and just env are the same. I use them interchangeably for linting
+purposes.
+"""
 
 import re
 
@@ -46,6 +50,31 @@ def event_doctree_read(app, doctree):
         else:
             images.add(node.imgur_id)
     initialize(app.builder.env.imgur_album_cache, albums, images)
+
+
+def event_env_merge_info(app, env, _, other):
+    """Called by Sphinx during phase 3 (resolving).
+
+    * Combine child process' modified env with this one.
+
+    :param sphinx.application.Sphinx app: Sphinx application object.
+    :param sphinx.environment.BuildEnvironment env: Sphinx build environment.
+    :param _: Not used.
+    :param sphinx.environment.BuildEnvironment other: Sphinx build environment from child process.
+    """
+    other_album_cache = getattr(other, 'imgur_album_cache', None)
+    if not other_album_cache:
+        return
+    album_cache = app.builder.env.imgur_album_cache
+    assert env  # Linting.
+
+    # Merge updated items.
+    for imgur_id, instance in ((k, v) for k, v in other_album_cache.items() if k in album_cache):
+        if instance.mod_time > album_cache[imgur_id].mod_time:
+            album_cache[imgur_id] = instance
+
+    # Add new items.
+    album_cache.update({k: v for k, v in other_album_cache.items() if k not in album_cache})
 
 
 def event_env_updated(app, env):
@@ -97,14 +126,13 @@ def setup(app, version):
     :rtype: dict
     """
     app.add_config_value('imgur_api_cache_ttl', 172800, False)
-    app.add_config_value('imgur_api_test_response_albums', None, False)
-    app.add_config_value('imgur_api_test_response_images', None, False)
     app.add_config_value('imgur_client_id', None, False)
     app.add_config_value('imgur_hide_post_details', False, True)
 
     app.connect('env-before-read-docs', event_before_read_docs)
     app.connect('doctree-read', event_doctree_read)
+    app.connect('env-merge-info', event_env_merge_info)
     app.connect('env-updated', event_env_updated)
     app.connect('doctree-resolved', event_doctree_resolved)
 
-    return dict(parallel_read_safe=False, version=version)
+    return dict(parallel_read_safe=True, version=version)

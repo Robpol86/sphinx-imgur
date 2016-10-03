@@ -126,12 +126,7 @@ class Image(object):
             return
 
         # Retrieve data.
-        test_key = 'imgur_api_test_response_albums' if self.TYPE == 'album' else 'imgur_api_test_response_images'
-        if app.config[test_key]:
-            app.debug('loading mock response for %s from %s config value.', self.imgur_id, test_key)
-            response = app.config[test_key][self.imgur_id]
-        else:
-            response = query_api(app, client_id, self.imgur_id, self.TYPE == 'album')
+        response = query_api(app, client_id, self.imgur_id, self.TYPE == 'album')
 
         # Parse.
         try:

@@ -21,7 +21,6 @@ class FakeApp(object):
 
     def __init__(self):
         """Constructor."""
-        self.config = dict(imgur_api_test_response_albums=dict(), imgur_api_test_response_images=dict())
         self.messages = list()
 
     def debug(self, message, *args, **kwargs):
@@ -93,21 +92,6 @@ def tmpdir_module(request, tmpdir_factory):
     :param tmpdir_factory: pytest fixture.
     """
     return tmpdir_factory.mktemp(request.module.__name__)
-
-
-@pytest.fixture
-def reset_sphinx(request):
-    """Reset Sphinx-related objects at the end of the test to prevent warnings between tests.
-
-    :param request: pytest fixture.
-    """
-    def finalizer():
-        from docutils.nodes import GenericNodeVisitor, SparseNodeVisitor
-        for obj in (GenericNodeVisitor, SparseNodeVisitor):
-            for attr in dir(obj):
-                if 'imgur' in attr.lower():
-                    delattr(obj, attr)
-    request.addfinalizer(finalizer)
 
 
 @pytest.fixture

@@ -46,11 +46,9 @@ Unreleased
 Added
     * Python 3.5 support (Linux/OS X and Windows).
 
-Changed
-    * Split ``imgur_api_test_response`` into ``imgur_api_test_response_albums`` and ``imgur_api_test_response_albums``.
-
 Removed
     * PyPy support.
+    * ``imgur_api_test_response`` conf variable.
 
 1.0.0 - 2015-08-09
 ------------------

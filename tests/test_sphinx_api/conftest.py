@@ -9,21 +9,24 @@ import pytest
 from sphinx import build_main
 
 
-def run_build_main(docs_dir, html_dir):
+def run_build_main(docs_dir, html_dir, overflow):
     """Run build_main().
 
     :param str docs_dir: Path to input docs directory.
     :param str html_dir: Path to output html directory.
+    :param iter overflow: Append these args to sphinx-build call.
 
     :return: Value from build_main().
     :rtype: int
     """
     argv = ('sphinx-build', str(docs_dir), str(html_dir))
+    if overflow:
+        argv += overflow
     result = build_main(argv)
     return result
 
 
-def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, queue):
+def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, queue, overflow):
     """Run Sphinx's build_main after setting up httpretty mock responses. Called by multiprocess.Process.
 
     Need to use this instead of httpretty pytest fixtures since forking doesn't exist in Windows and multiprocess runs
@@ -36,6 +39,7 @@ def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, qu
     :param str html_dir: Path to output html directory.
     :param dict cached_responses: URL keys and serialized JSON values.
     :param multiprocessing.queues.Queue queue: Queue to transmit stdout/err back to parent process.
+    :param iter overflow: Append these args to sphinx-build call.
     """
     # Capture stdout/stderr after forking/spawning.
     capture = __import__('_pytest').capture
@@ -53,7 +57,7 @@ def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, qu
                 httpretty.register_uri(httpretty.GET, url, body=body)
 
     # Run.
-    result = run_build_main(docs_dir, html_dir)
+    result = run_build_main(docs_dir, html_dir, overflow)
     stdout, stderr = capsys.readouterr()
     queue.put((stdout, stderr))
     if result != 0:
@@ -63,18 +67,19 @@ def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, qu
 @pytest.fixture(scope='session')
 def build_isolated():
     """Return function that runs Sphinx's build_main() isolated within a new process via multiprocessing."""
-    def run(docs_dir, html_dir, cached_responses):
+    def run(docs_dir, html_dir, cached_responses, overflow=None):
         """Run build_main() through multiprocessing.Process.
 
         :param str docs_dir: Path to input docs directory.
         :param str html_dir: Path to output html directory.
         :param dict cached_responses: URL keys and serialized JSON values.
+        :param iter overflow: Append these args to sphinx-build call.
 
         :return: Exit code of subprocess, stdout, and stderr.
         :rtype: tuple
         """
         queue = multiprocessing.Queue()
-        args = docs_dir, html_dir, cached_responses, queue
+        args = docs_dir, html_dir, cached_responses, queue, overflow
         child = multiprocessing.Process(target=run_build_main_post_multiprocessing, args=args)
         child.start()
         child.join()
