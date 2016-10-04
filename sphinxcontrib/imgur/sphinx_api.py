@@ -31,8 +31,11 @@ def event_before_read_docs(app, env, _):
         raise ExtensionError('imgur_client_id config value must be set for Imgur API calls.')
     if not RE_CLIENT_ID.match(client_id):
         raise ExtensionError('imgur_client_id config value must be 5-30 lower case hexadecimal characters only.')
-    env.imgur_album_cache = initialize(getattr(env, 'imgur_album_cache', None), (), ())
-    prune_cache(env.imgur_album_cache, app)
+
+    imgur_album_cache = getattr(env, 'imgur_album_cache', None)
+    imgur_image_cache = getattr(env, 'imgur_image_cache', None)
+    env.imgur_album_cache, env.imgur_image_cache = initialize(imgur_album_cache, imgur_image_cache, (), ())
+    prune_cache(env.imgur_album_cache, env.imgur_image_cache, app)
 
 
 def event_doctree_read(app, doctree):
@@ -49,7 +52,7 @@ def event_doctree_read(app, doctree):
             albums.add(node.imgur_id[2:])
         else:
             images.add(node.imgur_id)
-    initialize(app.builder.env.imgur_album_cache, albums, images)
+    initialize(app.builder.env.imgur_album_cache, app.builder.env.imgur_image_cache, albums, images)
 
 
 def event_env_merge_info(app, env, _, other):
@@ -63,18 +66,22 @@ def event_env_merge_info(app, env, _, other):
     :param sphinx.environment.BuildEnvironment other: Sphinx build environment from child process.
     """
     other_album_cache = getattr(other, 'imgur_album_cache', None)
-    if not other_album_cache:
+    other_image_cache = getattr(other, 'imgur_image_cache', None)
+    if not other_album_cache and not other_image_cache:
         return
     album_cache = app.builder.env.imgur_album_cache
+    image_cache = app.builder.env.imgur_image_cache
     assert env  # Linting.
 
     # Merge updated items.
-    for imgur_id, instance in ((k, v) for k, v in other_album_cache.items() if k in album_cache):
-        if instance.mod_time > album_cache[imgur_id].mod_time:
-            album_cache[imgur_id] = instance
+    for cache, other in ((album_cache, other_album_cache), (image_cache, other_image_cache)):
+        for imgur_id, instance in ((k, v) for k, v in other.items() if k in cache):
+            if instance.mod_time > cache[imgur_id].mod_time:
+                cache[imgur_id] = instance
 
     # Add new items.
     album_cache.update({k: v for k, v in other_album_cache.items() if k not in album_cache})
+    image_cache.update({k: v for k, v in other_image_cache.items() if k not in image_cache})
 
 
 def event_env_updated(app, env):
@@ -88,17 +95,23 @@ def event_env_updated(app, env):
     """
     client_id = app.config['imgur_client_id']
     ttl = app.config['imgur_api_cache_ttl']
-    whitelist = set()
+    album_whitelist = set()
+    image_whitelist = set()
 
     # Build whitelist of Imgur IDs in just new/updated docs.
     for doctree in (env.get_doctree(n) for n in app.builder.get_outdated_docs()):
         for node in (n for c in (ImgurDescriptionNode, ImgurTitleNode) for n in doctree.traverse(c)):
-            whitelist.add(node.imgur_id.split('/')[-1])
+            if node.imgur_id.startswith('a/'):
+                album_whitelist.add(node.imgur_id[2:])
+            else:
+                image_whitelist.add(node.imgur_id)
 
     # Update the cache only if an added/changed doc has an Imgur album/image.
-    if whitelist:
-        update_cache(app.builder.env.imgur_album_cache, app, client_id, ttl, whitelist)
-        prune_cache(app.builder.env.imgur_album_cache, app)
+    album_cache = app.builder.env.imgur_album_cache
+    image_cache = app.builder.env.imgur_image_cache
+    if album_whitelist or image_whitelist:
+        update_cache(album_cache, image_cache, app, client_id, ttl, album_whitelist, image_whitelist)
+        prune_cache(album_cache, image_cache, app)
 
 
 def event_doctree_resolved(app, doctree, _):
@@ -111,8 +124,10 @@ def event_doctree_resolved(app, doctree, _):
     :param _: Not used.
     """
     for node in (n for c in (ImgurDescriptionNode, ImgurTitleNode) for n in doctree.traverse(c)):
-        imgur_id = node.imgur_id.split('/')[-1]
-        text = getattr(app.env.imgur_album_cache[imgur_id], node.key)
+        if node.imgur_id.startswith('a/'):
+            text = getattr(app.env.imgur_album_cache[node.imgur_id[2:]], node.key)
+        else:
+            text = getattr(app.env.imgur_image_cache[node.imgur_id], node.key)
         node.replace_self([docutils.nodes.Text(text)])
 
 

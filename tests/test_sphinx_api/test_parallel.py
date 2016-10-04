@@ -74,14 +74,16 @@ def test_parallel(tmpdir, build_isolated, docs, httpretty_common_mock, parallel)
     env = pickle.load(handle)
     handle.close()
     actual = sorted(env.imgur_album_cache)
-    assert actual == ['2QcXR3R', '611EovQ', 'Hqw7KHM', 'Pwx1G5j', 'V76cJ', 'VMlM6', 'hiX02', 'mGQBV', 'ojGG7', 'pc8hc']
-    assert env.imgur_album_cache['2QcXR3R'].title is None
-    assert env.imgur_album_cache['611EovQ'].title == 'Work, June 1st, 2016: Uber'
-    assert env.imgur_album_cache['Hqw7KHM'].title is None
-    assert env.imgur_album_cache['Pwx1G5j'].title is None
+    assert actual == ['V76cJ', 'VMlM6']
+    actual = sorted(env.imgur_image_cache)
+    assert actual == ['2QcXR3R', '611EovQ', 'Hqw7KHM', 'Pwx1G5j', 'hiX02', 'mGQBV', 'ojGG7', 'pc8hc']
+    assert env.imgur_image_cache['2QcXR3R'].title is None
+    assert env.imgur_image_cache['611EovQ'].title == 'Work, June 1st, 2016: Uber'
+    assert env.imgur_image_cache['Hqw7KHM'].title is None
+    assert env.imgur_image_cache['Pwx1G5j'].title is None
     assert env.imgur_album_cache['V76cJ'].title == '2010 JSW, 2012 Projects'
     assert env.imgur_album_cache['VMlM6'].title == 'Screenshots'
-    assert env.imgur_album_cache['hiX02'].title is None
-    assert env.imgur_album_cache['mGQBV'].title == 'Wireless Charging 1: Testing'
-    assert env.imgur_album_cache['ojGG7'].title == 'Wireless Charging 3: Works'
-    assert env.imgur_album_cache['pc8hc'].title == 'Wireless Charging 2: Testing Closeup'
+    assert env.imgur_image_cache['hiX02'].title is None
+    assert env.imgur_image_cache['mGQBV'].title == 'Wireless Charging 1: Testing'
+    assert env.imgur_image_cache['ojGG7'].title == 'Wireless Charging 3: Works'
+    assert env.imgur_image_cache['pc8hc'].title == 'Wireless Charging 2: Testing Closeup'
