@@ -1,7 +1,7 @@
 """Docutils roles for Imgur inline text."""
 
 from sphinxcontrib.imgur.directives import ImgurError, RE_IMGUR_ID
-from sphinxcontrib.imgur.nodes import ImgurDescriptionNode, ImgurTitleNode
+from sphinxcontrib.imgur.nodes import ImgurTextNode
 
 
 def imgur_role(name, rawtext, text, *_):
@@ -11,7 +11,7 @@ def imgur_role(name, rawtext, text, *_):
 
     :raises ImgurError: if text has invalid Imgur ID.
 
-    :param str name: Role name that caused this function to be called (e.g. 'imgur-title').
+    :param str name: Role name (e.g. 'imgur-title').
     :param str rawtext: Entire role and value markup (e.g. ':imgur-title:`hWyW0`').
     :param str text: The parameter used in the role markup (e.g. 'hWyW0').
 
@@ -21,9 +21,5 @@ def imgur_role(name, rawtext, text, *_):
     if not RE_IMGUR_ID.match(text):
         message = 'Invalid Imgur ID specified. Must be 5-10 letters and numbers. Got "{}" from "{}".'
         raise ImgurError(message.format(text, rawtext))
-
-    if name == 'imgur-description':
-        node = ImgurDescriptionNode(text)
-    else:
-        node = ImgurTitleNode(text)
+    node = ImgurTextNode(name, text)
     return [node], []

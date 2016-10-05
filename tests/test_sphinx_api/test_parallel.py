@@ -9,7 +9,7 @@ import pytest
 def add_page(docs, name, role):
     """Add a page to the sample Sphinx docs.
 
-    :param py.path docs: Path to docs root dir.
+    :param py.path.local docs: Path to docs root dir.
     :param str name: Page name.
     :param str role: Sphinx role to put in page..
     """
@@ -19,26 +19,33 @@ def add_page(docs, name, role):
     page.write('.. _{}:\n\n{}\n{}\n\nTitle: {};\n'.format(name, name.capitalize(), '=' * len(name), role))
 
 
-@pytest.mark.parametrize('parallel', range(1, 5))
 @pytest.mark.httpretty
-def test_parallel(tmpdir, build_isolated, docs, httpretty_common_mock, parallel):
+def test_parallel(tmpdir, build_isolated, docs, httpretty_common_mock):
     """Run sphinx-build with -j option.
 
-    :param tmpdir: pytest fixture.
-    :param build_isolated: conftest fixture.
-    :param docs: conftest fixture.
-    :param httpretty_common_mock: conftest fixture.
-    :param int parallel: Run these many parallel processes.
+    :param py.path.local tmpdir: pytest fixture.
+    :param function build_isolated: conftest fixture.
+    :param py.path.local docs: conftest fixture.
+    :param dict httpretty_common_mock: conftest fixture.
     """
+    html = tmpdir.join('html')
+
+    # Add pages to build in parallel.
     add_page(docs, 'three', ':imgur-title:`hiX02`')
     add_page(docs, 'four', ':imgur-title:`Pwx1G5j`')
     add_page(docs, 'five', ':imgur-title:`mGQBV`')
     add_page(docs, 'six', ':imgur-title:`pc8hc`')
     add_page(docs, 'seven', ':imgur-title:`ojGG7`')
     add_page(docs, 'eight', ':imgur-title:`Hqw7KHM`')
-    html = tmpdir.join('html')
-    result, stdout, stderr = build_isolated(docs, html, httpretty_common_mock, ('-j', str(parallel)))
 
+    # Add empty pages to test event_env_merge_info() if statement.
+    for i in range(8):
+        add_page(docs, 'ignore{}'.format(i), 'Hello World')
+
+    # Run.
+    result, stdout, stderr = build_isolated(docs, html, httpretty_common_mock, ('-j', '4'))
+
+    # Verify return code and console output.
     assert result == 0
     assert not stderr
     actual = sorted(re.compile(r'^querying http.+$', re.MULTILINE).findall(stdout))
@@ -51,6 +58,7 @@ def test_parallel(tmpdir, build_isolated, docs, httpretty_common_mock, parallel)
     ]
     assert actual == expected
 
+    # Verify HTML contents.
     contents = html.join('one.html').read()
     assert 'Title: 2010 JSW, 2012 Projects;' in contents
     assert 'Description: Screenshots of my various devices.;' in contents
@@ -70,6 +78,7 @@ def test_parallel(tmpdir, build_isolated, docs, httpretty_common_mock, parallel)
     contents = html.join('eight.html').read()
     assert 'Title: None;' in contents
 
+    # Verify pickled environment.
     handle = html.join('.doctrees', 'environment.pickle').open(mode='rb')
     env = pickle.load(handle)
     handle.close()

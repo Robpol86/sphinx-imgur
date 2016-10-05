@@ -32,17 +32,19 @@ def test_first_run(build_isolated, docs, httpretty_common_mock, tmpdir_module):
     assert 'Description: None;' in contents
 
 
+@pytest.mark.parametrize('update', ['two.rst', 'ignore.rst'])
 @pytest.mark.httpretty
-def test_second_cached_run(build_isolated, tmpdir_module):
+def test_second_cached_run(build_isolated, tmpdir_module, update):
     """Run with nothing changed. Ensure no API queries happen.
 
     :param build_isolated: conftest fixture.
     :param tmpdir_module: conftest fixture.
+    :param str update: Which file to edit. two.rst edits a file with Imgur IDs, ignore.rst edits file without.
     """
     time.sleep(1.1)
 
     docs = tmpdir_module.join('docs')
-    docs.join('one.rst').write('Edited\n', mode='a')
+    docs.join(update).write('Edited\n', mode='a')
     html = tmpdir_module.join('html')
     result, stderr = build_isolated(docs, html, None)[::2]
 
@@ -52,10 +54,14 @@ def test_second_cached_run(build_isolated, tmpdir_module):
     contents = html.join('one.html').read()
     assert 'Title: 2010 JSW, 2012 Projects;' in contents
     assert 'Description: Screenshots of my various devices.;' in contents
-    assert 'Edited' in contents
     contents = html.join('two.html').read()
     assert 'Title: Work, June 1st, 2016: Uber;' in contents
     assert 'Description: None;' in contents
+    if update == 'two.rst':
+        assert 'Edited' in contents
+    else:
+        contents = html.join('ignore.html').read()
+        assert 'Edited' in contents
 
 
 @pytest.mark.httpretty

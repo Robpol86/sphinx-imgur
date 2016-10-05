@@ -8,13 +8,21 @@ class ImgurJavaScriptNode(General, Element):
 
     @staticmethod
     def visit(spht, node):
-        """Append opening tags to document body list."""
+        """Append opening tags to document body list.
+
+        :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
+        :param sphinxcontrib.imgur.nodes.ImgurJavaScriptNode node: This class' instance.
+        """
         html_attrs_bq = {'async': '', 'src': '//s.imgur.com/min/embed.js', 'charset': 'utf-8'}
         spht.body.append(spht.starttag(node, 'script', '', **html_attrs_bq))
 
     @staticmethod
     def depart(spht, _):
-        """Append closing tags to document body list."""
+        """Append closing tags to document body list.
+
+        :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
+        :param _: Not used.
+        """
         spht.body.append('</script>')
 
 
@@ -33,7 +41,11 @@ class ImgurEmbedNode(General, Element):
 
     @staticmethod
     def visit(spht, node):
-        """Append opening tags to document body list."""
+        """Append opening tags to document body list.
+
+        :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
+        :param sphinxcontrib.imgur.nodes.ImgurEmbedNode node: This class' instance.
+        """
         html_attrs_bq = {'CLASS': 'imgur-embed-pub', 'lang': spht.settings.language_code, 'data-id': node.imgur_id}
         if node.hide_post_details:
             html_attrs_bq['data-context'] = 'false'
@@ -43,31 +55,24 @@ class ImgurEmbedNode(General, Element):
 
     @staticmethod
     def depart(spht, _):
-        """Append closing tags to document body list."""
+        """Append closing tags to document body list.
+
+        :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
+        :param _: Not used.
+        """
         spht.body.extend(['</a>', '</blockquote>'])
 
 
-class ImgurDescriptionNode(General, Element):
+class ImgurTextNode(General, Element):
     """Imgur text node for image/album descriptions. To be replaced with docutils.nodes.Text."""
 
-    def __init__(self, imgur_id):
+    def __init__(self, name, text):
         """Constructor.
 
-        :param str imgur_id: Imgur album or image ID for later lookup.
+        :param str name: Role name (e.g. 'imgur-title').
+        :param str text: The parameter used in the role markup (e.g. 'hWyW0').
         """
-        super(ImgurDescriptionNode, self).__init__()
-        self.imgur_id = imgur_id
-        self.key = 'description'
-
-
-class ImgurTitleNode(General, Element):
-    """Imgur text node for image/album titles. To be replaced with docutils.nodes.Text."""
-
-    def __init__(self, imgur_id):
-        """Constructor.
-
-        :param str imgur_id: Imgur album or image ID for later lookup.
-        """
-        super(ImgurTitleNode, self).__init__()
-        self.imgur_id = imgur_id
-        self.key = 'title'
+        super(ImgurTextNode, self).__init__()
+        self.name = name
+        self.album = text.startswith('a/')
+        self.imgur_id = text[2:] if self.album else text

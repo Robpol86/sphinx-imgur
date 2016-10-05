@@ -10,7 +10,9 @@ import docutils.nodes
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur.cache import initialize, prune_cache, update_cache
-from sphinxcontrib.imgur.nodes import ImgurDescriptionNode, ImgurTitleNode
+from sphinxcontrib.imgur.directives import ImgurEmbedDirective
+from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurJavaScriptNode, ImgurTextNode
+from sphinxcontrib.imgur.roles import imgur_role
 
 RE_CLIENT_ID = re.compile(r'^[a-f0-9]{5,30}$')
 
@@ -47,9 +49,9 @@ def event_doctree_read(app, doctree):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     """
     albums, images = set(), set()
-    for node in (n for c in (ImgurDescriptionNode, ImgurTitleNode) for n in doctree.traverse(c)):
-        if node.imgur_id.startswith('a/'):
-            albums.add(node.imgur_id[2:])
+    for node in doctree.traverse(ImgurTextNode):
+        if node.album:
+            albums.add(node.imgur_id)
         else:
             images.add(node.imgur_id)
     initialize(app.builder.env.imgur_album_cache, app.builder.env.imgur_image_cache, albums, images)
@@ -58,7 +60,8 @@ def event_doctree_read(app, doctree):
 def event_env_merge_info(app, env, _, other):
     """Called by Sphinx during phase 3 (resolving).
 
-    * Combine child process' modified env with this one.
+    * Combine child process' modified env with this one. Only changes should be new Imgur IDs since cache update is done
+      in event_env_updated() after everything is merged and we're back to one process.
 
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param sphinx.environment.BuildEnvironment env: Sphinx build environment.
@@ -73,15 +76,9 @@ def event_env_merge_info(app, env, _, other):
     image_cache = app.builder.env.imgur_image_cache
     assert env  # Linting.
 
-    # Merge updated items.
-    for cache, other in ((album_cache, other_album_cache), (image_cache, other_image_cache)):
-        for imgur_id, instance in ((k, v) for k, v in other.items() if k in cache):
-            if instance.mod_time > cache[imgur_id].mod_time:
-                cache[imgur_id] = instance
-
-    # Add new items.
-    album_cache.update({k: v for k, v in other_album_cache.items() if k not in album_cache})
-    image_cache.update({k: v for k, v in other_image_cache.items() if k not in image_cache})
+    # Merge items.
+    album_cache.update(other_album_cache)
+    image_cache.update(other_image_cache)
 
 
 def event_env_updated(app, env):
@@ -100,9 +97,9 @@ def event_env_updated(app, env):
 
     # Build whitelist of Imgur IDs in just new/updated docs.
     for doctree in (env.get_doctree(n) for n in app.builder.get_outdated_docs()):
-        for node in (n for c in (ImgurDescriptionNode, ImgurTitleNode) for n in doctree.traverse(c)):
-            if node.imgur_id.startswith('a/'):
-                album_whitelist.add(node.imgur_id[2:])
+        for node in doctree.traverse(ImgurTextNode):
+            if node.album:
+                album_whitelist.add(node.imgur_id)
             else:
                 image_whitelist.add(node.imgur_id)
 
@@ -123,11 +120,15 @@ def event_doctree_resolved(app, doctree, _):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     :param _: Not used.
     """
-    for node in (n for c in (ImgurDescriptionNode, ImgurTitleNode) for n in doctree.traverse(c)):
-        if node.imgur_id.startswith('a/'):
-            text = getattr(app.env.imgur_album_cache[node.imgur_id[2:]], node.key)
+    for node in doctree.traverse(ImgurTextNode):
+        if node.album:
+            cache = app.env.imgur_album_cache
         else:
-            text = getattr(app.env.imgur_image_cache[node.imgur_id], node.key)
+            cache = app.env.imgur_image_cache
+        if node.name == 'imgur-description':
+            text = cache[node.imgur_id].description
+        else:
+            text = cache[node.imgur_id].title
         node.replace_self([docutils.nodes.Text(text)])
 
 
@@ -137,12 +138,18 @@ def setup(app, version):
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param str version: Version of sphinxcontrib-imgur.
 
-    :returns: Extension version.
+    :returns: Extension metadata.
     :rtype: dict
     """
     app.add_config_value('imgur_api_cache_ttl', 172800, False)
     app.add_config_value('imgur_client_id', None, False)
     app.add_config_value('imgur_hide_post_details', False, True)
+
+    app.add_directive('imgur-embed', ImgurEmbedDirective)
+    app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.visit, ImgurEmbedNode.depart))
+    app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
+    app.add_role('imgur-description', imgur_role)
+    app.add_role('imgur-title', imgur_role)
 
     app.connect('env-before-read-docs', event_before_read_docs)
     app.connect('doctree-read', event_doctree_read)

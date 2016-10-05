@@ -107,7 +107,7 @@ def docs(tmpdir):
     root.join('conf.py').write("extensions = ['sphinxcontrib.imgur']\nimgur_client_id = 'a0b1c2d3e4f56789'\n")
 
     # Create Sphinx docs.
-    pages = ['one', 'two']
+    pages = ['one', 'two', 'ignore']
     root.join('contents.rst').write(
         'Test\n'
         '====\n'
