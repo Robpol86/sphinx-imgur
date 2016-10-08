@@ -94,7 +94,6 @@ def test_prune_cache_bad_types(app, doctree_none):
     assert sorted(image_cache) == ['image1']
 
 
-@pytest.mark.httpretty
 def test_update_cache_none_needed(app, freezer):
     """Test no updates needed.
 
@@ -121,7 +120,6 @@ def test_update_cache_none_needed(app, freezer):
 
 
 @pytest.mark.usefixtures('freezer', 'httpretty_common_mock')
-@pytest.mark.httpretty
 def test_update_cache_everything(app):
     """Test with everything outdated.
 
@@ -163,7 +161,6 @@ def test_update_cache_everything(app):
 
 @pytest.mark.parametrize('album', [True, False])
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_update_cache_error_handling(app, album):
     """Test error handling.
 
@@ -227,7 +224,6 @@ def test_update_cache_error_handling(app, album):
         assert 'query unsuccessful from https://api.imgur.com/3/image/image: N/A' in merged
 
 
-@pytest.mark.httpretty
 def test_update_cache_error_keep_previous(app):
     """Make sure error handling preserves previous data in cache.
 
@@ -249,7 +245,6 @@ def test_update_cache_error_keep_previous(app):
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_update_cache_half(app):
     """Test with half the albums and half the standalone images being outdated.
 
@@ -273,7 +268,6 @@ def test_update_cache_half(app):
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_update_cache_one_image_in_album(app, freezer):
     """Test one image in an album outdated (but not other images in said album).
 
@@ -303,7 +297,6 @@ def test_update_cache_one_image_in_album(app, freezer):
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_update_cache_whitelist(app):
     """Test updating only whitelisted items.
 
@@ -326,7 +319,6 @@ def test_update_cache_whitelist(app):
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_update_cache_whitelist_parent(app):
     """Make sure parent album is updated even if not in whitelist.
 
@@ -350,7 +342,6 @@ def test_update_cache_whitelist_parent(app):
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_update_cache_whitelist_parent_changed(app):
     """Make sure child image is still updated when parent album no longer has the image.
 

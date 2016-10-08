@@ -21,6 +21,7 @@ def test_query_api_timeout_connection_error(monkeypatch, request, app, timeout):
     :param bool timeout: Test timeout instead of connection error.
     """
     # Listen on a random port.
+    httpretty.disable()
     server = socket.socket()
     server.bind(('127.0.0.1', 0))
     server.listen(1)
@@ -43,7 +44,6 @@ def test_query_api_timeout_connection_error(monkeypatch, request, app, timeout):
     assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:51', app.messages[-1][2])
 
 
-@pytest.mark.httpretty
 def test_query_api_non_json(app):
     """Test when API returns something other than JSON.
 
@@ -66,7 +66,6 @@ def test_query_api_non_json(app):
 
 
 @pytest.mark.parametrize('bad_json', [False, True])
-@pytest.mark.httpretty
 def test_query_api_not_success(app, bad_json):
     """Test non-successful replies or unexpected JSON data.
 
@@ -98,7 +97,6 @@ def test_query_api_not_success(app, bad_json):
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_query_api_valid(app):
     """Test working response.
 
@@ -114,7 +112,6 @@ def test_query_api_valid(app):
 
 @pytest.mark.parametrize('error', ['not json', 'no data', 'no title'])
 @pytest.mark.parametrize('is_album', [False, True])
-@pytest.mark.httpretty
 def test_image_album_refresh_error(app, error, is_album):
     """Test Image.refresh() and Album.refresh() with bad JSON.
 
@@ -151,7 +148,6 @@ def test_image_album_refresh_error(app, error, is_album):
         assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:133$', app.messages[-1][2])
 
 
-@pytest.mark.httpretty
 def test_album_minor_error(app):
     """Test Album.refresh() with bad images JSON.
 
@@ -175,7 +171,6 @@ def test_album_minor_error(app):
 
 @pytest.mark.parametrize('is_album', [False, True])
 @pytest.mark.usefixtures('httpretty_common_mock')
-@pytest.mark.httpretty
 def test_image_album_refresh_ttl(app, is_album):
     """Test Image.refresh() and Album.refresh() successfully with ttl.
 

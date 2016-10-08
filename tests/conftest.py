@@ -63,10 +63,12 @@ def app():
     return FakeApp()
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True)
 def config_httpretty():
-    """Configure httpretty global variables."""
+    """Configure httpretty global variables and enable httpretty in all tests."""
     httpretty.HTTPretty.allow_net_connect = False
+    httpretty.reset()
+    httpretty.enable()
 
 
 @pytest.fixture(autouse=True, scope='session')

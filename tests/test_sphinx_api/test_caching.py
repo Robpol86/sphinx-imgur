@@ -6,7 +6,6 @@ import time
 import pytest
 
 
-@pytest.mark.httpretty
 def test_first_run(docs, httpretty_common_mock, tmpdir_module):
     """Run sphinx-build once. Persist output files in module-scoped tmpdir.
 
@@ -34,7 +33,6 @@ def test_first_run(docs, httpretty_common_mock, tmpdir_module):
 
 
 @pytest.mark.parametrize('update', ['two.rst', 'ignore.rst'])
-@pytest.mark.httpretty
 def test_second_cached_run(tmpdir_module, update):
     """Run with nothing changed. Ensure no API queries happen.
 
@@ -64,7 +62,6 @@ def test_second_cached_run(tmpdir_module, update):
         assert 'Edited' in contents
 
 
-@pytest.mark.httpretty
 def test_new_rst_old_id(tmpdir_module):
     """Add a new RST file but use a pre-existing Imgur ID.
 
@@ -88,7 +85,6 @@ def test_new_rst_old_id(tmpdir_module):
     assert 'Description: Closeup of Nokia DT-900 charger wedged in my door panel.;' in contents
 
 
-@pytest.mark.httpretty
 def test_single_id_update(httpretty_common_mock, tmpdir_module):
     """Make sure only one ID is updated.
 
@@ -111,7 +107,6 @@ def test_single_id_update(httpretty_common_mock, tmpdir_module):
     assert 'Title: None;' in contents
 
 
-@pytest.mark.httpretty
 def test_expire_everything_single_update(httpretty_common_mock, tmpdir_module):
     """Make sure only one API query is done when only one document is updated even though other entries are old.
 

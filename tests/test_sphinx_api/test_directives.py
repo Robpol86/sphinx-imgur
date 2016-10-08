@@ -9,7 +9,6 @@ RE_SCRIPTS = re.compile(r'(<script[^>]* src="//s.imgur.com/min/embed.js"[^>]*>)'
 
 
 @pytest.mark.parametrize('album', [False, True])
-@pytest.mark.httpretty
 def test_bad_imgur_id(tmpdir, docs, album):
     """Test invalid imgur_id value.
 
@@ -31,7 +30,6 @@ def test_bad_imgur_id(tmpdir, docs, album):
 
 @pytest.mark.parametrize('hpd_option', [None, False, True])
 @pytest.mark.parametrize('hpd_conf', [None, False, True])
-@pytest.mark.httpretty
 def test_embed(tmpdir, docs, hpd_conf, hpd_option):
     """Test valid imgur_id value in imgur-embed directive.
 

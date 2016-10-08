@@ -5,7 +5,6 @@ import pytest
 
 @pytest.mark.parametrize('role', ['imgur-title', 'imgur-description'])
 @pytest.mark.parametrize('album', [False, True])
-@pytest.mark.httpretty
 def test_bad_imgur_id(tmpdir, docs, album, role):
     """Test invalid imgur_id value.
 
@@ -26,7 +25,6 @@ def test_bad_imgur_id(tmpdir, docs, album, role):
     assert expected.format(id=iid, role=role) in stderr
 
 
-@pytest.mark.httpretty
 def test_valid(tmpdir, docs, httpretty_common_mock):
     """Test valid imgur_id value.
 

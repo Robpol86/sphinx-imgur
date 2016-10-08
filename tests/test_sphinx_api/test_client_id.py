@@ -4,7 +4,6 @@ import pytest
 
 
 @pytest.mark.parametrize('invalid', [False, True])
-@pytest.mark.httpretty
 def test_bad_client_id(tmpdir, docs, invalid):
     """Test unset or invalid client_id values.
 

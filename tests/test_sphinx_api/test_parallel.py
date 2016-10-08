@@ -6,7 +6,6 @@ import re
 import pytest
 
 
-@pytest.mark.httpretty
 def test_parallel(tmpdir, docs, httpretty_common_mock):
     """Run sphinx-build with -j option.
 
