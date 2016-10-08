@@ -5,11 +5,10 @@ import pytest
 
 @pytest.mark.parametrize('invalid', [False, True])
 @pytest.mark.httpretty
-def test_bad_client_id(tmpdir, build_isolated, docs, invalid):
+def test_bad_client_id(tmpdir, docs, invalid):
     """Test unset or invalid client_id values.
 
     :param tmpdir: pytest fixture.
-    :param build_isolated: conftest fixture.
     :param docs: conftest fixture.
     :param bool invalid: Set invalid client_id instead of unsetting.
     """
@@ -22,7 +21,7 @@ def test_bad_client_id(tmpdir, build_isolated, docs, invalid):
     docs.join('conf.py').write(conf_py)
 
     # Run.
-    result, stderr = build_isolated(docs, html, None)[::2]
+    result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
     assert result != 0
     assert 'WARNING' not in stderr

@@ -6,11 +6,10 @@ import pytest
 @pytest.mark.parametrize('role', ['imgur-title', 'imgur-description'])
 @pytest.mark.parametrize('album', [False, True])
 @pytest.mark.httpretty
-def test_bad_imgur_id(tmpdir, build_isolated, docs, album, role):
+def test_bad_imgur_id(tmpdir, docs, album, role):
     """Test invalid imgur_id value.
 
     :param tmpdir: pytest fixture.
-    :param build_isolated: conftest fixture.
     :param docs: conftest fixture.
     :param bool album: Invalid album vs image ID.
     :param str role: Sphinx role to test.
@@ -18,7 +17,7 @@ def test_bad_imgur_id(tmpdir, build_isolated, docs, album, role):
     iid = 'a/inv@lid' if album else 'inv@lid'
     docs.join('one.rst').write('Testing: :{}:`{}`;\n'.format(role, iid), mode='a')
     html = tmpdir.join('html')
-    result, stderr = build_isolated(docs, html, None)[::2]
+    result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
     assert result != 0
     assert 'WARNING' not in stderr
@@ -28,20 +27,21 @@ def test_bad_imgur_id(tmpdir, build_isolated, docs, album, role):
 
 
 @pytest.mark.httpretty
-def test_valid(tmpdir, build_isolated, docs, httpretty_common_mock):
+def test_valid(tmpdir, docs, httpretty_common_mock):
     """Test valid imgur_id value.
 
     :param tmpdir: pytest fixture.
-    :param build_isolated: conftest fixture.
     :param docs: conftest fixture.
     :param httpretty_common_mock: conftest fixture.
     """
-    docs.join('one.rst').write('Album Title: :imgur-title:`a/VMlM6`;\n', mode='a')
-    docs.join('one.rst').write('Album Description: :imgur-description:`a/VMlM6`;\n', mode='a')
-    docs.join('one.rst').write('Image Title: :imgur-title:`611EovQ`;\n', mode='a')
-    docs.join('one.rst').write('Image Description: :imgur-description:`611EovQ`;\n', mode='a')
+    pytest.add_page(docs, 'one', (
+        'Album Title: :imgur-title:`a/VMlM6`;\n'
+        'Album Description: :imgur-description:`a/VMlM6`;\n'
+        'Image Title: :imgur-title:`611EovQ`;\n'
+        'Image Description: :imgur-description:`611EovQ`;\n'
+    ))
     html = tmpdir.join('html')
-    result, stderr = build_isolated(docs, html, httpretty_common_mock)[::2]
+    result, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)[::2]
 
     assert result == 0
     assert not stderr

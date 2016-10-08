@@ -6,44 +6,32 @@ import re
 import pytest
 
 
-def add_page(docs, name, role):
-    """Add a page to the sample Sphinx docs.
-
-    :param py.path.local docs: Path to docs root dir.
-    :param str name: Page name.
-    :param str role: Sphinx role to put in page..
-    """
-    docs.join('contents.rst').write('    {}\n'.format(name), mode='a')
-    page = docs.join('{}.rst'.format(name))
-    assert not page.check()
-    page.write('.. _{}:\n\n{}\n{}\n\nTitle: {};\n'.format(name, name.capitalize(), '=' * len(name), role))
-
-
 @pytest.mark.httpretty
-def test_parallel(tmpdir, build_isolated, docs, httpretty_common_mock):
+def test_parallel(tmpdir, docs, httpretty_common_mock):
     """Run sphinx-build with -j option.
 
     :param py.path.local tmpdir: pytest fixture.
-    :param function build_isolated: conftest fixture.
     :param py.path.local docs: conftest fixture.
     :param dict httpretty_common_mock: conftest fixture.
     """
     html = tmpdir.join('html')
 
     # Add pages to build in parallel.
-    add_page(docs, 'three', ':imgur-title:`hiX02`')
-    add_page(docs, 'four', ':imgur-title:`Pwx1G5j`')
-    add_page(docs, 'five', ':imgur-title:`mGQBV`')
-    add_page(docs, 'six', ':imgur-title:`pc8hc`')
-    add_page(docs, 'seven', ':imgur-title:`ojGG7`')
-    add_page(docs, 'eight', ':imgur-title:`Hqw7KHM`')
+    pytest.add_page(docs, 'one', 'Title: :imgur-title:`a/V76cJ`;\nDescription: :imgur-description:`a/VMlM6`;\n')
+    pytest.add_page(docs, 'two', 'Title: :imgur-title:`611EovQ`;\nDescription: :imgur-description:`2QcXR3R`;\n')
+    pytest.add_page(docs, 'three', 'Title: :imgur-title:`hiX02`;\n')
+    pytest.add_page(docs, 'four', 'Title: :imgur-title:`Pwx1G5j`;\n')
+    pytest.add_page(docs, 'five', 'Title: :imgur-title:`mGQBV`;\n')
+    pytest.add_page(docs, 'six', 'Title: :imgur-title:`pc8hc`;\n')
+    pytest.add_page(docs, 'seven', 'Title: :imgur-title:`ojGG7`;\n')
+    pytest.add_page(docs, 'eight', 'Title: :imgur-title:`Hqw7KHM`;\n')
 
     # Add empty pages to test event_env_merge_info() if statement.
     for i in range(8):
-        add_page(docs, 'ignore{}'.format(i), 'Hello World')
+        pytest.add_page(docs, 'ignore{}'.format(i), 'Hello World\n')
 
     # Run.
-    result, stdout, stderr = build_isolated(docs, html, httpretty_common_mock, ('-j', '4'))
+    result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock, ('-j', '4'))
 
     # Verify return code and console output.
     assert result == 0

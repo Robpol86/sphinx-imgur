@@ -64,10 +64,30 @@ def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, qu
         raise RuntimeError(result, stdout, stderr)
 
 
-@pytest.fixture(scope='session')
-def build_isolated():
-    """Return function that runs Sphinx's build_main() isolated within a new process via multiprocessing."""
-    def run(docs_dir, html_dir, cached_responses, overflow=None):
+def pytest_namespace():
+    """Add objects to the pytest namespace.
+
+    E.g. Returning {'func': lambda: True} allows import pytest; assert pytest.func() is True.
+
+    :return: Namespace names and objects.
+    :rtype: dict
+    """
+    def add_page(root, name, append=''):
+        """Add a page to the sample Sphinx docs.
+
+        :param py.path.local root: Path to docs root dir.
+        :param str name: Page name.
+        :param str append: Append text to RST document body.
+
+        :return: Path to new page RST file.
+        :rtype: py.path.local
+        """
+        root.join('contents.rst').write('    {}\n'.format(name), mode='a')
+        page = root.join('{}.rst'.format(name))
+        page.write('.. _{}:\n\n{}\n{}\n\n{}'.format(name, name.capitalize(), '=' * len(name), append))
+        return page
+
+    def build_isolated(docs_dir, html_dir, cached_responses, overflow=None):
         """Run build_main() through multiprocessing.Process.
 
         :param str docs_dir: Path to input docs directory.
@@ -89,7 +109,8 @@ def build_isolated():
         except multiprocessing.queues.Empty:
             stdout, stderr = '', ''
         return result, stdout, stderr
-    return run
+
+    return dict(add_page=add_page, build_isolated=build_isolated)
 
 
 @pytest.fixture
@@ -107,22 +128,15 @@ def docs(tmpdir):
     root.join('conf.py').write("extensions = ['sphinxcontrib.imgur']\nimgur_client_id = 'a0b1c2d3e4f56789'\n")
 
     # Create Sphinx docs.
-    pages = ['one', 'two', 'ignore']
     root.join('contents.rst').write(
         'Test\n'
         '====\n'
         '\n'
         'Sample documentation.\n'
         '\n'
-        '.. toctree::\n' + ''.join('    {}\n'.format(p) for p in pages)
+        '.. toctree::\n'
+        '    ignore\n'
     )
-    for page in pages:
-        root.join('{}.rst'.format(page)).write('.. _{page}:\n\n{Page}\n{divider}\n\nHello World.\n'.format(
-            page=page, Page=page.capitalize(), divider='=' * len(page)
-        ))
-
-    # Add roles/directives to some pages.
-    root.join('one.rst').write('Title: :imgur-title:`a/V76cJ`;\nDescription: :imgur-description:`a/VMlM6`;\n', mode='a')
-    root.join('two.rst').write('Title: :imgur-title:`611EovQ`;\nDescription: :imgur-description:`2QcXR3R`;\n', mode='a')
+    root.join('ignore.rst').write('.. _ignore:\n\nIgnore\n======\n\nHello World.\n')
 
     return root

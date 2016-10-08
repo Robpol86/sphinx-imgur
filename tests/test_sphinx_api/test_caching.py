@@ -7,18 +7,19 @@ import pytest
 
 
 @pytest.mark.httpretty
-def test_first_run(build_isolated, docs, httpretty_common_mock, tmpdir_module):
+def test_first_run(docs, httpretty_common_mock, tmpdir_module):
     """Run sphinx-build once. Persist output files in module-scoped tmpdir.
 
-    :param build_isolated: conftest fixture.
     :param docs: conftest fixture.
     :param httpretty_common_mock: conftest fixture.
     :param tmpdir_module: conftest fixture.
     """
     docs.copy(tmpdir_module.ensure_dir('docs'))
     docs = tmpdir_module.join('docs')
+    pytest.add_page(docs, 'one', 'Title: :imgur-title:`a/V76cJ`;\nDescription: :imgur-description:`a/VMlM6`;\n')
+    pytest.add_page(docs, 'two', 'Title: :imgur-title:`611EovQ`;\nDescription: :imgur-description:`2QcXR3R`;\n')
     html = tmpdir_module.join('html')
-    result, stderr = build_isolated(docs, html, httpretty_common_mock)[::2]
+    result, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)[::2]
 
     assert result == 0
     assert not stderr
@@ -34,10 +35,9 @@ def test_first_run(build_isolated, docs, httpretty_common_mock, tmpdir_module):
 
 @pytest.mark.parametrize('update', ['two.rst', 'ignore.rst'])
 @pytest.mark.httpretty
-def test_second_cached_run(build_isolated, tmpdir_module, update):
+def test_second_cached_run(tmpdir_module, update):
     """Run with nothing changed. Ensure no API queries happen.
 
-    :param build_isolated: conftest fixture.
     :param tmpdir_module: conftest fixture.
     :param str update: Which file to edit. two.rst edits a file with Imgur IDs, ignore.rst edits file without.
     """
@@ -46,7 +46,7 @@ def test_second_cached_run(build_isolated, tmpdir_module, update):
     docs = tmpdir_module.join('docs')
     docs.join(update).write('Edited\n', mode='a')
     html = tmpdir_module.join('html')
-    result, stderr = build_isolated(docs, html, None)[::2]
+    result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
     assert result == 0
     assert not stderr
@@ -65,10 +65,9 @@ def test_second_cached_run(build_isolated, tmpdir_module, update):
 
 
 @pytest.mark.httpretty
-def test_new_rst_old_id(build_isolated, tmpdir_module):
+def test_new_rst_old_id(tmpdir_module):
     """Add a new RST file but use a pre-existing Imgur ID.
 
-    :param build_isolated: conftest fixture.
     :param tmpdir_module: conftest fixture.
     """
     time.sleep(1.1)
@@ -79,7 +78,7 @@ def test_new_rst_old_id(build_isolated, tmpdir_module):
     docs.join('three.rst').write('.. _three:\n\nThree\n=====\n\nTitle: :imgur-title:`a/VMlM6`;\n'
                                  'Description: :imgur-description:`pc8hc`;\n')
     html = tmpdir_module.join('html')
-    result, stderr = build_isolated(docs, html, None)[::2]
+    result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
     assert result == 0
     assert not stderr
@@ -90,10 +89,9 @@ def test_new_rst_old_id(build_isolated, tmpdir_module):
 
 
 @pytest.mark.httpretty
-def test_single_id_update(build_isolated, httpretty_common_mock, tmpdir_module):
+def test_single_id_update(httpretty_common_mock, tmpdir_module):
     """Make sure only one ID is updated.
 
-    :param build_isolated: conftest fixture.
     :param httpretty_common_mock: conftest fixture.
     :param tmpdir_module: conftest fixture.
     """
@@ -102,7 +100,7 @@ def test_single_id_update(build_isolated, httpretty_common_mock, tmpdir_module):
     docs = tmpdir_module.join('docs')
     docs.join('three.rst').write('Title: :imgur-title:`hiX02`;\n', mode='a')
     html = tmpdir_module.join('html')
-    result, stdout, stderr = build_isolated(docs, html, httpretty_common_mock)
+    result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)
 
     assert result == 0
     assert not stderr
@@ -114,10 +112,9 @@ def test_single_id_update(build_isolated, httpretty_common_mock, tmpdir_module):
 
 
 @pytest.mark.httpretty
-def test_expire_everything_single_update(build_isolated, httpretty_common_mock, tmpdir_module):
+def test_expire_everything_single_update(httpretty_common_mock, tmpdir_module):
     """Make sure only one API query is done when only one document is updated even though other entries are old.
 
-    :param build_isolated: conftest fixture.
     :param httpretty_common_mock: conftest fixture.
     :param tmpdir_module: conftest fixture.
     """
@@ -127,7 +124,7 @@ def test_expire_everything_single_update(build_isolated, httpretty_common_mock, 
     docs.join('conf.py').write('imgur_api_cache_ttl = 1\n', mode='a')
     docs.join('three.rst').write('.. _three:\n\nThree\n=====\n\nTitle: :imgur-title:`a/VMlM6`;\n')
     html = tmpdir_module.join('html')
-    result, stdout, stderr = build_isolated(docs, html, httpretty_common_mock)
+    result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)
 
     assert result == 0
     assert not stderr
