@@ -17,7 +17,7 @@ def test_bad_imgur_id(tmpdir, docs, album):
     :param bool album: Invalid album vs image ID.
     """
     iid = 'a/inv@lid' if album else 'inv@lid'
-    docs.join('one.rst').write('\n.. imgur-embed:: {}\n'.format(iid), mode='a')
+    pytest.add_page(docs, 'one', '\n.. imgur-embed:: {}\n'.format(iid))
     html = tmpdir.join('html')
     result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
@@ -28,40 +28,39 @@ def test_bad_imgur_id(tmpdir, docs, album):
     assert expected in stderr
 
 
-@pytest.mark.parametrize('hpd_option', [None, False, True])
 @pytest.mark.parametrize('hpd_conf', [None, False, True])
-def test_embed(tmpdir, docs, hpd_conf, hpd_option):
+def test_embed(tmpdir, docs, hpd_conf):
     """Test valid imgur_id value in imgur-embed directive.
 
     :param tmpdir: pytest fixture.
     :param docs: conftest fixture.
     :param bool hpd_conf: Value of imgur_hide_post_details in conf.py or don't set if None.
-    :param bool hpd_option: Value of hide_post_details in rst file or don't set if None.
     """
     if hpd_conf is not None:
         docs.join('conf.py').write('imgur_hide_post_details = {}\n'.format(hpd_conf), mode='a')
-    pytest.add_page(docs, 'one')
 
-    for iid in ('a/VMlM6', '611EovQ'):
-        docs.join('one.rst').write('\n.. imgur-embed:: {}\n'.format(iid), mode='a')
-        if hpd_option is not None:
-            docs.join('one.rst').write('    :hide_post_details: {}\n'.format(hpd_option), mode='a')
+    for page, hpd_option in [('one', None), ('two', False), ('three', True)]:
+        hpd = '\n    :hide_post_details: {}'.format(hpd_option) if hpd_option is not None else ''
+        pytest.add_page(docs, page, '.. imgur-embed:: a/VMlM6{0}\n\n.. imgur-embed:: 611EovQ{0}\n'.format(hpd))
 
     html = tmpdir.join('html')
     result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
     assert result == 0
     assert not stderr
-    contents = html.join('one.html').read()
-    blockquotes = RE_BLOCKQUOTES.findall(contents)
-    scripts = RE_SCRIPTS.findall(contents)
-    assert len(blockquotes) == 2
-    assert len(scripts) == 2
-    assert 'data-id="a/VMlM6"' in blockquotes[0]
-    assert 'data-id="611EovQ"' in blockquotes[1]
 
-    actual = contents.count('data-context="false"')
-    if hpd_option or (hpd_option is None and hpd_conf):
-        assert actual == 2
-    else:
-        assert actual == 0
+    # Verify blockquotes/scripts.
+    for page in ('one.html', 'two.html', 'three.html'):
+        contents = html.join(page).read()
+        blockquotes = RE_BLOCKQUOTES.findall(contents)
+        scripts = RE_SCRIPTS.findall(contents)
+        assert len(blockquotes) == 2
+        assert len(scripts) == 2
+        assert 'data-id="a/VMlM6"' in blockquotes[0]
+        assert 'data-id="611EovQ"' in blockquotes[1]
+
+    # Verify data-context.
+    for page, expected in [('one.html', 2 if hpd_conf else 0), ('two.html', 0), ('three.html', 2)]:
+        contents = html.join(page).read()
+        actual = contents.count('data-context="false"')
+        assert actual == expected

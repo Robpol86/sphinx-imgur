@@ -14,7 +14,7 @@ def test_bad_imgur_id(tmpdir, docs, album, role):
     :param str role: Sphinx role to test.
     """
     iid = 'a/inv@lid' if album else 'inv@lid'
-    docs.join('one.rst').write('Testing: :{}:`{}`;\n'.format(role, iid), mode='a')
+    pytest.add_page(docs, 'one', 'Testing: :{}:`{}`;\n'.format(role, iid))
     html = tmpdir.join('html')
     result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
