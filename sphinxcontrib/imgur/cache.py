@@ -6,8 +6,8 @@ from sphinxcontrib.imgur.imgur_api import Album, APIError, Image
 def initialize(album_cache, image_cache, albums, images):
     """Instantiate Album or Image instances not already in cache.
 
-    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Image or Album instances.
-    :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image or Album instances.
+    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Album instances.
+    :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image instances.
     :param iter albums: List of album Imgur IDs.
     :param iter images: List of image Imgur IDs.
 
@@ -28,8 +28,8 @@ def initialize(album_cache, image_cache, albums, images):
 def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_image_ids=None):
     """Remove Images and Albums from the cache if they are no longer used.
 
-    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Image or Album instances.
-    :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image or Album instances.
+    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Album instances.
+    :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image instances.
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param iter doctree_album_ids: Imgur album IDs used in all Sphinx docs.
     :param iter doctree_image_ids: Imgur image IDs used in all Sphinx docs.
@@ -64,8 +64,8 @@ def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_i
 def update_cache(album_cache, image_cache, app, client_id, ttl, album_whitelist, image_whitelist):
     """Update cache items with expired TTLs.
 
-    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Image or Album instances.
-    :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image or Album instances.
+    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Album instances.
+    :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image instances.
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
     :param int ttl: Number of seconds before this is considered out of date.

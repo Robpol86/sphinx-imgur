@@ -114,7 +114,7 @@ def event_env_updated(app, env):
 def event_doctree_resolved(app, doctree, _):
     """Called by Sphinx after phase 3 (resolving).
 
-    * Replace Imgur nodes with data from the Sphinx cache.
+    * Replace Imgur text nodes with data from the Sphinx cache.
 
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param docutils.nodes.document doctree: Tree of docutils nodes.

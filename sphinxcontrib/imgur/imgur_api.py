@@ -142,6 +142,7 @@ class Album(Image):
     :ivar str imgur_id: The Imgur ID to query.
     :ivar str title: Album title text.
     :ivar str description: Album description text.
+    :ivar str cover_id: Imgur image ID of the cover image for this album.
     :ivar list image_ids: List of Imgur image IDs for images in this album.
     """
 
@@ -153,6 +154,7 @@ class Album(Image):
         :param str imgur_id: The Imgur ID to query.
         :param dict data: Parsed JSON response from API.
         """
+        self.cover_id = str()
         self.image_ids = list()
         super(Album, self).__init__(imgur_id, data)
 
@@ -178,6 +180,7 @@ class Album(Image):
         :rtype: list.
         """
         super(Album, self)._parse(data)
+        self.cover_id = data['cover']
         images = [Image(i['id'], i) for i in data['images']]
         self.image_ids[:] = [i.imgur_id for i in images]
         return images

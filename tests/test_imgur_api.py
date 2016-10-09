@@ -156,7 +156,8 @@ def test_album_minor_error(app):
     :param app: conftest fixture.
     """
     url = API_URL.format(type='album', id='imgur_id')
-    body = '{"success":true, "data":{"id":"imgur_id", "title": null, "description": null, "images": [{}]}}'
+    body = ('{"success":true, "data":{"id":"imgur_id", "cover": "imgur_id", "title": null, "description": null, '
+            '"images": [{}]}}')
     httpretty.register_uri(httpretty.GET, url, body=body)
 
     # Test.
@@ -197,6 +198,7 @@ def test_image_album_refresh_ttl(app, is_album):
     assert instance.title == title
     assert instance.description == description
     if is_album:
+        assert instance.cover_id == '2QcXR3R'
         assert instance.image_ids == ['2QcXR3R', 'Hqw7KHM']
         assert '2QcXR3R' in instance
         assert 'Hqw7KHM' in instance
@@ -213,6 +215,7 @@ def test_image_album_refresh_ttl(app, is_album):
     assert instance.title == title
     assert instance.description == description
     if is_album:
+        assert instance.cover_id == '2QcXR3R'
         assert instance.image_ids == ['2QcXR3R', 'Hqw7KHM']
         assert '2QcXR3R' in instance
         assert Image('Hqw7KHM') in instance
