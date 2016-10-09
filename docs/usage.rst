@@ -79,3 +79,16 @@ To see them in action visit the :ref:`Examples` section.
     .. attribute:: hide_post_details
 
         Overrides :attr:`imgur_hide_post_details` for this specific embed.
+
+.. rst:directive:: imgur-image
+
+    Equivalent to the built in `image directive <http://docutils.sourceforge.net/docs/ref/rst/directives.html#image>`_.
+    Display an Imgur image in the document the same way a regular image is displayed.
+
+    .. attribute:: align
+
+        Align image horizontally (same as the regular image directive). Valid values: "left", "center", or "right"
+
+    .. attribute:: alt
+
+        Alternate text in the ``<img>`` tag. Same as the regular image directive.

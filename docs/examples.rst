@@ -22,8 +22,8 @@ Titles and Descriptions
 * Imgur title of the album below: :imgur-title:`a/hWyW0`
 * And the description of the animated image below: :imgur-description:`7WTPx0v`
 
-Embedded Directives
-===================
+Embedded Directive
+==================
 
 Embed Imgur albums or images using their JavaScript option. This is the same as the "Embed album" link when you view
 an album on imgur.com.
@@ -83,3 +83,12 @@ Image Without Details
 
 .. imgur-embed:: Srt4owo
     :hide_post_details: True
+
+Image Directive
+===============
+
+.. code-block:: rst
+
+    .. imgur-image:: 611EovQ
+
+.. imgur-image:: 611EovQ

@@ -1,4 +1,4 @@
-"""Test Sphinx directives."""
+"""Test imgur-embed directive."""
 
 import re
 

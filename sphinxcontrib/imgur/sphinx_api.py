@@ -10,8 +10,8 @@ import docutils.nodes
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur.cache import initialize, prune_cache, update_cache
-from sphinxcontrib.imgur.directives import ImgurEmbedDirective
-from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurJavaScriptNode, ImgurTextNode
+from sphinxcontrib.imgur.directives import ImgurEmbedDirective, ImgurImageDirective
+from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode, ImgurTextNode
 from sphinxcontrib.imgur.roles import imgur_role
 
 RE_CLIENT_ID = re.compile(r'^[a-f0-9]{5,30}$')
@@ -49,7 +49,7 @@ def event_doctree_read(app, doctree):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     """
     albums, images = set(), set()
-    for node in doctree.traverse(ImgurTextNode):
+    for node in (n for c in (ImgurTextNode, ImgurImageNode) for n in doctree.traverse(c)):
         if node.album:
             albums.add(node.imgur_id)
         else:
@@ -97,7 +97,7 @@ def event_env_updated(app, env):
 
     # Build whitelist of Imgur IDs in just new/updated docs.
     for doctree in (env.get_doctree(n) for n in app.builder.get_outdated_docs()):
-        for node in doctree.traverse(ImgurTextNode):
+        for node in (n for c in (ImgurTextNode, ImgurImageNode) for n in doctree.traverse(c)):
             if node.album:
                 album_whitelist.add(node.imgur_id)
             else:
@@ -115,6 +115,7 @@ def event_doctree_resolved(app, doctree, _):
     """Called by Sphinx after phase 3 (resolving).
 
     * Replace Imgur text nodes with data from the Sphinx cache.
+    * Call finalizer for ImgurImageNode nodes.
 
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param docutils.nodes.document doctree: Tree of docutils nodes.
@@ -131,6 +132,9 @@ def event_doctree_resolved(app, doctree, _):
             text = cache[node.imgur_id].title
         node.replace_self([docutils.nodes.Text(text)])
 
+    for node in doctree.traverse(ImgurImageNode):
+        node.finalize(app.env.imgur_album_cache, app.env.imgur_image_cache)
+
 
 def setup(app, version):
     """Called by Sphinx during phase 0 (initialization).
@@ -146,7 +150,9 @@ def setup(app, version):
     app.add_config_value('imgur_hide_post_details', False, True)
 
     app.add_directive('imgur-embed', ImgurEmbedDirective)
+    app.add_directive('imgur-image', ImgurImageDirective)
     app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.visit, ImgurEmbedNode.depart))
+    app.add_node(ImgurImageNode, html=(ImgurImageNode.visit, lambda *_: None))
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
     app.add_role('imgur-description', imgur_role)
     app.add_role('imgur-title', imgur_role)

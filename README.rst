@@ -45,6 +45,7 @@ Unreleased
 
 Added
     * Python 3.5 support (Linux/OS X and Windows).
+    * ``imgur-image`` directive.
 
 Changed
     * Rewrote most of the library. Previous code was ugly, complicated, and hard to follow.
