@@ -203,6 +203,8 @@ def test_image_album_refresh_ttl(app, is_album):
         assert '2QcXR3R' in instance
         assert 'Hqw7KHM' in instance
         assert 'abc123' not in instance
+    else:
+        assert instance.type == 'image/png'
 
     # Verify log.
     assert line not in app.messages
@@ -220,6 +222,8 @@ def test_image_album_refresh_ttl(app, is_album):
         assert '2QcXR3R' in instance
         assert Image('Hqw7KHM') in instance
         assert 'abc123' not in instance
+    else:
+        assert instance.type == 'image/png'
 
     # Verify log.
     assert line in app.messages

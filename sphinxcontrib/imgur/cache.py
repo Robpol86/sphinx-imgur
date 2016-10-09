@@ -36,7 +36,7 @@ def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_i
     """
     # Prune invalid types.
     for kind, cache in (('Album', album_cache), ('Image', image_cache)):
-        for key in [k for k, v in cache.items() if not hasattr(v, 'TYPE') or not hasattr(v, 'imgur_id')]:
+        for key in [k for k, v in cache.items() if not hasattr(v, 'KIND') or not hasattr(v, 'imgur_id')]:
             app.debug("removing %s from Imgur cache since value isn't %s instance.", key, kind)
             cache.pop(key)
 

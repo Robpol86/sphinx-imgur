@@ -68,8 +68,8 @@ def query_api(app, client_id, imgur_id, is_album):
     return parsed
 
 
-class Image(object):
-    """Imgur image metadata.
+class Base(object):
+    """Base class for Image and Album classes. Defines common attributes.
 
     :ivar int mod_time: Time of API query.
     :ivar str imgur_id: The Imgur ID to query.
@@ -77,7 +77,7 @@ class Image(object):
     :ivar str description: Image description text.
     """
 
-    TYPE = 'image'
+    KIND = None
 
     def __init__(self, imgur_id, data=None):
         """Constructor.
@@ -126,7 +126,7 @@ class Image(object):
             return
 
         # Retrieve data.
-        response = query_api(app, client_id, self.imgur_id, self.TYPE == 'album')
+        response = query_api(app, client_id, self.imgur_id, self.KIND == 'album')
 
         # Parse.
         try:
@@ -135,7 +135,36 @@ class Image(object):
             raise APIError('unexpected JSON for {}: {}'.format(self.imgur_id, repr(exc)), app)
 
 
-class Album(Image):
+class Image(Base):
+    """Imgur image metadata.
+
+    :ivar int mod_time: Time of API query.
+    :ivar str imgur_id: The Imgur ID to query.
+    :ivar str title: Image title text.
+    :ivar str description: Image description text.
+    """
+
+    KIND = 'image'
+
+    def __init__(self, imgur_id, data=None):
+        """Constructor.
+
+        :param str imgur_id: The Imgur ID to query.
+        :param dict data: Parsed JSON response from API.
+        """
+        self.type = str()
+        super(Image, self).__init__(imgur_id, data)
+
+    def _parse(self, data):
+        """Parse API response.
+
+        :param dict data: Parsed JSON response from API 'data' key.
+        """
+        super(Image, self)._parse(data)
+        self.type = data['type']
+
+
+class Album(Base):
     """Imgur album metadata.
 
     :ivar int mod_time: Time of API query.
@@ -146,7 +175,7 @@ class Album(Image):
     :ivar list image_ids: List of Imgur image IDs for images in this album.
     """
 
-    TYPE = 'album'
+    KIND = 'album'
 
     def __init__(self, imgur_id, data=None):
         """Constructor.
