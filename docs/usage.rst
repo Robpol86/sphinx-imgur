@@ -58,6 +58,29 @@ All Config Options
 
     The default value of ``hide_post_details`` in embedded albums/images. Overridden in the directive.
 
+.. attribute:: imgur_target_default_largest
+
+    *Default: False*
+
+    All :rst:dir:`imgur-image` images by default don't link to anything. Setting this to ``true`` results in all Imgur
+    images to link to the original/full size version of the image by default. Ignored for albums.
+
+.. attribute:: imgur_target_default_page
+
+    *Default: False*
+
+    Like :attr:`imgur_target_default_largest` but instead links to the image's page on Imgur by default (with the share
+    buttons, etc). Overrides :attr:`imgur_target_default_largest` if both are set.
+
+.. attribute:: imgur_target_default_gallery
+
+    *Default: False*
+
+    Like :attr:`imgur_target_default_largest` but instead links to the albums's gallery on Imgur by default. Only
+    applies images or albums (which :rst:dir:`imgur-image` displays the cover image) released to the Imgur gallery,
+    ignored otherwise. Overrides :attr:`imgur_target_default_largest` and :attr:`imgur_target_default_page` if all are
+    set and image/album is in the gallery.
+
 Roles and Directives
 ====================
 
@@ -87,8 +110,27 @@ To see them in action visit the :ref:`Examples` section.
 
     .. attribute:: align
 
-        Align image horizontally (same as the regular image directive). Valid values: "left", "center", or "right"
+        Same as the regular image directive. Align image horizontally. Valid values: "left", "center", or "right"
 
     .. attribute:: alt
 
-        Alternate text in the ``<img>`` tag. Same as the regular image directive.
+        Same as the regular image directive. Alternate text in the ``<img>`` tag.
+
+    .. attribute:: target_largest
+
+        Image will link directly to the original/full size version. Not available for albums.
+
+    .. attribute:: target_page
+
+        Image will link to its page on Imgur (with the share buttons, etc). Takes precedence over
+        :attr:`target_largest`.
+
+    .. attribute:: target_gallery
+
+        Image will link to its gallery page on Imgur if there is one, otherwise will be ignored. Takes precedence over
+        :attr:`target_largest` and :attr:`target_page` if image is in Imgur gallery.
+
+    .. attribute:: target
+
+        Same as the regular image directive. Image will link to this URL. Takes precedence over :attr:`target_largest`,
+        :attr:`target_page`, and :attr:`target_gallery`.

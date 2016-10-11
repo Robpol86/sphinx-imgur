@@ -93,6 +93,10 @@ class ImgurImageNode(General, Element):
         self.options = dict(
             align=options.get('align', None),
             alt=options.get('alt', None),
+            target=options.get('target', None),
+            target_gallery=options.get('target_gallery', None),
+            target_largest=options.get('target_largest', None),
+            target_page=options.get('target_page', None),
         )
         self.src = str()
 
@@ -102,14 +106,26 @@ class ImgurImageNode(General, Element):
         :param dict album_cache: Cache of Imgur albums to read. Keys are Imgur IDs, values are Album instances.
         :param dict image_cache: Cache of Imgur images to read. Keys are Imgur IDs, values are Image instances.
         """
-        image = image_cache[album_cache[self.imgur_id].cover_id] if self.album else image_cache[self.imgur_id]
+        album = album_cache[self.imgur_id] if self.album else None
+        image = image_cache[album.cover_id] if self.album else image_cache[self.imgur_id]
         if image.type in ('image/png', 'image/gif'):
             extension = image.type[-3:]
         else:
             extension = 'jpg'
         self.src = '//i.imgur.com/{}.{}'.format(image.imgur_id, extension)
+
+        # Determine alt text.
         if not self.options['alt']:
-            self.options['alt'] = self.src[2:]
+            self.options['alt'] = image.title or self.src[2:]
+
+        # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
+        if self.options['target_gallery'] and (album.in_gallery if album else image.in_gallery):
+            self.options['target'] = '//imgur.com/gallery/{}'.format(album.imgur_id if album else image.imgur_id)
+        elif self.options['target_page']:
+            self.options['target'] = '//imgur.com/{}'.format(album.imgur_id if album else image.imgur_id)
+        elif self.options['target_largest'] and not album:
+            imgur_id = album.imgur_id if album else image.imgur_id
+            self.options['target'] = '//i.imgur.com/{}.{}'.format(imgur_id, extension)
 
     @staticmethod
     def visit(spht, node):
@@ -118,7 +134,21 @@ class ImgurImageNode(General, Element):
         :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
         :param sphinxcontrib.imgur.nodes.ImgurImageNode node: This class' instance.
         """
+        if node.options['target']:
+            html_attrs_ah = dict(CLASS='reference external image-reference', href=node.options['target'])
+            spht.body.append(spht.starttag(node, 'a', '', **html_attrs_ah))
+
         html_attrs_img = dict(src=node.src, alt=node.options['alt'])
         if node.options['align']:
             html_attrs_img['CLASS'] = 'align-{}'.format(node.options['align'])
         spht.body.append(spht.starttag(node, 'img', '', **html_attrs_img))
+
+    @staticmethod
+    def depart(spht, node):
+        """Append closing tags to document body list.
+
+        :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
+        :param sphinxcontrib.imgur.nodes.ImgurImageNode node: This class' instance.
+        """
+        if node.options['target']:
+            spht.body.append('</a>')

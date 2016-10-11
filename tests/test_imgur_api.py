@@ -142,10 +142,10 @@ def test_image_album_refresh_error(app, error, is_album):
         assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:60$', app.messages[-1][2])
     elif error == 'no data':
         assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('data',)"]
-        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:133$', app.messages[-1][2])
+        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
     else:
         assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('title',)"]
-        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:133$', app.messages[-1][2])
+        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
 
 
 def test_album_minor_error(app):
@@ -157,7 +157,7 @@ def test_album_minor_error(app):
     """
     url = API_URL.format(type='album', id='imgur_id')
     body = ('{"success":true, "data":{"id":"imgur_id", "cover": "imgur_id", "title": null, "description": null, '
-            '"images": [{}]}}')
+            '"in_gallery": false, "images": [{}]}}')
     httpretty.register_uri(httpretty.GET, url, body=body)
 
     # Test.
@@ -167,7 +167,7 @@ def test_album_minor_error(app):
 
     # Verify log.
     assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('id',)"]
-    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:133$', app.messages[-1][2])
+    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
 
 
 @pytest.mark.parametrize('is_album', [False, True])
@@ -197,6 +197,7 @@ def test_image_album_refresh_ttl(app, is_album):
     assert instance.imgur_id == imgur_id
     assert instance.title == title
     assert instance.description == description
+    assert instance.in_gallery is False
     if is_album:
         assert instance.cover_id == '2QcXR3R'
         assert instance.image_ids == ['2QcXR3R', 'Hqw7KHM']
@@ -216,6 +217,7 @@ def test_image_album_refresh_ttl(app, is_album):
     assert instance.imgur_id == imgur_id
     assert instance.title == title
     assert instance.description == description
+    assert instance.in_gallery is False
     if is_album:
         assert instance.cover_id == '2QcXR3R'
         assert instance.image_ids == ['2QcXR3R', 'Hqw7KHM']

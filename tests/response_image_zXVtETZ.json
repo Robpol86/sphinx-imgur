@@ -1,0 +1,30 @@
+{
+  "data": {
+    "description": null,
+    "mp4": "http://i.imgur.com/zXVtETZ.mp4",
+    "is_ad": false,
+    "gifv": "http://i.imgur.com/zXVtETZ.gifv",
+    "type": "image/gif",
+    "nsfw": null,
+    "datetime": 1476014856,
+    "vote": null,
+    "height": 720,
+    "favorite": false,
+    "size": 31276409,
+    "mp4_size": 1682326,
+    "in_gallery": true,
+    "account_url": null,
+    "animated": true,
+    "bandwidth": 20860395234321,
+    "section": null,
+    "link": "http://i.imgur.com/zXVtETZh.gif",
+    "account_id": null,
+    "title": "Blow me a kiss!",
+    "views": 666969,
+    "width": 720,
+    "id": "zXVtETZ",
+    "looping": true
+  },
+  "success": true,
+  "status": 200
+}

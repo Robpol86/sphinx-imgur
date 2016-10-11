@@ -89,6 +89,7 @@ class Base(object):
         self.imgur_id = imgur_id
         self.title = str()
         self.description = str()
+        self.in_gallery = False
         if data:
             self._parse(data)
 
@@ -100,6 +101,7 @@ class Base(object):
         self.mod_time = int(time.time())
         self.title = data['title']
         self.description = data['description']
+        self.in_gallery = data['in_gallery']
 
     def seconds_remaining(self, ttl):
         """Return number of seconds left before Imgur API needs to be queried for this instance.

@@ -46,6 +46,8 @@ Unreleased
 Added
     * Python 3.5 support (Linux/OS X and Windows).
     * ``imgur-image`` directive.
+    * ``imgur_target_default_gallery``, ``imgur_target_default_largest``, and ``imgur_target_default_page`` conf
+      variables.
 
 Changed
     * Rewrote most of the library. Previous code was ugly, complicated, and hard to follow.
