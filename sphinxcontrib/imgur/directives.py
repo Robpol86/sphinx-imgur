@@ -76,6 +76,8 @@ class ImgurImageDirective(Directive):
         # Modify options.
         if self.options.get('width', '').isdigit():
             self.options['width'] += 'px'
+        if self.options.get('height', '').isdigit():
+            self.options['height'] += 'px'
 
         # Read from conf.py. Unset gallery/largest/page targets if :target: is set.
         if self.options.get('target', None):

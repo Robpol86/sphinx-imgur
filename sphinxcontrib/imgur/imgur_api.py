@@ -151,13 +151,15 @@ class Image(Base):
         :param dict data: Parsed JSON response from API 'data' key.
         """
         super(Image, self)._parse(data)
+        self.height = data['height']
         self.type = data['type']
         self.width = data['width']
 
-    def filename(self, display_width='', full_size=False):
-        """Determine which resized Imgur filename to use based on the display width. Includes the extension.
+    def filename(self, display_width='', display_height='', full_size=False):
+        """Determine which resized Imgur filename to use based on the display width/height. Includes the extension.
 
         :param str display_width: Display width from Sphinx directive options (e.g. '100px', '50%').
+        :param str display_height: Display height from Sphinx directive options (e.g. '100px', '50%').
         :param bool full_size: Always return the original full size image filename.
 
         :return: The filename to use in <img src="...">.
@@ -167,14 +169,16 @@ class Image(Base):
         if extension == 'gif' or full_size:
             return '{}.{}'.format(self.imgur_id, extension)  # Imgur doesn't animate resized versions.
         size = 'h'  # Default is 'huge' since all Sphinx themes limit document width to < 1024px.
-        if not display_width:
+        if not display_width and not display_height:
             return '{}{}.{}'.format(self.imgur_id, size, extension)
 
-        # Parse display_width.
+        # Parse display_width and display_height.
         if display_width.endswith('px'):
             width = int(display_width[:-2])
         elif display_width.endswith('%'):
             width = self.width * (int(display_width[:-1]) / 100.0)
+        elif display_height.endswith('px'):
+            width = (self.width * int(display_height[:-2])) / self.height
         else:
             width = self.width
 

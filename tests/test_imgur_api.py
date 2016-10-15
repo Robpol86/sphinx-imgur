@@ -207,6 +207,7 @@ def test_image_album_refresh_ttl(app, is_album):
     else:
         assert instance.type == 'image/png'
         assert instance.width == 3072
+        assert instance.height == 1280
 
     # Verify log.
     assert line not in app.messages
@@ -228,6 +229,7 @@ def test_image_album_refresh_ttl(app, is_album):
     else:
         assert instance.type == 'image/png'
         assert instance.width == 3072
+        assert instance.height == 1280
 
     # Verify log.
     assert line in app.messages

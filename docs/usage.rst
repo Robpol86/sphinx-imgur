@@ -116,6 +116,14 @@ To see them in action visit the :ref:`Examples` section.
 
         Same as the regular image directive. Alternate text in the ``<img>`` tag.
 
+    .. attribute:: height
+
+        Same as the regular image directive. Resizes the image vertically maintaining the aspect ratio.
+
+    .. attribute:: scale
+
+        Same as the regular image directive. Resizes the image maintaining the aspect ratio.
+
     .. attribute:: target_largest
 
         Image will link directly to the original/full size version. Not available for albums.
@@ -134,3 +142,7 @@ To see them in action visit the :ref:`Examples` section.
 
         Same as the regular image directive. Image will link to this URL. Takes precedence over :attr:`target_largest`,
         :attr:`target_page`, and :attr:`target_gallery`.
+
+    .. attribute:: width
+
+        Same as the regular image directive. Resizes the image horizontally maintaining the aspect ratio.

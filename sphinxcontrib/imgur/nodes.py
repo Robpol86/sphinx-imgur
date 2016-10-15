@@ -1,6 +1,10 @@
 """Docutils nodes for Imgur embeds."""
 
+import re
+
 from docutils.nodes import Element, General
+
+RE_WIDTH_HEIGHT = re.compile(r'([0-9.]+)(\S*)$')  # From: docutils/writers/html4css1/__init__.py
 
 
 class ImgurJavaScriptNode(General, Element):
@@ -93,6 +97,8 @@ class ImgurImageNode(General, Element):
         self.options = dict(
             align=options.get('align', ''),
             alt=options.get('alt', ''),
+            height=options.get('height', ''),
+            scale=options.get('scale', ''),
             target=options.get('target', ''),
             target_gallery=options.get('target_gallery', ''),
             target_largest=options.get('target_largest', ''),
@@ -110,24 +116,34 @@ class ImgurImageNode(General, Element):
         """
         album = album_cache[self.imgur_id] if self.album else None
         image = image_cache[album.cover_id] if self.album else image_cache[self.imgur_id]
-        self.src = '//i.imgur.com/' + image.filename(self.options['width'])
+        options = self.options
+
+        # Handle scale, width, and height.
+        if options['scale']:
+            match = RE_WIDTH_HEIGHT.match(options['width'] or '%dpx' % image.width)
+            options['width'] = '{}{}'.format(int(float(match.group(1)) * (options['scale'] / 100.0)), match.group(2))
+            match = RE_WIDTH_HEIGHT.match(options['height'] or '%dpx' % image.height)
+            options['height'] = '{}{}'.format(int(float(match.group(1)) * (options['scale'] / 100.0)), match.group(2))
 
         # Set src and style.
-        style = [p for p in ((k, self.options[k]) for k in ('width',)) if p[1]]
+        self.src = '//i.imgur.com/' + image.filename(options['width'], options['height'])
+        style = [p for p in ((k, options[k]) for k in ('width', 'height')) if p[1]]
         if style:
             self.style = '; '.join('{}: {}'.format(k, v) for k, v in style)
 
         # Determine alt text.
-        if not self.options['alt']:
-            self.options['alt'] = image.title or self.src[2:]
+        if not options['alt']:
+            options['alt'] = image.title or self.src[2:]
 
         # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
-        if self.options['target_gallery'] and (album.in_gallery if album else image.in_gallery):
-            self.options['target'] = '//imgur.com/gallery/{}'.format(album.imgur_id if album else image.imgur_id)
-        elif self.options['target_page']:
-            self.options['target'] = '//imgur.com/{}'.format(album.imgur_id if album else image.imgur_id)
-        elif (self.options['target_largest'] and not album) or (not self.options['target'] and self.options['width']):
-            self.options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
+        if options['target_gallery'] and (album.in_gallery if album else image.in_gallery):
+            options['target'] = '//imgur.com/gallery/{}'.format(album.imgur_id if album else image.imgur_id)
+        elif options['target_page']:
+            options['target'] = '//imgur.com/{}'.format(album.imgur_id if album else image.imgur_id)
+        elif options['target_largest'] and not album:
+            options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
+        elif not options['target'] and (options['width'] or options['height']):
+            options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
 
     @staticmethod
     def visit(spht, node):

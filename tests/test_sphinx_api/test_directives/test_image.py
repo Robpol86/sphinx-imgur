@@ -235,6 +235,10 @@ def test_width(tmpdir, docs, httpretty_common_mock, set_conf):
         'SEP\n\n'
         '.. image:: 611EovQ.jpg\n    :width: 300em\n\nSEP\n\n'
         '.. imgur-image:: 611EovQ\n    :width: 300em\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :height: 300em\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :height: 300em\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 300em\n    :height: 300em\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 300em\n    :height: 300em\n\nSEP\n\n'
     ))
     pytest.add_page(docs, 'no_mix', (
         'SEP\n\n'
@@ -244,6 +248,25 @@ def test_width(tmpdir, docs, httpretty_common_mock, set_conf):
         '.. imgur-image:: 611EovQ\n    :width: 15%\n\nSEP\n\n'
         '.. image:: 611EovQ.jpg\n    :width: 160\n\nSEP\n\n'
         '.. imgur-image:: 611EovQ\n    :width: 160\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :height: 200px\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :height: 200px\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :height: 110\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :height: 110\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :scale: 50%\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :scale: 50%\n\nSEP\n\n'
+    ))
+    pytest.add_page(docs, 'no_target_mix', (
+        'SEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 300px\n    :height: 300px\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 300px\n    :height: 300px\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 300px\n    :scale: 50%\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 300px\n    :scale: 50%\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 50%\n    :scale: 50%\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 50%\n    :scale: 50%\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :height: 300px\n    :scale: 50%\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :height: 300px\n    :scale: 50%\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 300px\n    :height: 300px\n    :scale: 50%\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 300px\n    :height: 300px\n    :scale: 50%\n\nSEP\n\n'
     ))
     pytest.add_page(docs, 'target_mix', (
         'SEP\n\n'
@@ -272,6 +295,10 @@ def test_width(tmpdir, docs, httpretty_common_mock, set_conf):
     contents = [c.strip() for c in html.join('unsupported_units.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents[0] == href_i % 'src="_images/611EovQ.jpg" style="width: 300em;"'
     assert contents[1] == href % 'src="//i.imgur.com/611EovQh.jpg" style="width: 300em"'
+    assert contents[2] == href_i % 'src="_images/611EovQ.jpg" style="height: 300em;"'
+    assert contents[3] == href % 'src="//i.imgur.com/611EovQh.jpg" style="height: 300em"'
+    assert contents[4] == href_i % 'src="_images/611EovQ.jpg" style="width: 300em; height: 300em;"'
+    assert contents[5] == href % 'src="//i.imgur.com/611EovQh.jpg" style="width: 300em; height: 300em"'
 
     contents = [c.strip() for c in html.join('no_mix.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents[0] == href_i % 'src="_images/611EovQ.jpg" style="width: 300px;"'
@@ -280,6 +307,24 @@ def test_width(tmpdir, docs, httpretty_common_mock, set_conf):
     assert contents[3] == href % 'src="//i.imgur.com/611EovQl.jpg" style="width: 15%"'
     assert contents[4] == href_i % 'src="_images/611EovQ.jpg" style="width: 160px;"'
     assert contents[5] == href % 'src="//i.imgur.com/611EovQt.jpg" style="width: 160px"'
+    assert contents[6] == href_i % 'src="_images/611EovQ.jpg" style="height: 200px;"'
+    assert contents[7] == href % 'src="//i.imgur.com/611EovQm.jpg" style="height: 200px"'
+    assert contents[8] == href_i % 'src="_images/611EovQ.jpg" style="height: 110px;"'
+    assert contents[9] == href % 'src="//i.imgur.com/611EovQt.jpg" style="height: 110px"'
+    assert contents[10] == href_i % 'src="_images/611EovQ.jpg" style="width: 2000.0px; height: 1496.0px;"'
+    assert contents[11] == href % 'src="//i.imgur.com/611EovQh.jpg" style="width: 2000px; height: 1496px"'
+
+    contents = [c.strip() for c in html.join('no_target_mix.html').read().split('<p>SEP</p>')[1:-1]]
+    assert contents[0] == href_i % 'src="_images/611EovQ.jpg" style="width: 300px; height: 300px;"'
+    assert contents[1] == href % 'src="//i.imgur.com/611EovQm.jpg" style="width: 300px; height: 300px"'
+    assert contents[2] == href_i % 'src="_images/611EovQ.jpg" style="width: 150.0px; height: 1496.0px;"'
+    assert contents[3] == href % 'src="//i.imgur.com/611EovQt.jpg" style="width: 150px; height: 1496px"'
+    assert contents[4] == href_i % 'src="_images/611EovQ.jpg" style="width: 25.0%; height: 1496.0px;"'
+    assert contents[5] == href % 'src="//i.imgur.com/611EovQh.jpg" style="width: 25%; height: 1496px"'
+    assert contents[6] == href_i % 'src="_images/611EovQ.jpg" style="width: 2000.0px; height: 150.0px;"'
+    assert contents[7] == href % 'src="//i.imgur.com/611EovQh.jpg" style="width: 2000px; height: 150px"'
+    assert contents[8] == href_i % 'src="_images/611EovQ.jpg" style="width: 150.0px; height: 150.0px;"'
+    assert contents[9] == href % 'src="//i.imgur.com/611EovQt.jpg" style="width: 150px; height: 150px"'
 
     href_i = ('<a class="reference external image-reference" href="%s">'
               '<img alt="_images/611EovQ.jpg" src="_images/611EovQ.jpg" style="width: 50%%;" /></a>')
@@ -304,6 +349,10 @@ def test_width_invalid(tmpdir, docs, httpretty_common_mock):
         'SEP\n\n'
         '.. image:: 611EovQ.jpg\n    :width: 300db\n\nSEP\n\n'
         '.. imgur-image:: 611EovQ\n    :width: 300db\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :height: 300db\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :height: 300db\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :scale: 300db\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :scale: 300db\n\nSEP\n\n'
     ))
     html = tmpdir.join('html')
     results = pytest.build_isolated(docs, html, httpretty_common_mock)
