@@ -69,13 +69,19 @@ class ImgurImageDirective(Directive):
         if not RE_IMGUR_ID.match(imgur_id):
             raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers. Albums prefixed with "a/".')
 
+        # Validate directive options.
+        if imgur_id.startswith('a/') and self.options.get('target_largest', None):
+            raise ImgurError('Imgur albums (whose covers are displayed) do not support :target_largest: option.')
+
+        # Modify options.
+        if self.options.get('width', '').isdigit():
+            self.options['width'] += 'px'
+
         # Read from conf.py. Unset gallery/largest/page targets if :target: is set.
         if self.options.get('target', None):
             self.options.pop('target_gallery', None)
             self.options.pop('target_largest', None)
             self.options.pop('target_page', None)
-        elif imgur_id.startswith('a/') and self.options.get('target_largest', None):
-            raise ImgurError('Imgur albums (whose covers are displayed) do not support :target_largest: option.')
         elif not any(self.options.get('target_' + i, None) for i in ('gallery', 'largest', 'page')):
             config = self.state.document.settings.env.config
             self.options.setdefault('target_gallery', config.imgur_target_default_gallery)

@@ -91,14 +91,16 @@ class ImgurImageNode(General, Element):
         self.album = text.startswith('a/')
         self.imgur_id = text[2:] if self.album else text
         self.options = dict(
-            align=options.get('align', None),
-            alt=options.get('alt', None),
-            target=options.get('target', None),
-            target_gallery=options.get('target_gallery', None),
-            target_largest=options.get('target_largest', None),
-            target_page=options.get('target_page', None),
+            align=options.get('align', ''),
+            alt=options.get('alt', ''),
+            target=options.get('target', ''),
+            target_gallery=options.get('target_gallery', ''),
+            target_largest=options.get('target_largest', ''),
+            target_page=options.get('target_page', ''),
+            width=options.get('width', ''),
         )
         self.src = str()
+        self.style = str()
 
     def finalize(self, album_cache, image_cache):
         """Update attributes after Sphinx cache is updated.
@@ -108,11 +110,12 @@ class ImgurImageNode(General, Element):
         """
         album = album_cache[self.imgur_id] if self.album else None
         image = image_cache[album.cover_id] if self.album else image_cache[self.imgur_id]
-        if image.type in ('image/png', 'image/gif'):
-            extension = image.type[-3:]
-        else:
-            extension = 'jpg'
-        self.src = '//i.imgur.com/{}.{}'.format(image.imgur_id, extension)
+        self.src = '//i.imgur.com/' + image.filename(self.options['width'])
+
+        # Set src and style.
+        style = [p for p in ((k, self.options[k]) for k in ('width',)) if p[1]]
+        if style:
+            self.style = '; '.join('{}: {}'.format(k, v) for k, v in style)
 
         # Determine alt text.
         if not self.options['alt']:
@@ -123,9 +126,8 @@ class ImgurImageNode(General, Element):
             self.options['target'] = '//imgur.com/gallery/{}'.format(album.imgur_id if album else image.imgur_id)
         elif self.options['target_page']:
             self.options['target'] = '//imgur.com/{}'.format(album.imgur_id if album else image.imgur_id)
-        elif self.options['target_largest'] and not album:
-            imgur_id = album.imgur_id if album else image.imgur_id
-            self.options['target'] = '//i.imgur.com/{}.{}'.format(imgur_id, extension)
+        elif (self.options['target_largest'] and not album) or (not self.options['target'] and self.options['width']):
+            self.options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
 
     @staticmethod
     def visit(spht, node):
@@ -141,6 +143,8 @@ class ImgurImageNode(General, Element):
         html_attrs_img = dict(src=node.src, alt=node.options['alt'])
         if node.options['align']:
             html_attrs_img['CLASS'] = 'align-{}'.format(node.options['align'])
+        if node.style:
+            html_attrs_img['style'] = node.style
         spht.body.append(spht.starttag(node, 'img', '', **html_attrs_img))
 
     @staticmethod

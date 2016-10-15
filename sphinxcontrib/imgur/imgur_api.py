@@ -69,13 +69,7 @@ def query_api(app, client_id, imgur_id, is_album):
 
 
 class Base(object):
-    """Base class for Image and Album classes. Defines common attributes.
-
-    :ivar int mod_time: Time of API query.
-    :ivar str imgur_id: The Imgur ID to query.
-    :ivar str title: Image title text.
-    :ivar str description: Image description text.
-    """
+    """Base class for Image and Album classes. Defines common attributes."""
 
     KIND = None
 
@@ -85,11 +79,11 @@ class Base(object):
         :param str imgur_id: The Imgur ID to query.
         :param dict data: Parsed JSON response from API.
         """
-        self.mod_time = 0
-        self.imgur_id = imgur_id
-        self.title = str()
         self.description = str()
+        self.imgur_id = imgur_id
         self.in_gallery = False
+        self.mod_time = 0
+        self.title = str()
         if data:
             self._parse(data)
 
@@ -98,10 +92,10 @@ class Base(object):
 
         :param dict data: Parsed JSON response from API 'data' key.
         """
-        self.mod_time = int(time.time())
-        self.title = data['title']
         self.description = data['description']
         self.in_gallery = data['in_gallery']
+        self.mod_time = int(time.time())
+        self.title = data['title']
 
     def seconds_remaining(self, ttl):
         """Return number of seconds left before Imgur API needs to be queried for this instance.
@@ -138,13 +132,7 @@ class Base(object):
 
 
 class Image(Base):
-    """Imgur image metadata.
-
-    :ivar int mod_time: Time of API query.
-    :ivar str imgur_id: The Imgur ID to query.
-    :ivar str title: Image title text.
-    :ivar str description: Image description text.
-    """
+    """Imgur image metadata."""
 
     KIND = 'image'
 
@@ -164,18 +152,44 @@ class Image(Base):
         """
         super(Image, self)._parse(data)
         self.type = data['type']
+        self.width = data['width']
+
+    def filename(self, display_width='', full_size=False):
+        """Determine which resized Imgur filename to use based on the display width. Includes the extension.
+
+        :param str display_width: Display width from Sphinx directive options (e.g. '100px', '50%').
+        :param bool full_size: Always return the original full size image filename.
+
+        :return: The filename to use in <img src="...">.
+        :rtype: str
+        """
+        extension = self.type[-3:] if self.type in ('image/png', 'image/gif') else 'jpg'
+        if extension == 'gif' or full_size:
+            return '{}.{}'.format(self.imgur_id, extension)  # Imgur doesn't animate resized versions.
+        size = 'h'  # Default is 'huge' since all Sphinx themes limit document width to < 1024px.
+        if not display_width:
+            return '{}{}.{}'.format(self.imgur_id, size, extension)
+
+        # Parse display_width.
+        if display_width.endswith('px'):
+            width = int(display_width[:-2])
+        elif display_width.endswith('%'):
+            width = self.width * (int(display_width[:-1]) / 100.0)
+        else:
+            width = self.width
+
+        # Determine size.
+        if width <= 160:
+            size = 't'
+        elif width <= 320:
+            size = 'm'
+        elif width <= 640:
+            size = 'l'
+        return '{}{}.{}'.format(self.imgur_id, size, extension)
 
 
 class Album(Base):
-    """Imgur album metadata.
-
-    :ivar int mod_time: Time of API query.
-    :ivar str imgur_id: The Imgur ID to query.
-    :ivar str title: Album title text.
-    :ivar str description: Album description text.
-    :ivar str cover_id: Imgur image ID of the cover image for this album.
-    :ivar list image_ids: List of Imgur image IDs for images in this album.
-    """
+    """Imgur album metadata."""
 
     KIND = 'album'
 

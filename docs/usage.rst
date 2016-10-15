@@ -56,7 +56,7 @@ All Config Options
 
     *Default: False*
 
-    The default value of ``hide_post_details`` in embedded albums/images. Overridden in the directive.
+    The default value of ``hide_post_details`` for :rst:dir:`imgur-embed`. Overridden in the directive.
 
 .. attribute:: imgur_target_default_largest
 

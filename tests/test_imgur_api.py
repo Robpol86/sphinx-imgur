@@ -142,10 +142,10 @@ def test_image_album_refresh_error(app, error, is_album):
         assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:60$', app.messages[-1][2])
     elif error == 'no data':
         assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('data',)"]
-        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
+        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:129$', app.messages[-1][2])
     else:
-        assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('title',)"]
-        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
+        assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('description',)"]
+        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:129$', app.messages[-1][2])
 
 
 def test_album_minor_error(app):
@@ -167,7 +167,7 @@ def test_album_minor_error(app):
 
     # Verify log.
     assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('id',)"]
-    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
+    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:129$', app.messages[-1][2])
 
 
 @pytest.mark.parametrize('is_album', [False, True])
@@ -206,6 +206,7 @@ def test_image_album_refresh_ttl(app, is_album):
         assert 'abc123' not in instance
     else:
         assert instance.type == 'image/png'
+        assert instance.width == 3072
 
     # Verify log.
     assert line not in app.messages
@@ -226,6 +227,7 @@ def test_image_album_refresh_ttl(app, is_album):
         assert 'abc123' not in instance
     else:
         assert instance.type == 'image/png'
+        assert instance.width == 3072
 
     # Verify log.
     assert line in app.messages

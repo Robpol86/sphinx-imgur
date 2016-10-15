@@ -79,10 +79,10 @@ def test_basic(tmpdir, docs, httpretty_common_mock):
     # Verify HTML contents.
     contents = [c.strip() for c in html.join('album.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents[0] == '<img alt="_images/2QcXR3R.png" src="_images/2QcXR3R.png" />'
-    assert contents[1] == '<img alt="i.imgur.com/2QcXR3R.png" src="//i.imgur.com/2QcXR3R.png">'
+    assert contents[1] == '<img alt="i.imgur.com/2QcXR3Rh.png" src="//i.imgur.com/2QcXR3Rh.png">'
     contents = [c.strip() for c in html.join('image.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents[0] == '<img alt="_images/611EovQ.jpg" src="_images/611EovQ.jpg" />'
-    assert contents[1] == '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQ.jpg">'
+    assert contents[1] == '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQh.jpg">'
 
 
 @pytest.mark.usefixtures('copy_images')
@@ -122,14 +122,14 @@ def test_alt_align(tmpdir, docs, httpretty_common_mock):
 
     contents = [c.strip() for c in html.join('alt.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents[0] == '<img alt="Alternative Text" class="align-right" src="_images/611EovQ.jpg" />'
-    assert contents[1] == '<img alt="Alternative Text" class="align-right" src="//i.imgur.com/611EovQ.jpg">'
-    assert contents[2] == '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQ.jpg">'
+    assert contents[1] == '<img alt="Alternative Text" class="align-right" src="//i.imgur.com/611EovQh.jpg">'
+    assert contents[2] == '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQh.jpg">'
 
     contents = [c.strip() for c in html.join('aligns.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents[0] == '<img alt="_images/2QcXR3R.png" class="align-left" src="_images/2QcXR3R.png" />'
-    assert contents[1] == '<img alt="i.imgur.com/2QcXR3R.png" class="align-left" src="//i.imgur.com/2QcXR3R.png">'
+    assert contents[1] == '<img alt="i.imgur.com/2QcXR3Rh.png" class="align-left" src="//i.imgur.com/2QcXR3Rh.png">'
     assert contents[2] == '<img alt="_images/2QcXR3R.png" class="align-center" src="_images/2QcXR3R.png" />'
-    assert contents[3] == '<img alt="i.imgur.com/2QcXR3R.png" class="align-center" src="//i.imgur.com/2QcXR3R.png">'
+    assert contents[3] == '<img alt="i.imgur.com/2QcXR3Rh.png" class="align-center" src="//i.imgur.com/2QcXR3Rh.png">'
 
 
 @pytest.mark.usefixtures('copy_images')
@@ -176,7 +176,7 @@ def test_target(tmpdir, docs, httpretty_common_mock, set_conf):
     assert not stderr
 
     img_i = '<img alt="_images/611EovQ.jpg" src="_images/611EovQ.jpg" />'
-    img = '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQ.jpg">'
+    img = '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQh.jpg">'
     dat = [c.strip() for c in html.join('no_gallery.html').read().split('<p>SEP</p>')[1:-1]]
     assert dat[0] == '<a class="reference external image-reference" href="https://goo.gl">%s</a>' % img_i
     assert dat[1] == '<a class="reference external image-reference" href="https://goo.gl">%s</a>' % img
@@ -205,7 +205,7 @@ def test_target(tmpdir, docs, httpretty_common_mock, set_conf):
     else:
         assert dat[4] == img
 
-    img = '<img alt="Rack Cabinet" src="//i.imgur.com/RIK1sDw.jpg">'
+    img = '<img alt="Rack Cabinet" src="//i.imgur.com/RIK1sDwh.jpg">'
     dat = [c.strip() for c in html.join('gallery_album.html').read().split('<p>SEP</p>')[1:-1]]
     assert dat[0] == '<a class="reference external image-reference" href="https://goo.gl">%s</a>' % img
     assert dat[1] == '<a class="reference external image-reference" href="//imgur.com/gallery/ePSyN">%s</a>' % img
@@ -216,3 +216,99 @@ def test_target(tmpdir, docs, httpretty_common_mock, set_conf):
         assert dat[3] == '<a class="reference external image-reference" href="//imgur.com/gallery/ePSyN">%s</a>' % img
     else:
         assert dat[3] == img
+
+
+@pytest.mark.usefixtures('copy_images')
+@pytest.mark.parametrize('set_conf', [None, 'gallery', 'largest', 'page'])
+def test_width(tmpdir, docs, httpretty_common_mock, set_conf):
+    """Test width option.
+
+    :param tmpdir: pytest fixture.
+    :param docs: conftest fixture.
+    :param httpretty_common_mock: conftest fixture.
+    :param str set_conf: Set conf.py config setting.
+    """
+    if set_conf:
+        docs.join('conf.py').write('imgur_target_default_{} = True\n'.format(set_conf), mode='a')
+
+    pytest.add_page(docs, 'unsupported_units', (
+        'SEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 300em\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 300em\n\nSEP\n\n'
+    ))
+    pytest.add_page(docs, 'no_mix', (
+        'SEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 300px\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 300px\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 15%\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 15%\n\nSEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 160\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 160\n\nSEP\n\n'
+    ))
+    pytest.add_page(docs, 'target_mix', (
+        'SEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 50%\n    :target: https://goo.gl\n\nSEP\n\n'
+        '.. imgur-image:: zXVtETZ\n    :width: 50%\n    :target: https://goo.gl\n\nSEP\n\n'
+        '.. imgur-image:: zXVtETZ\n    :width: 50%\n    :target_gallery: true\n\nSEP\n\n'
+        '.. imgur-image:: zXVtETZ\n    :width: 50%\n    :target_largest: true\n\nSEP\n\n'
+        '.. imgur-image:: zXVtETZ\n    :width: 50%\n    :target_page: true\n\nSEP\n\n'
+    ))
+    html = tmpdir.join('html')
+    result, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)[::2]
+
+    assert result == 0
+    assert not stderr
+
+    href_i = ('<a class="reference internal image-reference" href="_images/611EovQ.jpg">'
+              '<img alt="_images/611EovQ.jpg" %s /></a>')
+    if set_conf and set_conf != 'gallery':
+        url = '//imgur.com/611EovQ' if set_conf == 'page' else '//i.imgur.com/611EovQ.jpg'
+        href = ('<a class="reference external image-reference" href="{}">'
+                '<img alt="Work, June 1st, 2016: Uber" %s></a>').format(url)
+    else:
+        href = ('<a class="reference external image-reference" href="//i.imgur.com/611EovQ.jpg">'
+                '<img alt="Work, June 1st, 2016: Uber" %s></a>')
+
+    contents = [c.strip() for c in html.join('unsupported_units.html').read().split('<p>SEP</p>')[1:-1]]
+    assert contents[0] == href_i % 'src="_images/611EovQ.jpg" style="width: 300em;"'
+    assert contents[1] == href % 'src="//i.imgur.com/611EovQh.jpg" style="width: 300em"'
+
+    contents = [c.strip() for c in html.join('no_mix.html').read().split('<p>SEP</p>')[1:-1]]
+    assert contents[0] == href_i % 'src="_images/611EovQ.jpg" style="width: 300px;"'
+    assert contents[1] == href % 'src="//i.imgur.com/611EovQm.jpg" style="width: 300px"'
+    assert contents[2] == href_i % 'src="_images/611EovQ.jpg" style="width: 15%;"'
+    assert contents[3] == href % 'src="//i.imgur.com/611EovQl.jpg" style="width: 15%"'
+    assert contents[4] == href_i % 'src="_images/611EovQ.jpg" style="width: 160px;"'
+    assert contents[5] == href % 'src="//i.imgur.com/611EovQt.jpg" style="width: 160px"'
+
+    href_i = ('<a class="reference external image-reference" href="%s">'
+              '<img alt="_images/611EovQ.jpg" src="_images/611EovQ.jpg" style="width: 50%%;" /></a>')
+    href = ('<a class="reference external image-reference" href="%s">'
+            '<img alt="Blow me a kiss!" src="//i.imgur.com/zXVtETZ.gif" style="width: 50%%"></a>')
+    contents = [c.strip() for c in html.join('target_mix.html').read().split('<p>SEP</p>')[1:-1]]
+    assert contents[0] == href_i % 'https://goo.gl'
+    assert contents[1] == href % 'https://goo.gl'
+    assert contents[2] == href % '//imgur.com/gallery/zXVtETZ'
+    assert contents[3] == href % '//i.imgur.com/zXVtETZ.gif'
+    assert contents[4] == href % '//imgur.com/zXVtETZ'
+
+
+def test_width_invalid(tmpdir, docs, httpretty_common_mock):
+    """Test invalid values for width option.
+
+    :param tmpdir: pytest fixture.
+    :param docs: conftest fixture.
+    :param httpretty_common_mock: conftest fixture.
+    """
+    pytest.add_page(docs, 'one', (
+        'SEP\n\n'
+        '.. image:: 611EovQ.jpg\n    :width: 300db\n\nSEP\n\n'
+        '.. imgur-image:: 611EovQ\n    :width: 300db\n\nSEP\n\n'
+    ))
+    html = tmpdir.join('html')
+    results = pytest.build_isolated(docs, html, httpretty_common_mock)
+
+    assert results[0] == 0
+
+    contents = [c.strip() for c in html.join('one.html').read().split('<p>SEP</p>')[1:-1]]
+    assert not any(contents)  # Sphinx just omits the bad directive from the final HTML.
