@@ -62,6 +62,40 @@ def test_second_cached_run(tmpdir_module, update):
         assert 'Edited' in contents
 
 
+@pytest.mark.parametrize('overflow', [('-E', '-a'), ('-E', '-a'), ()])
+def test_no_save_environment(httpretty_common_mock, tmpdir_module, overflow):
+    """Verify extension still works when users disable the saved environment (e.g. sphinx-build -E).
+
+    :param httpretty_common_mock: conftest fixture.
+    :param tmpdir_module: conftest fixture.
+    :param tuple overflow: Passed to build_isolated().
+    """
+    docs = tmpdir_module.join('docs')
+    html = tmpdir_module.join('html')
+
+    # Run.
+    result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock, overflow)
+    assert result == 0
+    assert not stderr
+
+    # Verify queries.
+    actual = sorted(re.compile(r'^querying http.+$', re.MULTILINE).findall(stdout))
+    if overflow:
+        expected = [
+            'querying https://api.imgur.com/3/album/V76cJ',
+            'querying https://api.imgur.com/3/album/VMlM6',
+            'querying https://api.imgur.com/3/image/611EovQ',
+        ]
+    else:
+        expected = []
+    assert actual == expected
+
+    # Verify HTML.
+    contents = html.join('one.html').read()
+    assert 'Title: 2010 JSW, 2012 Projects;' in contents
+    assert 'Description: Screenshots of my various devices.;' in contents
+
+
 def test_new_rst_old_id(tmpdir_module):
     """Add a new RST file but use a pre-existing Imgur ID.
 

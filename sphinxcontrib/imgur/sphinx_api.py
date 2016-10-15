@@ -92,8 +92,10 @@ def event_env_updated(app, env):
     """
     client_id = app.config['imgur_client_id']
     ttl = app.config['imgur_api_cache_ttl']
-    album_whitelist = set()
-    image_whitelist = set()
+    album_cache = app.builder.env.imgur_album_cache
+    image_cache = app.builder.env.imgur_image_cache
+    album_whitelist = {v.imgur_id for v in album_cache.values() if v.mod_time == 0}
+    image_whitelist = {v.imgur_id for v in image_cache.values() if v.mod_time == 0}
 
     # Build whitelist of Imgur IDs in just new/updated docs.
     for doctree in (env.get_doctree(n) for n in app.builder.get_outdated_docs()):
@@ -104,8 +106,6 @@ def event_env_updated(app, env):
                 image_whitelist.add(node.imgur_id)
 
     # Update the cache only if an added/changed doc has an Imgur album/image.
-    album_cache = app.builder.env.imgur_album_cache
-    image_cache = app.builder.env.imgur_image_cache
     if album_whitelist or image_whitelist:
         update_cache(album_cache, image_cache, app, client_id, ttl, album_whitelist, image_whitelist)
         prune_cache(album_cache, image_cache, app)
