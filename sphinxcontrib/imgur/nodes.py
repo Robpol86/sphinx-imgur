@@ -173,7 +173,7 @@ class ImgurImageNode(General, Element):
             html_attrs_img['CLASS'] = 'align-{}'.format(node.options['align'])
         if node.style:
             html_attrs_img['style'] = node.style
-        spht.body.append(spht.starttag(node, 'img', '', **html_attrs_img))
+        spht.body.append(spht.starttag(node, 'img', '' if node.options['target'] else '\n', **html_attrs_img))
 
     @staticmethod
     def depart(spht, node):
@@ -183,4 +183,4 @@ class ImgurImageNode(General, Element):
         :param sphinxcontrib.imgur.nodes.ImgurImageNode node: This class' instance.
         """
         if node.options['target']:
-            spht.body.append('</a>')
+            spht.body.append('</a>\n')

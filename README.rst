@@ -40,6 +40,13 @@ Changelog
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+2.0.1 - 2016-10-15
+------------------
+
+Changed
+    * Adding newlines after imgur-image image/a HTML tags. Without those newlines Chrome doesn't display gaps between
+      images on the same line.
+
 2.0.0 - 2016-10-15
 ------------------
 

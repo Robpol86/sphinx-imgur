@@ -87,6 +87,10 @@ def test_basic(tmpdir, docs, httpretty_common_mock):
     assert contents[0] == '<img alt="_images/611EovQ.jpg" src="_images/611EovQ.jpg" />'
     assert contents[1] == '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQh.jpg">'
 
+    # Verify newlines.
+    contents = html.join('image.html').read()
+    assert '\n<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQh.jpg">\n' in contents
+
 
 @pytest.mark.usefixtures('copy_images')
 def test_alt_align(tmpdir, docs, httpretty_common_mock):
@@ -339,6 +343,11 @@ def test_width(tmpdir, docs, httpretty_common_mock, set_conf):
     assert contents[2] == href % '//imgur.com/gallery/zXVtETZ'
     assert contents[3] == href % '//i.imgur.com/zXVtETZ.gif'
     assert contents[4] == href % '//imgur.com/zXVtETZ'
+
+    # Verify newlines.
+    contents = html.join('target_mix.html').read()
+    expected = '\n' + (href % 'https://goo.gl') + '\n'
+    assert expected in contents
 
 
 def test_width_invalid(tmpdir, docs, httpretty_common_mock):
