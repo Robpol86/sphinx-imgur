@@ -2,8 +2,11 @@
 
 import re
 
+import httpretty
 import py
 import pytest
+
+from sphinxcontrib.imgur.imgur_api import API_URL
 
 
 @pytest.fixture
@@ -361,3 +364,60 @@ def test_width_invalid(tmpdir, docs, httpretty_common_mock):
 
     contents = [c.strip() for c in html.join('one.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents == ['', '', '', '', '', '']  # Sphinx just omits the bad directive from the final HTML.
+
+
+def test_missing_api_data(tmpdir, docs):
+    """Test handling of missing data in the cache. Will behave like the built-in image directive with external URLs.
+
+    :param tmpdir: pytest fixture.
+    :param docs: conftest fixture.
+    """
+    httpretty_mock = {API_URL.format(type='image', id='imgur0id'): '{}'}
+    for url, body in httpretty_mock.items():
+        httpretty.register_uri(httpretty.GET, url, body=body)
+
+    pytest.add_page(docs, 'no_scale', (
+        'SEP\n\n'
+        '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :width: 300px\n\nSEP\n\n'
+        '.. imgur-image:: imgur0id\n    :width: 300px\n\nSEP\n\n'
+        '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :width: 30%\n\nSEP\n\n'
+        '.. imgur-image:: imgur0id\n    :width: 30%\n\nSEP\n\n'
+        '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :height: 300px\n\nSEP\n\n'
+        '.. imgur-image:: imgur0id\n    :height: 300px\n\nSEP\n\n'
+    ))
+    pytest.add_page(docs, 'scale', (
+        'SEP\n\n'
+        '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :scale: 25%\n\nSEP\n\n'
+        '.. imgur-image:: imgur0id\n    :scale: 25%\n\nSEP\n\n'
+    ))
+    html = tmpdir.join('html')
+    result, stderr = pytest.build_isolated(docs, html, httpretty_mock)[::2]
+
+    assert result == 0
+    lines = [l.split('WARNING: ')[-1].strip() for l in stderr.splitlines()]
+    expected = [
+        'query unsuccessful from https://api.imgur.com/3/image/imgur0id: no "data" key in JSON',
+        'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'Could not obtain image size. :scale: option is ignored.',
+        'Could not obtain image size. :scale: option is ignored.',
+    ]
+    assert lines == expected
+
+    href_i = ('<a class="reference internal image-reference" href="https://i.imgur.com/imgur0idh.jpg">'
+              '<img alt="https://i.imgur.com/imgur0idh.jpg" %s /></a>')
+    href = ('<a class="reference external image-reference" href="//i.imgur.com/imgur0id.jpg">'
+            '<img alt="i.imgur.com/imgur0idh.jpg" %s></a>')
+    contents = [c.strip() for c in html.join('no_scale.html').read().split('<p>SEP</p>')[1:-1]]
+    assert contents[0] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="width: 300px;"'
+    assert contents[1] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="width: 300px"'
+    assert contents[2] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="width: 30%;"'
+    assert contents[3] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="width: 30%"'
+    assert contents[4] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="height: 300px;"'
+    assert contents[5] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="height: 300px"'
+
+    contents = [c.strip() for c in html.join('scale.html').read().split('<p>SEP</p>')[1:-1]]
+    assert contents[0] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg"'
+    assert contents[1] == href % 'src="//i.imgur.com/imgur0idh.jpg"'

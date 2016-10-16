@@ -108,15 +108,31 @@ class ImgurImageNode(General, Element):
         self.src = str()
         self.style = str()
 
-    def finalize(self, album_cache, image_cache):
+    def finalize(self, album_cache, image_cache, warn_node):
         """Update attributes after Sphinx cache is updated.
 
         :param dict album_cache: Cache of Imgur albums to read. Keys are Imgur IDs, values are Album instances.
         :param dict image_cache: Cache of Imgur images to read. Keys are Imgur IDs, values are Image instances.
+        :param function warn_node: sphinx.environment.BuildEnvironment.warn_node without needing node argument.
         """
         album = album_cache[self.imgur_id] if self.album else None
         image = image_cache[album.cover_id] if self.album else image_cache[self.imgur_id]
         options = self.options
+
+        # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
+        if options['target_gallery'] and (album.in_gallery if album else image.in_gallery):
+            options['target'] = '//imgur.com/gallery/{}'.format(album.imgur_id if album else image.imgur_id)
+        elif options['target_page']:
+            options['target'] = '//imgur.com/{}'.format(album.imgur_id if album else image.imgur_id)
+        elif options['target_largest'] and not album:
+            options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
+        elif not options['target'] and (options['width'] or options['height'] or options['scale']):
+            options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
+
+        # Handle scale with no API data.
+        if options['scale'] and (not image.width or not image.height):
+            options['scale'] = ''
+            warn_node('Could not obtain image size. :scale: option is ignored.')
 
         # Handle scale, width, and height.
         if options['scale']:
@@ -134,16 +150,6 @@ class ImgurImageNode(General, Element):
         # Determine alt text.
         if not options['alt']:
             options['alt'] = image.title or self.src[2:]
-
-        # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
-        if options['target_gallery'] and (album.in_gallery if album else image.in_gallery):
-            options['target'] = '//imgur.com/gallery/{}'.format(album.imgur_id if album else image.imgur_id)
-        elif options['target_page']:
-            options['target'] = '//imgur.com/{}'.format(album.imgur_id if album else image.imgur_id)
-        elif options['target_largest'] and not album:
-            options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
-        elif not options['target'] and (options['width'] or options['height']):
-            options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
 
     @staticmethod
     def visit(spht, node):

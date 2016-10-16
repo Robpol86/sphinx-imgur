@@ -177,7 +177,7 @@ class Image(Base):
         if extension == 'gif' or full_size:
             return '{}.{}'.format(self.imgur_id, extension)  # Imgur doesn't animate resized versions.
         size = 'h'  # Default is 'huge' since all Sphinx themes limit document width to < 1024px.
-        if not display_width and not display_height:
+        if (not display_width and not display_height) or not self.width or not self.height:
             return '{}{}.{}'.format(self.imgur_id, size, extension)
 
         # Parse display_width and display_height.

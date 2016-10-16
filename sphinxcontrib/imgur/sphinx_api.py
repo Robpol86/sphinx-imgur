@@ -121,11 +121,11 @@ def event_doctree_resolved(app, doctree, _):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     :param _: Not used.
     """
+    album_cache = app.builder.env.imgur_album_cache
+    image_cache = app.builder.env.imgur_image_cache
+
     for node in doctree.traverse(ImgurTextNode):
-        if node.album:
-            cache = app.env.imgur_album_cache
-        else:
-            cache = app.env.imgur_image_cache
+        cache = album_cache if node.album else image_cache
         if node.name == 'imgur-description':
             text = cache[node.imgur_id].description
         else:
@@ -133,7 +133,7 @@ def event_doctree_resolved(app, doctree, _):
         node.replace_self([docutils.nodes.Text(text)])
 
     for node in doctree.traverse(ImgurImageNode):
-        node.finalize(app.env.imgur_album_cache, app.env.imgur_image_cache)
+        node.finalize(album_cache, image_cache, lambda m: app.builder.env.warn_node(m, node))
 
 
 def setup(app, version):
