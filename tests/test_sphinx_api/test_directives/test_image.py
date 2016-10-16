@@ -389,6 +389,12 @@ def test_missing_api_data(tmpdir, docs):
         'SEP\n\n'
         '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :scale: 25%\n\nSEP\n\n'
         '.. imgur-image:: imgur0id\n    :scale: 25%\n\nSEP\n\n'
+        '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :width: 300px\n    :scale: 25%\n\nSEP\n\n'
+        '.. imgur-image:: imgur0id\n    :width: 300px\n    :scale: 25%\n\nSEP\n\n'
+        '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :width: 30%\n    :scale: 25%\n\nSEP\n\n'
+        '.. imgur-image:: imgur0id\n    :width: 30%\n    :scale: 25%\n\nSEP\n\n'
+        '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :height: 300px\n    :scale: 25%\n\nSEP\n\n'
+        '.. imgur-image:: imgur0id\n    :height: 300px\n    :scale: 25%\n\nSEP\n\n'
     ))
     html = tmpdir.join('html')
     result, stderr = pytest.build_isolated(docs, html, httpretty_mock)[::2]
@@ -401,6 +407,15 @@ def test_missing_api_data(tmpdir, docs):
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'Could not obtain image size. :scale: option is ignored.',
+        'Could not obtain image height. :scale: option is partially ignored.',
+        'Could not obtain image height. :scale: option is partially ignored.',
+        'Could not obtain image width. :scale: option is partially ignored.',
+        'Could not obtain image size. :scale: option is ignored.',
+        'Could not obtain image size. :scale: option is ignored.',
         'Could not obtain image size. :scale: option is ignored.',
         'Could not obtain image size. :scale: option is ignored.',
     ]
@@ -421,3 +436,9 @@ def test_missing_api_data(tmpdir, docs):
     contents = [c.strip() for c in html.join('scale.html').read().split('<p>SEP</p>')[1:-1]]
     assert contents[0] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg"'
     assert contents[1] == href % 'src="//i.imgur.com/imgur0idh.jpg"'
+    assert contents[2] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="width: 75.0px;"'
+    assert contents[3] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="width: 75px"'
+    assert contents[4] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="width: 7.5%;"'
+    assert contents[5] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="width: 7%"'
+    assert contents[6] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="height: 75.0px;"'
+    assert contents[7] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="height: 75px"'

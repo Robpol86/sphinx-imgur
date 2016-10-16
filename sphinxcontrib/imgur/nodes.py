@@ -130,14 +130,20 @@ class ImgurImageNode(General, Element):
             options['target'] = '//i.imgur.com/' + image.filename(full_size=True)
 
         # Handle scale with no API data.
-        if options['scale'] and (not image.width or not image.height):
-            options['scale'] = ''
-            warn_node('Could not obtain image size. :scale: option is ignored.')
+        if options['scale']:
+            if not image.width and not options['width'] and not image.height and not options['height']:
+                options['scale'] = ''
+                warn_node('Could not obtain image size. :scale: option is ignored.')
+            elif not image.width and not options['width']:
+                warn_node('Could not obtain image width. :scale: option is partially ignored.')
+            elif not image.width or not image.height:
+                warn_node('Could not obtain image height. :scale: option is partially ignored.')
 
         # Handle scale, width, and height.
-        if options['scale']:
+        if options['scale'] and (options['width'] or image.width):
             match = RE_WIDTH_HEIGHT.match(options['width'] or '%dpx' % image.width)
             options['width'] = '{}{}'.format(int(float(match.group(1)) * (options['scale'] / 100.0)), match.group(2))
+        if options['scale'] and (options['height'] or image.height):
             match = RE_WIDTH_HEIGHT.match(options['height'] or '%dpx' % image.height)
             options['height'] = '{}{}'.format(int(float(match.group(1)) * (options['scale'] / 100.0)), match.group(2))
 
