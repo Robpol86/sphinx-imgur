@@ -9,7 +9,7 @@ from sphinxcontrib.imgur import sphinx_api
 
 __author__ = '@Robpol86'
 __license__ = 'MIT'
-__version__ = '1.0.0'
+__version__ = '2.0.0'
 
 
 def setup(app):

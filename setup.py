@@ -13,7 +13,7 @@ IMPORT = 'sphinxcontrib.imgur'
 INSTALL_REQUIRES = ['requests', 'sphinx']
 LICENSE = 'MIT'
 NAME = 'sphinxcontrib-imgur'
-VERSION = '1.0.0'
+VERSION = '2.0.0'
 
 
 def readme(path='README.rst'):
