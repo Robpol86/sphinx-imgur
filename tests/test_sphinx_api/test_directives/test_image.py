@@ -372,7 +372,10 @@ def test_missing_api_data(tmpdir, docs):
     :param tmpdir: pytest fixture.
     :param docs: conftest fixture.
     """
-    httpretty_mock = {API_URL.format(type='image', id='imgur0id'): '{}'}
+    httpretty_mock = {
+        API_URL.format(type='album', id='imgur0id'): '{}',
+        API_URL.format(type='image', id='imgur0id'): '{}',
+    }
     for url, body in httpretty_mock.items():
         httpretty.register_uri(httpretty.GET, url, body=body)
 
@@ -396,12 +399,17 @@ def test_missing_api_data(tmpdir, docs):
         '.. image:: https://i.imgur.com/imgur0idh.jpg\n    :height: 300px\n    :scale: 25%\n\nSEP\n\n'
         '.. imgur-image:: imgur0id\n    :height: 300px\n    :scale: 25%\n\nSEP\n\n'
     ))
+    pytest.add_page(docs, 'album', (
+        'SEP\n\n'
+        '.. imgur-image:: a/imgur0id\n\nSEP\n\n'
+    ))
     html = tmpdir.join('html')
     result, stderr = pytest.build_isolated(docs, html, httpretty_mock)[::2]
 
     assert result == 0
     lines = [l.split('WARNING: ')[-1].strip() for l in stderr.splitlines()]
     expected = [
+        'query unsuccessful from https://api.imgur.com/3/album/imgur0id: no "data" key in JSON',
         'query unsuccessful from https://api.imgur.com/3/image/imgur0id: no "data" key in JSON',
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
@@ -410,6 +418,7 @@ def test_missing_api_data(tmpdir, docs):
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
         'nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg',
+        'Album cover Imgur ID for imgur0id not available in local cache.',
         'Could not obtain image size. :scale: option is ignored.',
         'Could not obtain image height. :scale: option is partially ignored.',
         'Could not obtain image height. :scale: option is partially ignored.',
@@ -442,3 +451,6 @@ def test_missing_api_data(tmpdir, docs):
     assert contents[5] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="width: 7%"'
     assert contents[6] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="height: 75.0px;"'
     assert contents[7] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="height: 75px"'
+
+    contents = [c.strip() for c in html.join('album.html').read().split('<p>SEP</p>')[1:-1]]
+    assert contents == ['']

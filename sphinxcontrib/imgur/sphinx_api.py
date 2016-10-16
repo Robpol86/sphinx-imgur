@@ -133,7 +133,11 @@ def event_doctree_resolved(app, doctree, _):
         node.replace_self([docutils.nodes.Text(text)])
 
     for node in doctree.traverse(ImgurImageNode):
-        node.finalize(album_cache, image_cache, lambda m: app.builder.env.warn_node(m, node))
+        if node.album and not album_cache[node.imgur_id].cover_id:
+            app.warn('Album cover Imgur ID for {} not available in local cache.'.format(node.imgur_id))
+            node.replace_self([docutils.nodes.Text('')])
+        else:
+            node.finalize(album_cache, image_cache, lambda m: app.builder.env.warn_node(m, node))
 
 
 def setup(app, version):
