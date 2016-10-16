@@ -63,7 +63,13 @@ def query_api(app, client_id, imgur_id, is_album):
 
     # Verify data.
     if not parsed.get('success'):
-        raise APIError('query unsuccessful from {}: {}'.format(url, parsed.get('data', {}).get('error', 'N/A')), app)
+        if 'data' not in parsed:
+            message = 'no "data" key in JSON'
+        elif 'error' not in parsed['data']:
+            message = 'no "error" key in JSON'
+        else:
+            message = parsed['data']['error']
+        raise APIError('query unsuccessful from {}: {}'.format(url, message), app)
 
     return parsed
 
@@ -142,7 +148,9 @@ class Image(Base):
         :param str imgur_id: The Imgur ID to query.
         :param dict data: Parsed JSON response from API.
         """
+        self.height = 0
         self.type = str()
+        self.width = 0
         super(Image, self).__init__(imgur_id, data)
 
     def _parse(self, data):

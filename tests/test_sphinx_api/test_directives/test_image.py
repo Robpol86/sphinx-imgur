@@ -36,7 +36,7 @@ def test_bad_imgur_id(tmpdir, docs, album):
     assert expected in stderr
 
 
-def test_album_largest(tmpdir, docs):
+def test_bad_album_largest(tmpdir, docs):
     """Test :target_largest: being used on albums.
 
     :param tmpdir: pytest fixture.
@@ -360,4 +360,4 @@ def test_width_invalid(tmpdir, docs, httpretty_common_mock):
     assert results[0] == 0
 
     contents = [c.strip() for c in html.join('one.html').read().split('<p>SEP</p>')[1:-1]]
-    assert not any(contents)  # Sphinx just omits the bad directive from the final HTML.
+    assert contents == ['', '', '', '', '', '']  # Sphinx just omits the bad directive from the final HTML.

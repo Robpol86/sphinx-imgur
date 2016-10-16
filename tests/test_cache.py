@@ -214,14 +214,14 @@ def test_update_cache_error_handling(app, album):
     # Verify log.
     merged = '\n'.join('\t'.join(m) for m in app.messages)
     if album:
-        assert 'query unsuccessful from https://api.imgur.com/3/album/album: N/A' in merged
+        assert 'query unsuccessful from https://api.imgur.com/3/album/album: no "data" key in JSON' in merged
         assert '"id": "611EovQ"' in merged
     else:
         assert '"id": "V76cJ"' in merged
         assert '"id": "mGQBV"' in merged
         assert '"id": "ojGG7"' in merged
         assert '"id": "pc8hc"' in merged
-        assert 'query unsuccessful from https://api.imgur.com/3/image/image: N/A' in merged
+        assert 'query unsuccessful from https://api.imgur.com/3/image/image: no "data" key in JSON' in merged
 
 
 def test_update_cache_error_keep_previous(app):
@@ -229,7 +229,7 @@ def test_update_cache_error_keep_previous(app):
 
     :param app: conftest fixture.
     """
-    httpretty.register_uri(httpretty.GET, API_URL.format(type='album', id='album'), body='{}', status=500)
+    httpretty.register_uri(httpretty.GET, API_URL.format(type='album', id='album'), body='{"data": {}}', status=500)
     album_cache, image_cache = initialize(dict(), dict(), ['album'], [])
     album_cache['album'].description = 'Old'
     album_cache['album'].title = 'Old'
@@ -241,7 +241,7 @@ def test_update_cache_error_keep_previous(app):
     assert album_cache['album'].mod_time == 0
 
     merged = '\n'.join('\t'.join(m) for m in app.messages)
-    assert 'query unsuccessful from https://api.imgur.com/3/album/album: N/A' in merged
+    assert 'query unsuccessful from https://api.imgur.com/3/album/album: no "error" key in JSON' in merged
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')

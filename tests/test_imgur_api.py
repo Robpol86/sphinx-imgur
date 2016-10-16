@@ -77,7 +77,7 @@ def test_query_api_not_success(app, bad_json):
     if bad_json:
         body = '{}'
         status = 200
-        error = 'N/A'
+        error = 'no "data" key in JSON'
     else:
         body = '{"data":{"error":"Authentication required","method":"GET"},"success":false,"status":401}'
         status = 401
@@ -93,7 +93,7 @@ def test_query_api_not_success(app, bad_json):
     assert app.messages[0] == ['info', 'querying {}'.format(url)]
     assert app.messages[1] == ['debug2', 'Imgur API responded with: %s' % body]
     assert app.messages[2][:2] == ['warn', 'query unsuccessful from {}: {}'.format(url, error)]
-    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:66$', app.messages[-1][2])
+    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:72$', app.messages[-1][2])
 
 
 @pytest.mark.usefixtures('httpretty_common_mock')
@@ -142,10 +142,10 @@ def test_image_album_refresh_error(app, error, is_album):
         assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:60$', app.messages[-1][2])
     elif error == 'no data':
         assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('data',)"]
-        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:129$', app.messages[-1][2])
+        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
     else:
         assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('description',)"]
-        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:129$', app.messages[-1][2])
+        assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
 
 
 def test_album_minor_error(app):
@@ -167,7 +167,7 @@ def test_album_minor_error(app):
 
     # Verify log.
     assert app.messages[-1][:2] == ['warn', "unexpected JSON for imgur_id: KeyError('id',)"]
-    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:129$', app.messages[-1][2])
+    assert re.search(r'sphinxcontrib[/\\]imgur[/\\]imgur_api\.pyc?:135$', app.messages[-1][2])
 
 
 @pytest.mark.parametrize('is_album', [False, True])
