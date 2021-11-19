@@ -72,7 +72,6 @@ def pytest_namespace():
     :return: Namespace names and objects.
     :rtype: dict
     """
-
     def add_page(root, name, append=""):
         """Add a page to the sample Sphinx docs.
 
