@@ -1,4 +1,5 @@
 """Manage Imgur cache."""
+from sphinx.util import logging
 
 from sphinxcontrib.imgur.imgur_api import Album, APIError, Image
 
@@ -34,16 +35,18 @@ def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_i
     :param iter doctree_album_ids: Imgur album IDs used in all Sphinx docs.
     :param iter doctree_image_ids: Imgur image IDs used in all Sphinx docs.
     """
+    log = logging.getLogger(__name__)
+
     # Prune invalid types.
     for kind, cache in (("Album", album_cache), ("Image", image_cache)):
         for key in [k for k, v in cache.items() if not hasattr(v, "KIND") or not hasattr(v, "imgur_id")]:
-            app.debug("removing %s from Imgur cache since value isn't %s instance.", key, kind)
+            log.debug("removing %s from Imgur cache since value isn't %s instance.", key, kind)
             cache.pop(key)
 
     # Prune key mismatches.
     for cache in (album_cache, image_cache):
         for key in [k for k, v in cache.items() if v.imgur_id != k]:
-            app.debug("removing %s from Imgur cache since imgur_id doesn't match.", key)
+            log.debug("removing %s from Imgur cache since imgur_id doesn't match.", key)
             cache.pop(key)
 
     if doctree_album_ids is None or doctree_image_ids is None:
@@ -51,13 +54,13 @@ def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_i
 
     # Now prune albums.
     for album_id in [i for i in album_cache if i not in doctree_album_ids]:
-        app.debug("removing %s from Imgur album cache since it's not in the doctree.", album_id)
+        log.debug("removing %s from Imgur album cache since it's not in the doctree.", album_id)
         album_cache.pop(album_id)
 
     # Finally prune images not in doctree and not in any album.
     used_ids = list(doctree_image_ids) + [i for v in album_cache.values() for i in v.image_ids]
     for image_id in [i for i in image_cache if i not in used_ids]:
-        app.debug("removing %s from Imgur image cache since it's not in the doctree nor any album.", image_id)
+        log.debug("removing %s from Imgur image cache since it's not in the doctree nor any album.", image_id)
         image_cache.pop(image_id)
 
 

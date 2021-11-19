@@ -6,6 +6,7 @@ import time
 
 import requests
 import requests.exceptions
+from sphinx.util import logging
 
 API_URL = "https://api.imgur.com/3/{type}/{id}"
 
@@ -19,13 +20,14 @@ class APIError(Exception):
         :param str message: Message to log.
         :param sphinx.application.Sphinx app: Sphinx application object.
         """
+        log = logging.getLogger(__name__)
         try:
             line_number = sys.exc_info()[-1].tb_lineno
         except AttributeError:
             line_number = inspect.currentframe().f_back.f_lineno
         self.message = message
         super(APIError, self).__init__(message, app, line_number)
-        app.warn(message, location="{}:{}".format(__file__, line_number))
+        log.warning(message, location="{}:{}".format(__file__, line_number))
 
 
 def query_api(app, client_id, imgur_id, is_album):
@@ -41,19 +43,20 @@ def query_api(app, client_id, imgur_id, is_album):
     :return: Parsed JSON.
     :rtype: dict
     """
+    log = logging.getLogger(__name__)
     url = API_URL.format(type="album" if is_album else "image", id=imgur_id)
     headers = {"Authorization": "Client-ID {}".format(client_id)}
     timeout = 5
 
     # Query.
-    app.info("querying {}".format(url))
+    log.info("querying {}".format(url))
     try:
         response = requests.get(url, headers=headers, timeout=timeout)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout, requests.Timeout) as exc:
         raise APIError("timed out waiting for reply from {}: {}".format(url, str(exc)), app)
     except requests.ConnectionError as exc:
         raise APIError("unable to connect to {}: {}".format(url, str(exc)), app)
-    app.debug2("Imgur API responded with: %s", response.text)
+    log.debug("Imgur API responded with: %s", response.text)
 
     # Parse JSON.
     try:
@@ -122,9 +125,10 @@ class Base(object):
         :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
         :param int ttl: Number of seconds before this is considered out of date.
         """
+        log = logging.getLogger(__name__)
         remaining = self.seconds_remaining(ttl)
         if remaining:
-            app.debug2("Imgur ID %s still has %d seconds before needing refresh. Skipping.", self.imgur_id, remaining)
+            log.debug("Imgur ID %s still has %d seconds before needing refresh. Skipping.", self.imgur_id, remaining)
             return
 
         # Retrieve data.

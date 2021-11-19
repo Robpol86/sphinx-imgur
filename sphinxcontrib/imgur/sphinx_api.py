@@ -8,6 +8,7 @@ import re
 
 import docutils.nodes
 from sphinx.errors import ExtensionError
+from sphinx.util import logging
 
 from sphinxcontrib.imgur.cache import initialize, prune_cache, update_cache
 from sphinxcontrib.imgur.directives import ImgurEmbedDirective, ImgurImageDirective
@@ -121,6 +122,7 @@ def event_doctree_resolved(app, doctree, _):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     :param _: Not used.
     """
+    log = logging.getLogger(__name__)
     album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
 
@@ -134,7 +136,7 @@ def event_doctree_resolved(app, doctree, _):
 
     for node in doctree.traverse(ImgurImageNode):
         if node.album and not album_cache[node.imgur_id].cover_id:
-            app.warn("Album cover Imgur ID for {} not available in local cache.".format(node.imgur_id))
+            log.warning("Album cover Imgur ID for {} not available in local cache.".format(node.imgur_id))
             node.replace_self([docutils.nodes.Text("")])
         else:
             node.finalize(album_cache, image_cache, lambda m: app.builder.env.warn_node(m, node))
