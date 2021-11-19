@@ -7,7 +7,7 @@ import time
 import requests
 import requests.exceptions
 
-API_URL = 'https://api.imgur.com/3/{type}/{id}'
+API_URL = "https://api.imgur.com/3/{type}/{id}"
 
 
 class APIError(Exception):
@@ -25,7 +25,7 @@ class APIError(Exception):
             line_number = inspect.currentframe().f_back.f_lineno
         self.message = message
         super(APIError, self).__init__(message, app, line_number)
-        app.warn(message, location='{}:{}'.format(__file__, line_number))
+        app.warn(message, location="{}:{}".format(__file__, line_number))
 
 
 def query_api(app, client_id, imgur_id, is_album):
@@ -41,35 +41,35 @@ def query_api(app, client_id, imgur_id, is_album):
     :return: Parsed JSON.
     :rtype: dict
     """
-    url = API_URL.format(type='album' if is_album else 'image', id=imgur_id)
-    headers = {'Authorization': 'Client-ID {}'.format(client_id)}
+    url = API_URL.format(type="album" if is_album else "image", id=imgur_id)
+    headers = {"Authorization": "Client-ID {}".format(client_id)}
     timeout = 5
 
     # Query.
-    app.info('querying {}'.format(url))
+    app.info("querying {}".format(url))
     try:
         response = requests.get(url, headers=headers, timeout=timeout)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout, requests.Timeout) as exc:
-        raise APIError('timed out waiting for reply from {}: {}'.format(url, str(exc)), app)
+        raise APIError("timed out waiting for reply from {}: {}".format(url, str(exc)), app)
     except requests.ConnectionError as exc:
-        raise APIError('unable to connect to {}: {}'.format(url, str(exc)), app)
-    app.debug2('Imgur API responded with: %s', response.text)
+        raise APIError("unable to connect to {}: {}".format(url, str(exc)), app)
+    app.debug2("Imgur API responded with: %s", response.text)
 
     # Parse JSON.
     try:
         parsed = response.json()
     except ValueError:
-        raise APIError('failed to parse JSON from {}'.format(url), app)
+        raise APIError("failed to parse JSON from {}".format(url), app)
 
     # Verify data.
-    if not parsed.get('success'):
-        if 'data' not in parsed:
+    if not parsed.get("success"):
+        if "data" not in parsed:
             message = 'no "data" key in JSON'
-        elif 'error' not in parsed['data']:
+        elif "error" not in parsed["data"]:
             message = 'no "error" key in JSON'
         else:
-            message = parsed['data']['error']
-        raise APIError('query unsuccessful from {}: {}'.format(url, message), app)
+            message = parsed["data"]["error"]
+        raise APIError("query unsuccessful from {}: {}".format(url, message), app)
 
     return parsed
 
@@ -98,10 +98,10 @@ class Base(object):
 
         :param dict data: Parsed JSON response from API 'data' key.
         """
-        self.description = data['description']
-        self.in_gallery = data['in_gallery']
+        self.description = data["description"]
+        self.in_gallery = data["in_gallery"]
         self.mod_time = int(time.time())
-        self.title = data['title']
+        self.title = data["title"]
 
     def seconds_remaining(self, ttl):
         """Return number of seconds left before Imgur API needs to be queried for this instance.
@@ -124,23 +124,23 @@ class Base(object):
         """
         remaining = self.seconds_remaining(ttl)
         if remaining:
-            app.debug2('Imgur ID %s still has %d seconds before needing refresh. Skipping.', self.imgur_id, remaining)
+            app.debug2("Imgur ID %s still has %d seconds before needing refresh. Skipping.", self.imgur_id, remaining)
             return
 
         # Retrieve data.
-        response = query_api(app, client_id, self.imgur_id, self.KIND == 'album')
+        response = query_api(app, client_id, self.imgur_id, self.KIND == "album")
 
         # Parse.
         try:
-            return self._parse(response['data'])
+            return self._parse(response["data"])
         except KeyError as exc:
-            raise APIError('unexpected JSON for {}: {}'.format(self.imgur_id, repr(exc)), app)
+            raise APIError("unexpected JSON for {}: {}".format(self.imgur_id, repr(exc)), app)
 
 
 class Image(Base):
     """Imgur image metadata."""
 
-    KIND = 'image'
+    KIND = "image"
 
     def __init__(self, imgur_id, data=None):
         """Constructor.
@@ -159,11 +159,11 @@ class Image(Base):
         :param dict data: Parsed JSON response from API 'data' key.
         """
         super(Image, self)._parse(data)
-        self.height = data['height']
-        self.type = data['type']
-        self.width = data['width']
+        self.height = data["height"]
+        self.type = data["type"]
+        self.width = data["width"]
 
-    def filename(self, display_width='', display_height='', full_size=False):
+    def filename(self, display_width="", display_height="", full_size=False):
         """Determine which resized Imgur filename to use based on the display width/height. Includes the extension.
 
         :param str display_width: Display width from Sphinx directive options (e.g. '100px', '50%').
@@ -173,37 +173,37 @@ class Image(Base):
         :return: The filename to use in <img src="...">.
         :rtype: str
         """
-        extension = self.type[-3:] if self.type in ('image/png', 'image/gif') else 'jpg'
-        if extension == 'gif' or full_size:
-            return '{}.{}'.format(self.imgur_id, extension)  # Imgur doesn't animate resized versions.
-        size = 'h'  # Default is 'huge' since all Sphinx themes limit document width to < 1024px.
+        extension = self.type[-3:] if self.type in ("image/png", "image/gif") else "jpg"
+        if extension == "gif" or full_size:
+            return "{}.{}".format(self.imgur_id, extension)  # Imgur doesn't animate resized versions.
+        size = "h"  # Default is 'huge' since all Sphinx themes limit document width to < 1024px.
         if (not display_width and not display_height) or not self.width or not self.height:
-            return '{}{}.{}'.format(self.imgur_id, size, extension)
+            return "{}{}.{}".format(self.imgur_id, size, extension)
 
         # Parse display_width and display_height.
-        if display_width.endswith('px'):
+        if display_width.endswith("px"):
             width = int(display_width[:-2])
-        elif display_width.endswith('%'):
+        elif display_width.endswith("%"):
             width = self.width * (int(display_width[:-1]) / 100.0)
-        elif display_height.endswith('px'):
+        elif display_height.endswith("px"):
             width = (self.width * int(display_height[:-2])) / self.height
         else:
             width = self.width
 
         # Determine size.
         if width <= 160:
-            size = 't'
+            size = "t"
         elif width <= 320:
-            size = 'm'
+            size = "m"
         elif width <= 640:
-            size = 'l'
-        return '{}{}.{}'.format(self.imgur_id, size, extension)
+            size = "l"
+        return "{}{}.{}".format(self.imgur_id, size, extension)
 
 
 class Album(Base):
     """Imgur album metadata."""
 
-    KIND = 'album'
+    KIND = "album"
 
     def __init__(self, imgur_id, data=None):
         """Constructor.
@@ -223,7 +223,7 @@ class Album(Base):
         :return: If image is in this album.
         :rtype: bool
         """
-        if hasattr(item, 'imgur_id'):
+        if hasattr(item, "imgur_id"):
             # item is an Image instance.
             return item.imgur_id in self.image_ids
         return item in self.image_ids
@@ -237,8 +237,8 @@ class Album(Base):
         :rtype: list.
         """
         super(Album, self)._parse(data)
-        self.cover_id = data['cover']
-        images = [Image(i['id'], i) for i in data['images']]
+        self.cover_id = data["cover"]
+        images = [Image(i["id"], i) for i in data["images"]]
         self.image_ids[:] = [i.imgur_id for i in images]
         return images
 

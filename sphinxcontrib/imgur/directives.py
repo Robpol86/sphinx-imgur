@@ -8,7 +8,7 @@ from sphinx.application import SphinxError
 
 from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
 
-RE_IMGUR_ID = re.compile(r'^(?:a/)?[a-zA-Z0-9]{5,10}$')
+RE_IMGUR_ID = re.compile(r"^(?:a/)?[a-zA-Z0-9]{5,10}$")
 
 
 def is_true(argument):
@@ -19,13 +19,13 @@ def is_true(argument):
     :return: Is argument true/True/TRUE.
     :rtype: bool
     """
-    return argument.lower() == 'true'
+    return argument.lower() == "true"
 
 
 class ImgurError(SphinxError):
     """Non-configuration error. Raised when directive has bad options."""
 
-    category = 'Imgur option error'
+    category = "Imgur option error"
 
 
 class ImgurEmbedDirective(Directive):
@@ -47,7 +47,7 @@ class ImgurEmbedDirective(Directive):
 
         # Read from conf.py.
         config = self.state.document.settings.env.config
-        hide_post_details = self.options.get('hide_post_details', config.imgur_hide_post_details)
+        hide_post_details = self.options.get("hide_post_details", config.imgur_hide_post_details)
 
         return [ImgurEmbedNode(imgur_id, hide_post_details), ImgurJavaScriptNode()]
 
@@ -70,24 +70,24 @@ class ImgurImageDirective(Directive):
             raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers. Albums prefixed with "a/".')
 
         # Validate directive options.
-        if imgur_id.startswith('a/') and self.options.get('target_largest', None):
-            raise ImgurError('Imgur albums (whose covers are displayed) do not support :target_largest: option.')
+        if imgur_id.startswith("a/") and self.options.get("target_largest", None):
+            raise ImgurError("Imgur albums (whose covers are displayed) do not support :target_largest: option.")
 
         # Modify options.
-        if self.options.get('width', '').isdigit():
-            self.options['width'] += 'px'
-        if self.options.get('height', '').isdigit():
-            self.options['height'] += 'px'
+        if self.options.get("width", "").isdigit():
+            self.options["width"] += "px"
+        if self.options.get("height", "").isdigit():
+            self.options["height"] += "px"
 
         # Read from conf.py. Unset gallery/largest/page targets if :target: is set.
-        if self.options.get('target', None):
-            self.options.pop('target_gallery', None)
-            self.options.pop('target_largest', None)
-            self.options.pop('target_page', None)
-        elif not any(self.options.get('target_' + i, None) for i in ('gallery', 'largest', 'page')):
+        if self.options.get("target", None):
+            self.options.pop("target_gallery", None)
+            self.options.pop("target_largest", None)
+            self.options.pop("target_page", None)
+        elif not any(self.options.get("target_" + i, None) for i in ("gallery", "largest", "page")):
             config = self.state.document.settings.env.config
-            self.options.setdefault('target_gallery', config.imgur_target_default_gallery)
-            self.options.setdefault('target_largest', config.imgur_target_default_largest)
-            self.options.setdefault('target_page', config.imgur_target_default_page)
+            self.options.setdefault("target_gallery", config.imgur_target_default_gallery)
+            self.options.setdefault("target_largest", config.imgur_target_default_largest)
+            self.options.setdefault("target_page", config.imgur_target_default_page)
 
         return [ImgurImageNode(imgur_id, self.options)]
