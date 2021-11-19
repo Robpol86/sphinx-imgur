@@ -30,7 +30,7 @@ class FakeApp(object):
         """
         if args or kwargs:
             message = message % (args or kwargs)
-        self.messages.append(['debug', message])
+        self.messages.append(["debug", message])
 
     def debug2(self, message, *args, **kwargs):
         """Debug2 'logger'.
@@ -39,14 +39,14 @@ class FakeApp(object):
         """
         if args or kwargs:
             message = message % (args or kwargs)
-        self.messages.append(['debug2', message])
+        self.messages.append(["debug2", message])
 
     def info(self, message):
         """Info 'logger'.
 
         :param str message: Log message.
         """
-        self.messages.append(['info', message])
+        self.messages.append(["info", message])
 
     def warn(self, message, location):
         """Warning 'logger'.
@@ -54,7 +54,7 @@ class FakeApp(object):
         :param str message: Log message.
         :param str location: file path and line number.
         """
-        self.messages.append(['warn', message, location])
+        self.messages.append(["warn", message, location])
 
 
 @pytest.fixture
@@ -71,22 +71,22 @@ def config_httpretty():
     httpretty.enable()
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope="session")
 def config_requests():
     """Disable SSL warnings during testing."""
     if sys.version_info[:3] < (2, 7, 9):
         requests.packages.urllib3.disable_warnings()
-    logging.getLogger('requests').setLevel(logging.WARNING)
+    logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 @pytest.yield_fixture
 def freezer():
     """Mock a specific tine."""
-    with freeze_time('2016-09-20') as frozen_datetime:
+    with freeze_time("2016-09-20") as frozen_datetime:
         yield frozen_datetime
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def tmpdir_module(request, tmpdir_factory):
     """A tmpdir fixture for the module scope. Persists throughout the module.
 
@@ -104,8 +104,8 @@ def httpretty_common_mock():
     :rtype: dict
     """
     if not CACHED_RESPONSES:
-        for path in py.path.local(__file__).dirpath().visit('response_*_*.json'):
-            kind, imgur_id = os.path.splitext(path.basename)[0].split('_')[1:]
+        for path in py.path.local(__file__).dirpath().visit("response_*_*.json"):
+            kind, imgur_id = os.path.splitext(path.basename)[0].split("_")[1:]
             url = API_URL.format(type=kind, id=imgur_id)
             body = json.dumps(json.load(path))  # Verify valid JSON here.
             CACHED_RESPONSES[url] = body

@@ -19,7 +19,7 @@ def run_build_main(docs_dir, html_dir, overflow):
     :return: Value from build_main().
     :rtype: int
     """
-    argv = ('sphinx-build', str(docs_dir), str(html_dir))
+    argv = ("sphinx-build", str(docs_dir), str(html_dir))
     if overflow:
         argv += overflow
     result = build_main(argv)
@@ -42,15 +42,15 @@ def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, qu
     :param iter overflow: Append these args to sphinx-build call.
     """
     # Capture stdout/stderr after forking/spawning.
-    capture = __import__('_pytest').capture
+    capture = __import__("_pytest").capture
     try:
         capsys = capture.CaptureFixture(capture.SysCapture)
     except TypeError:
         capsys = capture.CaptureFixture(capture.SysCapture, None)
-    getattr(capsys, '_start')()
+    getattr(capsys, "_start")()
 
     # Re-run httpretty on Windows (due to lack of forking).
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         httpretty.enable()
         if cached_responses:
             for url, body in cached_responses.items():
@@ -72,7 +72,7 @@ def pytest_namespace():
     :return: Namespace names and objects.
     :rtype: dict
     """
-    def add_page(root, name, append=''):
+    def add_page(root, name, append=""):
         """Add a page to the sample Sphinx docs.
 
         :param py.path.local root: Path to docs root dir.
@@ -82,9 +82,9 @@ def pytest_namespace():
         :return: Path to new page RST file.
         :rtype: py.path.local
         """
-        root.join('contents.rst').write('    {}\n'.format(name), mode='a')
-        page = root.join('{}.rst'.format(name))
-        page.write('.. _{}:\n\n{}\n{}\n\n{}'.format(name, name.capitalize(), '=' * len(name), append))
+        root.join("contents.rst").write("    {}\n".format(name), mode="a")
+        page = root.join("{}.rst".format(name))
+        page.write(".. _{}:\n\n{}\n{}\n\n{}".format(name, name.capitalize(), "=" * len(name), append))
         return page
 
     def build_isolated(docs_dir, html_dir, cached_responses, overflow=None):
@@ -107,7 +107,7 @@ def pytest_namespace():
         try:
             stdout, stderr = queue.get(False)
         except multiprocessing.queues.Empty:
-            stdout, stderr = '', ''
+            stdout, stderr = "", ""
         return result, stdout, stderr
 
     return dict(add_page=add_page, build_isolated=build_isolated)
@@ -122,21 +122,13 @@ def docs(tmpdir):
     :return: Path to docs root.
     :rtype: py.path
     """
-    root = tmpdir.ensure_dir('docs')
+    root = tmpdir.ensure_dir("docs")
 
     # Create Sphinx config.
-    root.join('conf.py').write("extensions = ['sphinxcontrib.imgur']\nimgur_client_id = 'a0b1c2d3e4f56789'\n")
+    root.join("conf.py").write("extensions = ['sphinxcontrib.imgur']\nimgur_client_id = 'a0b1c2d3e4f56789'\n")
 
     # Create Sphinx docs.
-    root.join('contents.rst').write(
-        'Test\n'
-        '====\n'
-        '\n'
-        'Sample documentation.\n'
-        '\n'
-        '.. toctree::\n'
-        '    ignore\n'
-    )
-    root.join('ignore.rst').write('.. _ignore:\n\nIgnore\n======\n\nHello World.\n')
+    root.join("contents.rst").write("Test\n" "====\n" "\n" "Sample documentation.\n" "\n" ".. toctree::\n" "    ignore\n")
+    root.join("ignore.rst").write(".. _ignore:\n\nIgnore\n======\n\nHello World.\n")
 
     return root

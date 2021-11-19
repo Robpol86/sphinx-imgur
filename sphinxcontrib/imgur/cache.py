@@ -14,9 +14,9 @@ def initialize(album_cache, image_cache, albums, images):
     :return: Same album and image cache dictionaries from parameters.
     :rtype: tuple
     """
-    if not hasattr(album_cache, 'setdefault'):
+    if not hasattr(album_cache, "setdefault"):
         album_cache = dict()
-    if not hasattr(image_cache, 'setdefault'):
+    if not hasattr(image_cache, "setdefault"):
         image_cache = dict()
     for imgur_id in albums:
         album_cache.setdefault(imgur_id, Album(imgur_id))
@@ -35,8 +35,8 @@ def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_i
     :param iter doctree_image_ids: Imgur image IDs used in all Sphinx docs.
     """
     # Prune invalid types.
-    for kind, cache in (('Album', album_cache), ('Image', image_cache)):
-        for key in [k for k, v in cache.items() if not hasattr(v, 'KIND') or not hasattr(v, 'imgur_id')]:
+    for kind, cache in (("Album", album_cache), ("Image", image_cache)):
+        for key in [k for k, v in cache.items() if not hasattr(v, "KIND") or not hasattr(v, "imgur_id")]:
             app.debug("removing %s from Imgur cache since value isn't %s instance.", key, kind)
             cache.pop(key)
 

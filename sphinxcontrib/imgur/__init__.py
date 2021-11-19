@@ -7,9 +7,9 @@ https://pypi.python.org/pypi/sphinxcontrib-imgur
 
 from sphinxcontrib.imgur import sphinx_api
 
-__author__ = '@Robpol86'
-__license__ = 'MIT'
-__version__ = '2.0.1'
+__author__ = "@Robpol86"
+__license__ = "MIT"
+__version__ = "2.0.1"
 
 
 def setup(app):

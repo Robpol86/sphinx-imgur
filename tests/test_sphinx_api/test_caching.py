@@ -13,26 +13,26 @@ def test_first_run(docs, httpretty_common_mock, tmpdir_module):
     :param httpretty_common_mock: conftest fixture.
     :param tmpdir_module: conftest fixture.
     """
-    docs.copy(tmpdir_module.ensure_dir('docs'))
-    docs = tmpdir_module.join('docs')
-    pytest.add_page(docs, 'one', 'Title: :imgur-title:`a/V76cJ`;\nDescription: :imgur-description:`a/VMlM6`;\n')
-    pytest.add_page(docs, 'two', 'Title: :imgur-title:`611EovQ`;\nDescription: :imgur-description:`2QcXR3R`;\n')
-    html = tmpdir_module.join('html')
+    docs.copy(tmpdir_module.ensure_dir("docs"))
+    docs = tmpdir_module.join("docs")
+    pytest.add_page(docs, "one", "Title: :imgur-title:`a/V76cJ`;\nDescription: :imgur-description:`a/VMlM6`;\n")
+    pytest.add_page(docs, "two", "Title: :imgur-title:`611EovQ`;\nDescription: :imgur-description:`2QcXR3R`;\n")
+    html = tmpdir_module.join("html")
     result, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)[::2]
 
     assert result == 0
     assert not stderr
-    assert html.join('contents.html').check()
+    assert html.join("contents.html").check()
 
-    contents = html.join('one.html').read()
-    assert 'Title: 2010 JSW, 2012 Projects;' in contents
-    assert 'Description: Screenshots of my various devices.;' in contents
-    contents = html.join('two.html').read()
-    assert 'Title: Work, June 1st, 2016: Uber;' in contents
-    assert 'Description: None;' in contents
+    contents = html.join("one.html").read()
+    assert "Title: 2010 JSW, 2012 Projects;" in contents
+    assert "Description: Screenshots of my various devices.;" in contents
+    contents = html.join("two.html").read()
+    assert "Title: Work, June 1st, 2016: Uber;" in contents
+    assert "Description: None;" in contents
 
 
-@pytest.mark.parametrize('update', ['two.rst', 'ignore.rst'])
+@pytest.mark.parametrize("update", ["two.rst", "ignore.rst"])
 def test_second_cached_run(tmpdir_module, update):
     """Run with nothing changed. Ensure no API queries happen.
 
@@ -41,28 +41,28 @@ def test_second_cached_run(tmpdir_module, update):
     """
     time.sleep(1.1)
 
-    docs = tmpdir_module.join('docs')
-    docs.join(update).write('Edited\n', mode='a')
-    html = tmpdir_module.join('html')
+    docs = tmpdir_module.join("docs")
+    docs.join(update).write("Edited\n", mode="a")
+    html = tmpdir_module.join("html")
     result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
     assert result == 0
     assert not stderr
 
-    contents = html.join('one.html').read()
-    assert 'Title: 2010 JSW, 2012 Projects;' in contents
-    assert 'Description: Screenshots of my various devices.;' in contents
-    contents = html.join('two.html').read()
-    assert 'Title: Work, June 1st, 2016: Uber;' in contents
-    assert 'Description: None;' in contents
-    if update == 'two.rst':
-        assert 'Edited' in contents
+    contents = html.join("one.html").read()
+    assert "Title: 2010 JSW, 2012 Projects;" in contents
+    assert "Description: Screenshots of my various devices.;" in contents
+    contents = html.join("two.html").read()
+    assert "Title: Work, June 1st, 2016: Uber;" in contents
+    assert "Description: None;" in contents
+    if update == "two.rst":
+        assert "Edited" in contents
     else:
-        contents = html.join('ignore.html').read()
-        assert 'Edited' in contents
+        contents = html.join("ignore.html").read()
+        assert "Edited" in contents
 
 
-@pytest.mark.parametrize('overflow', [('-E', '-a'), ('-E', '-a'), ()])
+@pytest.mark.parametrize("overflow", [("-E", "-a"), ("-E", "-a"), ()])
 def test_no_save_environment(httpretty_common_mock, tmpdir_module, overflow):
     """Verify extension still works when users disable the saved environment (e.g. sphinx-build -E).
 
@@ -70,8 +70,8 @@ def test_no_save_environment(httpretty_common_mock, tmpdir_module, overflow):
     :param tmpdir_module: conftest fixture.
     :param tuple overflow: Passed to build_isolated().
     """
-    docs = tmpdir_module.join('docs')
-    html = tmpdir_module.join('html')
+    docs = tmpdir_module.join("docs")
+    html = tmpdir_module.join("html")
 
     # Run.
     result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock, overflow)
@@ -79,21 +79,21 @@ def test_no_save_environment(httpretty_common_mock, tmpdir_module, overflow):
     assert not stderr
 
     # Verify queries.
-    actual = sorted(re.compile(r'^querying http.+$', re.MULTILINE).findall(stdout))
+    actual = sorted(re.compile(r"^querying http.+$", re.MULTILINE).findall(stdout))
     if overflow:
         expected = [
-            'querying https://api.imgur.com/3/album/V76cJ',
-            'querying https://api.imgur.com/3/album/VMlM6',
-            'querying https://api.imgur.com/3/image/611EovQ',
+            "querying https://api.imgur.com/3/album/V76cJ",
+            "querying https://api.imgur.com/3/album/VMlM6",
+            "querying https://api.imgur.com/3/image/611EovQ",
         ]
     else:
         expected = []
     assert actual == expected
 
     # Verify HTML.
-    contents = html.join('one.html').read()
-    assert 'Title: 2010 JSW, 2012 Projects;' in contents
-    assert 'Description: Screenshots of my various devices.;' in contents
+    contents = html.join("one.html").read()
+    assert "Title: 2010 JSW, 2012 Projects;" in contents
+    assert "Description: Screenshots of my various devices.;" in contents
 
 
 def test_new_rst_old_id(tmpdir_module):
@@ -103,20 +103,21 @@ def test_new_rst_old_id(tmpdir_module):
     """
     time.sleep(1.1)
 
-    docs = tmpdir_module.join('docs')
-    docs.join('contents.rst').write('    three\n', mode='a')
-    assert not docs.join('three.rst').check()
-    docs.join('three.rst').write('.. _three:\n\nThree\n=====\n\nTitle: :imgur-title:`a/VMlM6`;\n'
-                                 'Description: :imgur-description:`pc8hc`;\n')
-    html = tmpdir_module.join('html')
+    docs = tmpdir_module.join("docs")
+    docs.join("contents.rst").write("    three\n", mode="a")
+    assert not docs.join("three.rst").check()
+    docs.join("three.rst").write(
+        ".. _three:\n\nThree\n=====\n\nTitle: :imgur-title:`a/VMlM6`;\n" "Description: :imgur-description:`pc8hc`;\n"
+    )
+    html = tmpdir_module.join("html")
     result, stderr = pytest.build_isolated(docs, html, None)[::2]
 
     assert result == 0
     assert not stderr
 
-    contents = html.join('three.html').read()
-    assert 'Title: Screenshots;' in contents
-    assert 'Description: Closeup of Nokia DT-900 charger wedged in my door panel.;' in contents
+    contents = html.join("three.html").read()
+    assert "Title: Screenshots;" in contents
+    assert "Description: Closeup of Nokia DT-900 charger wedged in my door panel.;" in contents
 
 
 def test_single_id_update(httpretty_common_mock, tmpdir_module):
@@ -127,18 +128,18 @@ def test_single_id_update(httpretty_common_mock, tmpdir_module):
     """
     time.sleep(1.1)
 
-    docs = tmpdir_module.join('docs')
-    docs.join('three.rst').write('Title: :imgur-title:`hiX02`;\n', mode='a')
-    html = tmpdir_module.join('html')
+    docs = tmpdir_module.join("docs")
+    docs.join("three.rst").write("Title: :imgur-title:`hiX02`;\n", mode="a")
+    html = tmpdir_module.join("html")
     result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)
 
     assert result == 0
     assert not stderr
-    actual = re.compile(r'^querying http.+$', re.MULTILINE).findall(stdout)
-    assert actual == ['querying https://api.imgur.com/3/image/hiX02']
+    actual = re.compile(r"^querying http.+$", re.MULTILINE).findall(stdout)
+    assert actual == ["querying https://api.imgur.com/3/image/hiX02"]
 
-    contents = html.join('three.html').read()
-    assert 'Title: None;' in contents
+    contents = html.join("three.html").read()
+    assert "Title: None;" in contents
 
 
 def test_expire_everything_single_update(httpretty_common_mock, tmpdir_module):
@@ -149,16 +150,16 @@ def test_expire_everything_single_update(httpretty_common_mock, tmpdir_module):
     """
     time.sleep(1.1)
 
-    docs = tmpdir_module.join('docs')
-    docs.join('conf.py').write('imgur_api_cache_ttl = 1\n', mode='a')
-    docs.join('three.rst').write('.. _three:\n\nThree\n=====\n\nTitle: :imgur-title:`a/VMlM6`;\n')
-    html = tmpdir_module.join('html')
+    docs = tmpdir_module.join("docs")
+    docs.join("conf.py").write("imgur_api_cache_ttl = 1\n", mode="a")
+    docs.join("three.rst").write(".. _three:\n\nThree\n=====\n\nTitle: :imgur-title:`a/VMlM6`;\n")
+    html = tmpdir_module.join("html")
     result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)
 
     assert result == 0
     assert not stderr
-    actual = re.compile(r'^querying http.+$', re.MULTILINE).findall(stdout)
-    assert actual == ['querying https://api.imgur.com/3/album/VMlM6']
+    actual = re.compile(r"^querying http.+$", re.MULTILINE).findall(stdout)
+    assert actual == ["querying https://api.imgur.com/3/album/VMlM6"]
 
-    contents = html.join('three.html').read()
-    assert 'Title: Screenshots;' in contents
+    contents = html.join("three.html").read()
+    assert "Title: Screenshots;" in contents
