@@ -32,21 +32,8 @@ html_theme = 'sphinx_rtd_theme'
 html_title = project
 
 
-# google analytics
-extensions.append('sphinxcontrib.googleanalytics')
-googleanalytics_id = 'UA-82627369-1'
-
-
 # imgur
 extensions.append('sphinxcontrib.imgur')
 imgur_client_id = '13d3c73555f2190'
 imgur_target_default_gallery = True
 imgur_target_default_page = True
-
-
-# SCVersioning.
-scv_banner_greatest_tag = True
-scv_grm_exclude = ('.gitignore', '.nojekyll', 'README.rst')
-scv_overflow = ('-W',)
-scv_show_banner = True
-scv_sort = ('semver', 'time')
