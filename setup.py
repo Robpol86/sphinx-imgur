@@ -62,15 +62,6 @@ class CheckVersion(Command):
         # Check changelog.
         if not re.compile(r'^%s - \d{4}-\d{2}-\d{2}[\r\n]' % VERSION, re.MULTILINE).search(readme()):
             raise SystemExit('Version not found in readme/changelog file.')
-        # Check tox.
-        if INSTALL_REQUIRES:
-            contents = readme('tox.ini')
-            section = re.compile(r'[\r\n]+install_requires =[\r\n]+(.+?)[\r\n]+\w', re.DOTALL).findall(contents)
-            if not section:
-                raise SystemExit('Missing install_requires section in tox.ini.')
-            in_tox = re.findall(r'    ([^=]+)==[\w\d.-]+', section[0])
-            if INSTALL_REQUIRES != in_tox:
-                raise SystemExit('Missing/unordered pinned dependencies in tox.ini.')
 
 
 if __name__ == '__main__':
