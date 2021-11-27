@@ -34,7 +34,7 @@ def event_before_read_docs(app, env, _):
 
     imgur_album_cache = getattr(env, "imgur_album_cache", None)
     imgur_image_cache = getattr(env, "imgur_image_cache", None)
-    env.imgur_album_cache, env.imgur_image_cache = initialize(imgur_album_cache, imgur_image_cache, (), ())
+    env.imgur_image_cache = initialize(imgur_image_cache, ())
     prune_cache(env.imgur_image_cache, app)
 
 
@@ -46,10 +46,10 @@ def event_doctree_read(app, doctree):
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     """
-    albums, images = set(), set()
+    images = set()
     for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
         images.add(node.imgur_id)
-    initialize(app.builder.env.imgur_album_cache, app.builder.env.imgur_image_cache, albums, images)
+    initialize(app.builder.env.imgur_image_cache, images)
 
 
 def event_env_merge_info(app, env, _, other):
@@ -87,7 +87,6 @@ def event_env_updated(app, env):
     """
     client_id = app.config["imgur_client_id"]
     ttl = app.config["imgur_api_cache_ttl"]
-    album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
     image_whitelist = {v.imgur_id for v in image_cache.values() if v.mod_time == 0}
 

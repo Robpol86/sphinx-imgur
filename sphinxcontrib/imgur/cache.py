@@ -1,28 +1,22 @@
 """Manage Imgur cache."""
 
-from sphinxcontrib.imgur.imgur_api import Album, APIError, Image
+from sphinxcontrib.imgur.imgur_api import APIError, Image
 
 
-def initialize(album_cache, image_cache, albums, images):
-    """Instantiate Album or Image instances not already in cache.
+def initialize(image_cache, images):
+    """Instantiate Image instances not already in cache.
 
-    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Album instances.
     :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image instances.
-    :param iter albums: List of album Imgur IDs.
     :param iter images: List of image Imgur IDs.
 
-    :return: Same album and image cache dictionaries from parameters.
+    :return: Same image cache dictionaries from parameters.
     :rtype: tuple
     """
-    if not hasattr(album_cache, "setdefault"):
-        album_cache = dict()
     if not hasattr(image_cache, "setdefault"):
         image_cache = dict()
-    for imgur_id in albums:
-        album_cache.setdefault(imgur_id, Album(imgur_id))
     for imgur_id in images:
         image_cache.setdefault(imgur_id, Image(imgur_id))
-    return album_cache, image_cache
+    return image_cache
 
 
 def prune_cache(image_cache, app, doctree_image_ids=None):
