@@ -77,7 +77,9 @@ class ImgurImageNode(General, Element):
         :param dict options: Options from directive.
         """
         super(ImgurImageNode, self).__init__()
-        self.album = text.startswith("a/")
+        if text.startswith("a/"):
+            raise NotImplementedError
+        self.album = False
         self.imgur_id = text[2:] if self.album else text
         self.options = dict(
             align=options.get("align", ""),
