@@ -72,15 +72,6 @@ All Config Options
     Like :attr:`imgur_target_default_largest` but instead links to the image's page on Imgur by default (with the share
     buttons, etc). Overrides :attr:`imgur_target_default_largest` if both are set.
 
-.. attribute:: imgur_target_default_gallery
-
-    *Default: False*
-
-    Like :attr:`imgur_target_default_largest` but instead links to the albums's gallery on Imgur by default. Only
-    applies images or albums (which :rst:dir:`imgur-image` displays the cover image) released to the Imgur gallery,
-    ignored otherwise. Overrides :attr:`imgur_target_default_largest` and :attr:`imgur_target_default_page` if all are
-    set and image/album is in the gallery.
-
 Directives
 ==========
 
@@ -125,15 +116,11 @@ To see them in action visit the :ref:`Examples` section.
         Image will link to its page on Imgur (with the share buttons, etc). Takes precedence over
         :attr:`target_largest`.
 
-    .. attribute:: target_gallery
-
-        Image will link to its gallery page on Imgur if there is one, otherwise will be ignored. Takes precedence over
-        :attr:`target_largest` and :attr:`target_page` if image is in Imgur gallery.
 
     .. attribute:: target
 
         Same as the regular image directive. Image will link to this URL. Takes precedence over :attr:`target_largest`,
-        :attr:`target_page`, and :attr:`target_gallery`.
+        and :attr:`target_page`.
 
     .. attribute:: width
 
