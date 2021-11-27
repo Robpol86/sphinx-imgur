@@ -123,7 +123,7 @@ def event_doctree_resolved(app, doctree, _):
     album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
 
-    for node in doctree.traverse(ImgurImageNode):
+    for node in doctree.traverse(ImgurImageNode):  # pylint: disable=cell-var-from-loop
         if node.album and not album_cache[node.imgur_id].cover_id:
             app.warn("Album cover Imgur ID for {} not available in local cache.".format(node.imgur_id))
             node.replace_self([docutils.nodes.Text("")])
