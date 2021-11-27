@@ -49,10 +49,7 @@ def event_doctree_read(app, doctree):
     """
     albums, images = set(), set()
     for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
-        if node.album:
-            albums.add(node.imgur_id)
-        else:
-            images.add(node.imgur_id)
+        images.add(node.imgur_id)
     initialize(app.builder.env.imgur_album_cache, app.builder.env.imgur_image_cache, albums, images)
 
 
@@ -99,10 +96,7 @@ def event_env_updated(app, env):
     # Build whitelist of Imgur IDs in just new/updated docs.
     for doctree in (env.get_doctree(n) for n in app.builder.get_outdated_docs()):
         for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
-            if node.album:
-                album_whitelist.add(node.imgur_id)
-            else:
-                image_whitelist.add(node.imgur_id)
+            image_whitelist.add(node.imgur_id)
 
     # Update the cache only if an added/changed doc has an Imgur album/image.
     if album_whitelist or image_whitelist:
@@ -124,11 +118,7 @@ def event_doctree_resolved(app, doctree, _):
     image_cache = app.builder.env.imgur_image_cache
 
     for node in doctree.traverse(ImgurImageNode):
-        if node.album and not album_cache[node.imgur_id].cover_id:
-            app.warn("Album cover Imgur ID for {} not available in local cache.".format(node.imgur_id))
-            node.replace_self([docutils.nodes.Text("")])
-        else:
-            node.finalize(album_cache, image_cache, functools.partial(app.builder.env.warn_node, node=node))
+        node.finalize(image_cache, functools.partial(app.builder.env.warn_node, node=node))
 
 
 def setup(app, version):

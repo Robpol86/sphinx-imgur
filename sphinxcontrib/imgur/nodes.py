@@ -79,8 +79,7 @@ class ImgurImageNode(General, Element):
         super(ImgurImageNode, self).__init__()
         if text.startswith("a/"):
             raise NotImplementedError
-        self.album = False
-        self.imgur_id = text[2:] if self.album else text
+        self.imgur_id = text
         self.options = dict(
             align=options.get("align", ""),
             alt=options.get("alt", ""),
@@ -95,23 +94,21 @@ class ImgurImageNode(General, Element):
         self.src = str()
         self.style = str()
 
-    def finalize(self, album_cache, image_cache, warn_node):
+    def finalize(self, image_cache, warn_node):
         """Update attributes after Sphinx cache is updated.
 
-        :param dict album_cache: Cache of Imgur albums to read. Keys are Imgur IDs, values are Album instances.
         :param dict image_cache: Cache of Imgur images to read. Keys are Imgur IDs, values are Image instances.
         :param function warn_node: sphinx.environment.BuildEnvironment.warn_node without needing node argument.
         """
-        album = album_cache[self.imgur_id] if self.album else None
-        image = image_cache[album.cover_id] if self.album else image_cache[self.imgur_id]
+        image = image_cache[self.imgur_id]
         options = self.options
 
         # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
-        if options["target_gallery"] and (album.in_gallery if album else image.in_gallery):
-            options["target"] = "//imgur.com/gallery/{}".format(album.imgur_id if album else image.imgur_id)
+        if options["target_gallery"] and image.in_gallery:
+            options["target"] = "//imgur.com/gallery/{}".format(image.imgur_id)
         elif options["target_page"]:
-            options["target"] = "//imgur.com/{}".format(album.imgur_id if album else image.imgur_id)
-        elif options["target_largest"] and not album:
+            options["target"] = "//imgur.com/{}".format(image.imgur_id)
+        elif options["target_largest"]:
             options["target"] = "//i.imgur.com/" + image.filename(full_size=True)
         elif not options["target"] and (options["width"] or options["height"] or options["scale"]):
             options["target"] = "//i.imgur.com/" + image.filename(full_size=True)
