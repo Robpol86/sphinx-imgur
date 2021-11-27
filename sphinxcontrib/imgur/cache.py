@@ -25,39 +25,32 @@ def initialize(album_cache, image_cache, albums, images):
     return album_cache, image_cache
 
 
-def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_image_ids=None):
-    """Remove Images and Albums from the cache if they are no longer used.
+def prune_cache(image_cache, app, doctree_image_ids=None):
+    """Remove Images from the cache if they are no longer used.
 
-    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Album instances.
     :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image instances.
     :param sphinx.application.Sphinx app: Sphinx application object.
-    :param iter doctree_album_ids: Imgur album IDs used in all Sphinx docs.
     :param iter doctree_image_ids: Imgur image IDs used in all Sphinx docs.
     """
     # Prune invalid types.
-    for kind, cache in (("Album", album_cache), ("Image", image_cache)):
+    for kind, cache in (("Image", image_cache),):
         for key in [k for k, v in cache.items() if not hasattr(v, "KIND") or not hasattr(v, "imgur_id")]:
             app.debug("removing %s from Imgur cache since value isn't %s instance.", key, kind)
             cache.pop(key)
 
     # Prune key mismatches.
-    for cache in (album_cache, image_cache):
+    for cache in (image_cache,):
         for key in [k for k, v in cache.items() if v.imgur_id != k]:
             app.debug("removing %s from Imgur cache since imgur_id doesn't match.", key)
             cache.pop(key)
 
-    if doctree_album_ids is None or doctree_image_ids is None:
+    if doctree_image_ids is None:
         return
 
-    # Now prune albums.
-    for album_id in [i for i in album_cache if i not in doctree_album_ids]:
-        app.debug("removing %s from Imgur album cache since it's not in the doctree.", album_id)
-        album_cache.pop(album_id)
-
-    # Finally prune images not in doctree and not in any album.
-    used_ids = list(doctree_image_ids) + [i for v in album_cache.values() for i in v.image_ids]
+    # Finally prune images not in doctree.
+    used_ids = list(doctree_image_ids)
     for image_id in [i for i in image_cache if i not in used_ids]:
-        app.debug("removing %s from Imgur image cache since it's not in the doctree nor any album.", image_id)
+        app.debug("removing %s from Imgur image cache since it's not in the doctree.", image_id)
         image_cache.pop(image_id)
 
 

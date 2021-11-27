@@ -35,7 +35,7 @@ def event_before_read_docs(app, env, _):
     imgur_album_cache = getattr(env, "imgur_album_cache", None)
     imgur_image_cache = getattr(env, "imgur_image_cache", None)
     env.imgur_album_cache, env.imgur_image_cache = initialize(imgur_album_cache, imgur_image_cache, (), ())
-    prune_cache(env.imgur_album_cache, env.imgur_image_cache, app)
+    prune_cache(env.imgur_image_cache, app)
 
 
 def event_doctree_read(app, doctree):
@@ -99,7 +99,7 @@ def event_env_updated(app, env):
     # Update the cache only if an added/changed doc has an Imgur album/image.
     if image_whitelist:
         update_cache(image_cache, app, client_id, ttl, image_whitelist)
-        prune_cache(album_cache, image_cache, app)
+        prune_cache(image_cache, app)
 
 
 def event_doctree_resolved(app, doctree, _):
