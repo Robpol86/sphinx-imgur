@@ -1,4 +1,4 @@
-"""Sphinx extension that embeds Imgur images, albums, and their metadata in documents.
+"""Sphinx extension that embeds Imgur images in documents.
 
 https://sphinxcontrib-imgur.readthedocs.org
 https://github.com/Robpol86/sphinxcontrib-imgur

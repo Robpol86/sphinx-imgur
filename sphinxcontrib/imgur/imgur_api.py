@@ -28,7 +28,7 @@ class APIError(Exception):
         app.warn(message, location="{}:{}".format(__file__, line_number))
 
 
-def query_api(app, client_id, imgur_id, is_album):
+def query_api(app, client_id, imgur_id):
     """Query the Imgur API.
 
     :raise APIError: When Imgur responds with errors or unexpected data.
@@ -36,12 +36,11 @@ def query_api(app, client_id, imgur_id, is_album):
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
     :param str imgur_id: The Imgur ID to query.
-    :param bool is_album: If this ID is an album instead of an image.
 
     :return: Parsed JSON.
     :rtype: dict
     """
-    url = API_URL.format(type="album" if is_album else "image", id=imgur_id)
+    url = API_URL.format(type="image", id=imgur_id)
     headers = {"Authorization": "Client-ID {}".format(client_id)}
     timeout = 5
 
@@ -75,7 +74,7 @@ def query_api(app, client_id, imgur_id, is_album):
 
 
 class Base(object):
-    """Base class for Image and Album classes. Defines common attributes."""
+    """Base class for Image class. Defines common attributes."""
 
     KIND = None
 
@@ -128,7 +127,7 @@ class Base(object):
             return
 
         # Retrieve data.
-        response = query_api(app, client_id, self.imgur_id, self.KIND == "album")
+        response = query_api(app, client_id, self.imgur_id)
 
         # Parse.
         try:
@@ -198,60 +197,3 @@ class Image(Base):
         elif width <= 640:
             size = "l"
         return "{}{}.{}".format(self.imgur_id, size, extension)
-
-
-class Album(Base):
-    """Imgur album metadata."""
-
-    KIND = "album"
-
-    def __init__(self, imgur_id, data=None):
-        """Constructor.
-
-        :param str imgur_id: The Imgur ID to query.
-        :param dict data: Parsed JSON response from API.
-        """
-        self.cover_id = str()
-        self.image_ids = list()
-        super(Album, self).__init__(imgur_id, data)
-
-    def __contains__(self, item):
-        """Search for images in this album.
-
-        :param item: Imgur ID string or Image instance to search for in self.images.
-
-        :return: If image is in this album.
-        :rtype: bool
-        """
-        if hasattr(item, "imgur_id"):
-            # item is an Image instance.
-            return item.imgur_id in self.image_ids
-        return item in self.image_ids
-
-    def _parse(self, data):
-        """Parse API response.
-
-        :param dict data: Parsed JSON response from API 'data' key.
-
-        :return: Image instances.
-        :rtype: list.
-        """
-        super(Album, self)._parse(data)
-        self.cover_id = data["cover"]
-        images = [Image(i["id"], i) for i in data["images"]]
-        self.image_ids[:] = [i.imgur_id for i in images]
-        return images
-
-    def refresh(self, app, client_id, ttl):
-        """Query the API to update this instance.
-
-        :raise APIError: When Imgur responds with errors or unexpected data.
-
-        :param sphinx.application.Sphinx app: Sphinx application object.
-        :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
-        :param int ttl: Number of seconds before this is considered out of date.
-
-        :return: self._parse() return value.
-        :rtype: list
-        """
-        return super(Album, self).refresh(app, client_id, ttl) or list()

@@ -45,6 +45,7 @@ Unreleased
 
 Removed
     * Title and description roles.
+    * Support for albums in image directive.
 
 2.0.1 - 2016-10-15
 ------------------

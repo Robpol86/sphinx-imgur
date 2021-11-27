@@ -6,7 +6,6 @@ purposes.
 import functools
 import re
 
-import docutils.nodes
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur.cache import initialize, prune_cache, update_cache
@@ -33,10 +32,9 @@ def event_before_read_docs(app, env, _):
     if not RE_CLIENT_ID.match(client_id):
         raise ExtensionError("imgur_client_id config value must be 5-30 lower case hexadecimal characters only.")
 
-    imgur_album_cache = getattr(env, "imgur_album_cache", None)
     imgur_image_cache = getattr(env, "imgur_image_cache", None)
-    env.imgur_album_cache, env.imgur_image_cache = initialize(imgur_album_cache, imgur_image_cache, (), ())
-    prune_cache(env.imgur_album_cache, env.imgur_image_cache, app)
+    env.imgur_image_cache = initialize(imgur_image_cache, ())
+    prune_cache(env.imgur_image_cache, app)
 
 
 def event_doctree_read(app, doctree):
@@ -47,13 +45,10 @@ def event_doctree_read(app, doctree):
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     """
-    albums, images = set(), set()
+    images = set()
     for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
-        if node.album:
-            albums.add(node.imgur_id)
-        else:
-            images.add(node.imgur_id)
-    initialize(app.builder.env.imgur_album_cache, app.builder.env.imgur_image_cache, albums, images)
+        images.add(node.imgur_id)
+    initialize(app.builder.env.imgur_image_cache, images)
 
 
 def event_env_merge_info(app, env, _, other):
@@ -67,16 +62,13 @@ def event_env_merge_info(app, env, _, other):
     :param _: Not used.
     :param sphinx.environment.BuildEnvironment other: Sphinx build environment from child process.
     """
-    other_album_cache = getattr(other, "imgur_album_cache", None)
     other_image_cache = getattr(other, "imgur_image_cache", None)
-    if not other_album_cache and not other_image_cache:
+    if not other_image_cache:
         return
-    album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
     assert env  # Linting.
 
     # Merge items.
-    album_cache.update(other_album_cache)
     image_cache.update(other_image_cache)
 
 
@@ -84,30 +76,25 @@ def event_env_updated(app, env):
     """Called by Sphinx during phase 3 (resolving).
 
     * Find Imgur IDs that need to be queried.
-    * Query the Imgur API for new/outdated albums/images.
+    * Query the Imgur API for new/outdated images.
 
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param sphinx.environment.BuildEnvironment env: Sphinx build environment.
     """
     client_id = app.config["imgur_client_id"]
     ttl = app.config["imgur_api_cache_ttl"]
-    album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
-    album_whitelist = {v.imgur_id for v in album_cache.values() if v.mod_time == 0}
     image_whitelist = {v.imgur_id for v in image_cache.values() if v.mod_time == 0}
 
     # Build whitelist of Imgur IDs in just new/updated docs.
     for doctree in (env.get_doctree(n) for n in app.builder.get_outdated_docs()):
         for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
-            if node.album:
-                album_whitelist.add(node.imgur_id)
-            else:
-                image_whitelist.add(node.imgur_id)
+            image_whitelist.add(node.imgur_id)
 
-    # Update the cache only if an added/changed doc has an Imgur album/image.
-    if album_whitelist or image_whitelist:
-        update_cache(album_cache, image_cache, app, client_id, ttl, album_whitelist, image_whitelist)
-        prune_cache(album_cache, image_cache, app)
+    # Update the cache only if an added/changed doc has an Imgur image.
+    if image_whitelist:
+        update_cache(image_cache, app, client_id, ttl, image_whitelist)
+        prune_cache(image_cache, app)
 
 
 def event_doctree_resolved(app, doctree, _):
@@ -120,15 +107,10 @@ def event_doctree_resolved(app, doctree, _):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     :param _: Not used.
     """
-    album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
 
     for node in doctree.traverse(ImgurImageNode):
-        if node.album and not album_cache[node.imgur_id].cover_id:
-            app.warn("Album cover Imgur ID for {} not available in local cache.".format(node.imgur_id))
-            node.replace_self([docutils.nodes.Text("")])
-        else:
-            node.finalize(album_cache, image_cache, functools.partial(app.builder.env.warn_node, node=node))
+        node.finalize(image_cache, functools.partial(app.builder.env.warn_node, node=node))
 
 
 def setup(app, version):

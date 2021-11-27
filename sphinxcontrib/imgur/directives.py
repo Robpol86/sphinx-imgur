@@ -53,7 +53,7 @@ class ImgurEmbedDirective(Directive):
 
 
 class ImgurImageDirective(Directive):
-    """Imgur ".. imgur-image::" rst directive for inlining album covers and images from Imgur."""
+    """Imgur ".. imgur-image::" rst directive for inlining images from Imgur."""
 
     required_arguments = 1
     option_spec = dict(Image.option_spec, target_gallery=is_true, target_largest=is_true, target_page=is_true)
@@ -67,11 +67,7 @@ class ImgurImageDirective(Directive):
         # Get Imgur ID.
         imgur_id = self.arguments[0]
         if not RE_IMGUR_ID.match(imgur_id):
-            raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers. Albums prefixed with "a/".')
-
-        # Validate directive options.
-        if imgur_id.startswith("a/") and self.options.get("target_largest", None):
-            raise ImgurError("Imgur albums (whose covers are displayed) do not support :target_largest: option.")
+            raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers.')
 
         # Modify options.
         if self.options.get("width", "").isdigit():

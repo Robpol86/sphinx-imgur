@@ -19,15 +19,13 @@ def copy_images(docs):
         path.copy(docs.join(path.basename[6:]))
 
 
-@pytest.mark.parametrize("album", [False, True])
-def test_bad_imgur_id(tmpdir, docs, album):
+def test_bad_imgur_id(tmpdir, docs):
     """Test invalid imgur_id value.
 
     :param tmpdir: pytest fixture.
     :param docs: conftest fixture.
-    :param bool album: Invalid album vs image ID.
     """
-    iid = "a/inv@lid" if album else "inv@lid"
+    iid = "inv@lid"
     pytest.add_page(docs, "one", "\n.. imgur-image:: {}\n".format(iid))
     html = tmpdir.join("html")
     result, stderr = pytest.build_isolated(docs, html, None)[::2]
@@ -35,24 +33,7 @@ def test_bad_imgur_id(tmpdir, docs, album):
     assert result != 0
     assert "WARNING" not in stderr
     assert not html.listdir("*.html")
-    expected = 'Invalid Imgur ID specified. Must be 5-10 letters and numbers. Albums prefixed with "a/".'
-    assert expected in stderr
-
-
-def test_bad_album_largest(tmpdir, docs):
-    """Test :target_largest: being used on albums.
-
-    :param tmpdir: pytest fixture.
-    :param docs: conftest fixture.
-    """
-    pytest.add_page(docs, "one", "\n.. imgur-image:: a/valid\n    :target_largest: true\n")
-    html = tmpdir.join("html")
-    result, stderr = pytest.build_isolated(docs, html, None)[::2]
-
-    assert result != 0
-    assert "WARNING" not in stderr
-    assert not html.listdir("*.html")
-    expected = "Imgur albums (whose covers are displayed) do not support :target_largest: option."
+    expected = 'Invalid Imgur ID specified. Must be 5-10 letters and numbers.'
     assert expected in stderr
 
 
@@ -64,7 +45,6 @@ def test_basic(tmpdir, docs, httpretty_common_mock):
     :param docs: conftest fixture.
     :param httpretty_common_mock: conftest fixture.
     """
-    pytest.add_page(docs, "album", "SEP\n\n.. image:: 2QcXR3R.png\n\nSEP\n\n.. imgur-image:: a/VMlM6\n\nSEP\n")
     pytest.add_page(docs, "image", "SEP\n\n.. image:: 611EovQ.jpg\n\nSEP\n\n.. imgur-image:: 611EovQ\n\nSEP\n")
     html = tmpdir.join("html")
     result, stdout, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)
@@ -74,15 +54,11 @@ def test_basic(tmpdir, docs, httpretty_common_mock):
     assert not stderr
     actual = sorted(re.compile(r"^querying http.+$", re.MULTILINE).findall(stdout))
     expected = [
-        "querying https://api.imgur.com/3/album/VMlM6",
         "querying https://api.imgur.com/3/image/611EovQ",
     ]
     assert actual == expected
 
     # Verify HTML contents.
-    contents = [c.strip() for c in html.join("album.html").read().split("<p>SEP</p>")[1:-1]]
-    assert contents[0] == '<img alt="_images/2QcXR3R.png" src="_images/2QcXR3R.png" />'
-    assert contents[1] == '<img alt="i.imgur.com/2QcXR3Rh.png" src="//i.imgur.com/2QcXR3Rh.png">'
     contents = [c.strip() for c in html.join("image.html").read().split("<p>SEP</p>")[1:-1]]
     assert contents[0] == '<img alt="_images/611EovQ.jpg" src="_images/611EovQ.jpg" />'
     assert contents[1] == '<img alt="Work, June 1st, 2016: Uber" src="//i.imgur.com/611EovQh.jpg">'
@@ -185,17 +161,6 @@ def test_target(tmpdir, docs, httpretty_common_mock, set_conf):
             ".. imgur-image:: zXVtETZ\n\nSEP\n\n"
         ),
     )
-    pytest.add_page(
-        docs,
-        "gallery_album",
-        (
-            "SEP\n\n"
-            ".. imgur-image:: a/ePSyN\n    :target: https://goo.gl\n\nSEP\n\n"
-            ".. imgur-image:: a/ePSyN\n    :target_gallery: true\n\nSEP\n\n"
-            ".. imgur-image:: a/ePSyN\n    :target_page: true\n\nSEP\n\n"
-            ".. imgur-image:: a/ePSyN\n\nSEP\n\n"
-        ),
-    )
     html = tmpdir.join("html")
     result, stderr = pytest.build_isolated(docs, html, httpretty_common_mock)[::2]
 
@@ -231,18 +196,6 @@ def test_target(tmpdir, docs, httpretty_common_mock, set_conf):
         assert dat[4] == '<a class="reference external image-reference" href="//imgur.com/gallery/zXVtETZ">%s</a>' % img
     else:
         assert dat[4] == img
-
-    img = '<img alt="Rack Cabinet" src="//i.imgur.com/RIK1sDwh.jpg">'
-    dat = [c.strip() for c in html.join("gallery_album.html").read().split("<p>SEP</p>")[1:-1]]
-    assert dat[0] == '<a class="reference external image-reference" href="https://goo.gl">%s</a>' % img
-    assert dat[1] == '<a class="reference external image-reference" href="//imgur.com/gallery/ePSyN">%s</a>' % img
-    assert dat[2] == '<a class="reference external image-reference" href="//imgur.com/ePSyN">%s</a>' % img
-    if set_conf == "page":
-        assert dat[3] == '<a class="reference external image-reference" href="//imgur.com/ePSyN">%s</a>' % img
-    elif set_conf == "gallery":
-        assert dat[3] == '<a class="reference external image-reference" href="//imgur.com/gallery/ePSyN">%s</a>' % img
-    else:
-        assert dat[3] == img
 
 
 @pytest.mark.usefixtures("copy_images")
@@ -431,7 +384,6 @@ def test_missing_api_data(tmpdir, docs):
     :param docs: conftest fixture.
     """
     httpretty_mock = {
-        API_URL.format(type="album", id="imgur0id"): "{}",
         API_URL.format(type="image", id="imgur0id"): "{}",
     }
     for url, body in httpretty_mock.items():
@@ -465,14 +417,12 @@ def test_missing_api_data(tmpdir, docs):
             ".. imgur-image:: imgur0id\n    :height: 300px\n    :scale: 25%\n\nSEP\n\n"
         ),
     )
-    pytest.add_page(docs, "album", ("SEP\n\n" ".. imgur-image:: a/imgur0id\n\nSEP\n\n"))
     html = tmpdir.join("html")
     result, stderr = pytest.build_isolated(docs, html, httpretty_mock)[::2]
 
     assert result == 0
     lines = [l.split("WARNING: ")[-1].strip() for l in stderr.splitlines()]
     expected = [
-        'query unsuccessful from https://api.imgur.com/3/album/imgur0id: no "data" key in JSON',
         'query unsuccessful from https://api.imgur.com/3/image/imgur0id: no "data" key in JSON',
         "nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg",
         "nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg",
@@ -481,7 +431,6 @@ def test_missing_api_data(tmpdir, docs):
         "nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg",
         "nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg",
         "nonlocal image URI found: https://i.imgur.com/imgur0idh.jpg",
-        "Album cover Imgur ID for imgur0id not available in local cache.",
         "Could not obtain image size. :scale: option is ignored.",
         "Could not obtain image height. :scale: option is partially ignored.",
         "Could not obtain image height. :scale: option is partially ignored.",
@@ -518,6 +467,3 @@ def test_missing_api_data(tmpdir, docs):
     assert contents[5] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="width: 7%"'
     assert contents[6] == href_i % 'src="https://i.imgur.com/imgur0idh.jpg" style="height: 75.0px;"'
     assert contents[7] == href % 'src="//i.imgur.com/imgur0idh.jpg" style="height: 75px"'
-
-    contents = [c.strip() for c in html.join("album.html").read().split("<p>SEP</p>")[1:-1]]
-    assert contents == [""]
