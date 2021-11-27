@@ -6,7 +6,6 @@ purposes.
 import functools
 import re
 
-import docutils.nodes
 from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur.cache import initialize, prune_cache, update_cache
@@ -114,7 +113,6 @@ def event_doctree_resolved(app, doctree, _):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     :param _: Not used.
     """
-    album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
 
     for node in doctree.traverse(ImgurImageNode):
