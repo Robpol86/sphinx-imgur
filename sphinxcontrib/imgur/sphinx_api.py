@@ -32,7 +32,6 @@ def event_before_read_docs(app, env, _):
     if not RE_CLIENT_ID.match(client_id):
         raise ExtensionError("imgur_client_id config value must be 5-30 lower case hexadecimal characters only.")
 
-    imgur_album_cache = getattr(env, "imgur_album_cache", None)
     imgur_image_cache = getattr(env, "imgur_image_cache", None)
     env.imgur_image_cache = initialize(imgur_image_cache, ())
     prune_cache(env.imgur_image_cache, app)
