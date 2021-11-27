@@ -67,21 +67,6 @@ class ImgurEmbedNode(General, Element):
         spht.body.extend(["</a>", "</blockquote>"])
 
 
-class ImgurTextNode(General, Element):
-    """Imgur text node for image/album descriptions. To be replaced with docutils.nodes.Text."""
-
-    def __init__(self, name, text):
-        """Constructor.
-
-        :param str name: Role name (e.g. 'imgur-title').
-        :param str text: The parameter used in the role markup (e.g. 'hWyW0').
-        """
-        super(ImgurTextNode, self).__init__()
-        self.name = name
-        self.album = text.startswith("a/")
-        self.imgur_id = text[2:] if self.album else text
-
-
 class ImgurImageNode(General, Element):
     """Imgur image node for inline images."""
 

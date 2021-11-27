@@ -3,7 +3,7 @@
 Note about the two env variables: app.builder.env and just env are the same. I use them interchangeably for linting
 purposes.
 """
-
+import functools
 import re
 
 import docutils.nodes
@@ -11,8 +11,7 @@ from sphinx.errors import ExtensionError
 
 from sphinxcontrib.imgur.cache import initialize, prune_cache, update_cache
 from sphinxcontrib.imgur.directives import ImgurEmbedDirective, ImgurImageDirective
-from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode, ImgurTextNode
-from sphinxcontrib.imgur.roles import imgur_role
+from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
 
 RE_CLIENT_ID = re.compile(r"^[a-f0-9]{5,30}$")
 
@@ -49,7 +48,7 @@ def event_doctree_read(app, doctree):
     :param docutils.nodes.document doctree: Tree of docutils nodes.
     """
     albums, images = set(), set()
-    for node in (n for c in (ImgurTextNode, ImgurImageNode) for n in doctree.traverse(c)):
+    for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
         if node.album:
             albums.add(node.imgur_id)
         else:
@@ -99,7 +98,7 @@ def event_env_updated(app, env):
 
     # Build whitelist of Imgur IDs in just new/updated docs.
     for doctree in (env.get_doctree(n) for n in app.builder.get_outdated_docs()):
-        for node in (n for c in (ImgurTextNode, ImgurImageNode) for n in doctree.traverse(c)):
+        for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
             if node.album:
                 album_whitelist.add(node.imgur_id)
             else:
@@ -124,20 +123,12 @@ def event_doctree_resolved(app, doctree, _):
     album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
 
-    for node in doctree.traverse(ImgurTextNode):
-        cache = album_cache if node.album else image_cache
-        if node.name == "imgur-description":
-            text = cache[node.imgur_id].description
-        else:
-            text = cache[node.imgur_id].title
-        node.replace_self([docutils.nodes.Text(text)])
-
     for node in doctree.traverse(ImgurImageNode):
         if node.album and not album_cache[node.imgur_id].cover_id:
             app.warn("Album cover Imgur ID for {} not available in local cache.".format(node.imgur_id))
             node.replace_self([docutils.nodes.Text("")])
         else:
-            node.finalize(album_cache, image_cache, lambda m: app.builder.env.warn_node(m, node))
+            node.finalize(album_cache, image_cache, functools.partial(app.builder.env.warn_node, node=node))
 
 
 def setup(app, version):
@@ -161,8 +152,6 @@ def setup(app, version):
     app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.visit, ImgurEmbedNode.depart))
     app.add_node(ImgurImageNode, html=(ImgurImageNode.visit, ImgurImageNode.depart))
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
-    app.add_role("imgur-description", imgur_role)
-    app.add_role("imgur-title", imgur_role)
 
     app.connect("env-before-read-docs", event_before_read_docs)
     app.connect("doctree-read", event_doctree_read)
