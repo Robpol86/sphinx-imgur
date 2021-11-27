@@ -81,19 +81,11 @@ All Config Options
     ignored otherwise. Overrides :attr:`imgur_target_default_largest` and :attr:`imgur_target_default_page` if all are
     set and image/album is in the gallery.
 
-Roles and Directives
-====================
+Directives
+==========
 
-These are the available Sphinx/RST roles and `directives <http://www.sphinx-doc.org/en/stable/rest.html#directives>`_.
+These are the available Sphinx/RST `directives <http://www.sphinx-doc.org/en/stable/rest.html#directives>`_.
 To see them in action visit the :ref:`Examples` section.
-
-.. rst:role:: imgur-title
-
-    Display an Imgur image or album's title inline.
-
-.. rst:role:: imgur-description
-
-    Display an Imgur image or album's description text inline.
 
 .. rst:directive:: imgur-embed
 

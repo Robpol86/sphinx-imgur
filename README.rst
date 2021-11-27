@@ -40,6 +40,12 @@ Changelog
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+Unreleased
+----------
+
+Removed
+    * Title and description roles.
+
 2.0.1 - 2016-10-15
 ------------------
 
