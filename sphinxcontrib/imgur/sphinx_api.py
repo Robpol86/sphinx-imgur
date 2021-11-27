@@ -62,16 +62,13 @@ def event_env_merge_info(app, env, _, other):
     :param _: Not used.
     :param sphinx.environment.BuildEnvironment other: Sphinx build environment from child process.
     """
-    other_album_cache = getattr(other, "imgur_album_cache", None)
     other_image_cache = getattr(other, "imgur_image_cache", None)
-    if not other_album_cache and not other_image_cache:
+    if not other_image_cache:
         return
-    album_cache = app.builder.env.imgur_album_cache
     image_cache = app.builder.env.imgur_image_cache
     assert env  # Linting.
 
     # Merge items.
-    album_cache.update(other_album_cache)
     image_cache.update(other_image_cache)
 
 
@@ -79,7 +76,7 @@ def event_env_updated(app, env):
     """Called by Sphinx during phase 3 (resolving).
 
     * Find Imgur IDs that need to be queried.
-    * Query the Imgur API for new/outdated albums/images.
+    * Query the Imgur API for new/outdated images.
 
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param sphinx.environment.BuildEnvironment env: Sphinx build environment.
@@ -94,7 +91,7 @@ def event_env_updated(app, env):
         for node in (n for c in (ImgurImageNode,) for n in doctree.traverse(c)):
             image_whitelist.add(node.imgur_id)
 
-    # Update the cache only if an added/changed doc has an Imgur album/image.
+    # Update the cache only if an added/changed doc has an Imgur image.
     if image_whitelist:
         update_cache(image_cache, app, client_id, ttl, image_whitelist)
         prune_cache(image_cache, app)

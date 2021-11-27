@@ -28,7 +28,7 @@ class APIError(Exception):
         app.warn(message, location="{}:{}".format(__file__, line_number))
 
 
-def query_api(app, client_id, imgur_id, is_album):
+def query_api(app, client_id, imgur_id):
     """Query the Imgur API.
 
     :raise APIError: When Imgur responds with errors or unexpected data.
@@ -36,12 +36,11 @@ def query_api(app, client_id, imgur_id, is_album):
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
     :param str imgur_id: The Imgur ID to query.
-    :param bool is_album: If this ID is an album instead of an image.
 
     :return: Parsed JSON.
     :rtype: dict
     """
-    url = API_URL.format(type="album" if is_album else "image", id=imgur_id)
+    url = API_URL.format(type="image", id=imgur_id)
     headers = {"Authorization": "Client-ID {}".format(client_id)}
     timeout = 5
 
@@ -75,7 +74,7 @@ def query_api(app, client_id, imgur_id, is_album):
 
 
 class Base(object):
-    """Base class for Image and Album classes. Defines common attributes."""
+    """Base class for Image class. Defines common attributes."""
 
     KIND = None
 
@@ -128,7 +127,7 @@ class Base(object):
             return
 
         # Retrieve data.
-        response = query_api(app, client_id, self.imgur_id, self.KIND == "album")
+        response = query_api(app, client_id, self.imgur_id)
 
         # Parse.
         try:
