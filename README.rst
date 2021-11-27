@@ -46,6 +46,9 @@ Unreleased
 Removed
     * Title and description roles.
     * Support for albums in image directive.
+    * ``imgur_target_default_gallery`` and ``target_gallery`` options.
+    * Caching and querying the Imgur API.
+    * Auto-detecting size, extension/type, and album images.
 
 2.0.1 - 2016-10-15
 ------------------

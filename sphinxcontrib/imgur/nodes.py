@@ -1,10 +1,5 @@
 """Docutils nodes for Imgur embeds."""
-
-import re
-
 from docutils.nodes import Element, General
-
-RE_WIDTH_HEIGHT = re.compile(r"([0-9.]+)(\S*)$")  # From: docutils/writers/html4css1/__init__.py
 
 
 class ImgurJavaScriptNode(General, Element):
@@ -86,7 +81,6 @@ class ImgurImageNode(General, Element):
             height=options.get("height", ""),
             scale=options.get("scale", ""),
             target=options.get("target", ""),
-            target_gallery=options.get("target_gallery", ""),
             target_largest=options.get("target_largest", ""),
             target_page=options.get("target_page", ""),
             width=options.get("width", ""),
@@ -94,52 +88,27 @@ class ImgurImageNode(General, Element):
         self.src = str()
         self.style = str()
 
-    def finalize(self, image_cache, warn_node):
-        """Update attributes after Sphinx cache is updated.
-
-        :param dict image_cache: Cache of Imgur images to read. Keys are Imgur IDs, values are Image instances.
-        :param function warn_node: sphinx.environment.BuildEnvironment.warn_node without needing node argument.
-        """
-        image = image_cache[self.imgur_id]
+    def finalize(self):
+        """Update attributes after Sphinx cache is updated."""
         options = self.options
 
         # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
-        if options["target_gallery"] and image.in_gallery:
-            options["target"] = "//imgur.com/gallery/{}".format(image.imgur_id)
-        elif options["target_page"]:
-            options["target"] = "//imgur.com/{}".format(image.imgur_id)
+        if options["target_page"]:
+            options["target"] = "//imgur.com/{}".format(self.imgur_id)
         elif options["target_largest"]:
-            options["target"] = "//i.imgur.com/" + image.filename(full_size=True)
+            options["target"] = "//i.imgur.com/{}.jpg".format(self.imgur_id)
         elif not options["target"] and (options["width"] or options["height"] or options["scale"]):
-            options["target"] = "//i.imgur.com/" + image.filename(full_size=True)
-
-        # Handle scale with no API data.
-        if options["scale"]:
-            if not image.width and not options["width"] and not image.height and not options["height"]:
-                options["scale"] = ""
-                warn_node("Could not obtain image size. :scale: option is ignored.")
-            elif not image.width and not options["width"]:
-                warn_node("Could not obtain image width. :scale: option is partially ignored.")
-            elif not image.width or not image.height:
-                warn_node("Could not obtain image height. :scale: option is partially ignored.")
-
-        # Handle scale, width, and height.
-        if options["scale"] and (options["width"] or image.width):
-            match = RE_WIDTH_HEIGHT.match(options["width"] or "%dpx" % image.width)
-            options["width"] = "{}{}".format(int(float(match.group(1)) * (options["scale"] / 100.0)), match.group(2))
-        if options["scale"] and (options["height"] or image.height):
-            match = RE_WIDTH_HEIGHT.match(options["height"] or "%dpx" % image.height)
-            options["height"] = "{}{}".format(int(float(match.group(1)) * (options["scale"] / 100.0)), match.group(2))
+            options["target"] = "//i.imgur.com/{}.jpg".format(self.imgur_id)
 
         # Set src and style.
-        self.src = "//i.imgur.com/" + image.filename(options["width"], options["height"])
+        self.src = "//i.imgur.com/{}h.jpg".format(self.imgur_id)
         style = [p for p in ((k, options[k]) for k in ("width", "height")) if p[1]]
         if style:
             self.style = "; ".join("{}: {}".format(k, v) for k, v in style)
 
         # Determine alt text.
         if not options["alt"]:
-            options["alt"] = image.title or self.src[2:]
+            options["alt"] = self.src[2:]
 
     @staticmethod
     def visit(spht, node):

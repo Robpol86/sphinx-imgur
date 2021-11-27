@@ -56,7 +56,7 @@ class ImgurImageDirective(Directive):
     """Imgur ".. imgur-image::" rst directive for inlining images from Imgur."""
 
     required_arguments = 1
-    option_spec = dict(Image.option_spec, target_gallery=is_true, target_largest=is_true, target_page=is_true)
+    option_spec = dict(Image.option_spec, target_largest=is_true, target_page=is_true)
 
     def run(self):
         """Called by Sphinx.
@@ -69,20 +69,12 @@ class ImgurImageDirective(Directive):
         if not RE_IMGUR_ID.match(imgur_id):
             raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers.')
 
-        # Modify options.
-        if self.options.get("width", "").isdigit():
-            self.options["width"] += "px"
-        if self.options.get("height", "").isdigit():
-            self.options["height"] += "px"
-
-        # Read from conf.py. Unset gallery/largest/page targets if :target: is set.
+        # Read from conf.py. Unset largest/page targets if :target: is set.
         if self.options.get("target", None):
-            self.options.pop("target_gallery", None)
             self.options.pop("target_largest", None)
             self.options.pop("target_page", None)
-        elif not any(self.options.get("target_" + i, None) for i in ("gallery", "largest", "page")):
+        elif not any(self.options.get("target_" + i, None) for i in ("largest", "page")):
             config = self.state.document.settings.env.config
-            self.options.setdefault("target_gallery", config.imgur_target_default_gallery)
             self.options.setdefault("target_largest", config.imgur_target_default_largest)
             self.options.setdefault("target_page", config.imgur_target_default_page)
 
