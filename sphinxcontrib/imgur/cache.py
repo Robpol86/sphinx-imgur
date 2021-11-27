@@ -61,39 +61,20 @@ def prune_cache(album_cache, image_cache, app, doctree_album_ids=None, doctree_i
         image_cache.pop(image_id)
 
 
-def update_cache(album_cache, image_cache, app, client_id, ttl, album_whitelist, image_whitelist):
+def update_cache(image_cache, app, client_id, ttl, image_whitelist):
     """Update cache items with expired TTLs.
 
-    :param dict album_cache: Cache of Imgur albums to update. Keys are Imgur IDs, values are Album instances.
     :param dict image_cache: Cache of Imgur images to update. Keys are Imgur IDs, values are Image instances.
     :param sphinx.application.Sphinx app: Sphinx application object.
     :param str client_id: Imgur API client ID to use. https://api.imgur.com/oauth2
     :param int ttl: Number of seconds before this is considered out of date.
-    :param iter album_whitelist: Only update these Imgur album IDs.
     :param iter image_whitelist: Only update these Imgur image IDs.
     """
-    if not album_whitelist and not image_whitelist:
-        album_whitelist = list(album_cache)
+    if not image_whitelist:
         image_whitelist = list(image_cache)
-    needs_update_album = {k: v for k, v in album_cache.items() if k in album_whitelist and not v.seconds_remaining(ttl)}
     needs_update_image = {k: v for k, v in image_cache.items() if k in image_whitelist and not v.seconds_remaining(ttl)}
-    if not needs_update_album and not needs_update_image:
+    if not needs_update_image:
         return
-
-    # If an image in an album needs to be updated, update entire album (includes all images in that album).
-    albums_up_to_date = [v for k, v in album_cache.items() if k not in needs_update_album]
-    for image_id in needs_update_image:
-        for album in albums_up_to_date:
-            if image_id in album:
-                needs_update_album[album.imgur_id] = album
-
-    # Update all albums.
-    for album in needs_update_album.values():
-        try:
-            images = album.refresh(app, client_id, 0)
-        except APIError:
-            continue
-        image_cache.update((i.imgur_id, i) for i in images)  # New Image instances.
 
     # Possible new Image instances, redefining needs_update. Only caring about images now.
     needs_update_image = {k: v for k, v in image_cache.items() if k in image_whitelist and not v.seconds_remaining(ttl)}
