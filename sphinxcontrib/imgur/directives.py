@@ -4,7 +4,7 @@ import re
 
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst.directives.images import Image
-from sphinx.application import SphinxError
+from sphinx.errors import SphinxError
 
 from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
 

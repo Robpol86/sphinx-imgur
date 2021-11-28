@@ -3,9 +3,7 @@
 
 from __future__ import print_function
 
-import codecs
 import os
-import re
 
 from setuptools import Command, setup
 
@@ -14,26 +12,6 @@ INSTALL_REQUIRES = ['requests', 'sphinx']
 LICENSE = 'MIT'
 NAME = 'sphinxcontrib-imgur'
 VERSION = '2.0.1'
-
-
-def readme(path='README.rst'):
-    """Try to read README.rst or return empty string if failed.
-
-    :param str path: Path to README file.
-
-    :return: File contents.
-    :rtype: str
-    """
-    path = os.path.realpath(os.path.join(os.path.dirname(__file__), path))
-    handle = None
-    url_prefix = 'https://raw.githubusercontent.com/Robpol86/{name}/v{version}/'.format(name=NAME, version=VERSION)
-    try:
-        handle = codecs.open(path, encoding='utf-8')
-        return handle.read(131072).replace('.. image:: docs', '.. image:: {0}docs'.format(url_prefix))
-    except IOError:
-        return ''
-    finally:
-        getattr(handle, 'close', lambda: None)()
 
 
 class CheckVersion(Command):
@@ -45,12 +23,10 @@ class CheckVersion(Command):
     @classmethod
     def initialize_options(cls):
         """Required by distutils."""
-        pass
 
     @classmethod
     def finalize_options(cls):
         """Required by distutils."""
-        pass
 
     @classmethod
     def run(cls):
@@ -59,9 +35,6 @@ class CheckVersion(Command):
         for expected, var in [('@Robpol86', '__author__'), (LICENSE, '__license__'), (VERSION, '__version__')]:
             if getattr(project, var) != expected:
                 raise SystemExit('Mismatch: {0}'.format(var))
-        # Check changelog.
-        if not re.compile(r'^%s - \d{4}-\d{2}-\d{2}[\r\n]' % VERSION, re.MULTILINE).search(readme()):
-            raise SystemExit('Version not found in readme/changelog file.')
 
 
 if __name__ == '__main__':
@@ -92,7 +65,7 @@ if __name__ == '__main__':
         install_requires=INSTALL_REQUIRES,
         keywords='sphinx imgur',
         license=LICENSE,
-        long_description=readme(),
+        long_description='',
         name=NAME,
         packages=['sphinxcontrib', os.path.join('sphinxcontrib', 'imgur')],
         url='https://github.com/Robpol86/' + NAME,

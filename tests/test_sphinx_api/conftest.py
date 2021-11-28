@@ -1,10 +1,7 @@
 """Fixtures for tests in this directory."""
-
 import multiprocessing
 import multiprocessing.queues
-import sys
 
-import httpretty
 import pytest
 from sphinx import build_main
 
@@ -26,7 +23,7 @@ def run_build_main(docs_dir, html_dir, overflow):
     return result
 
 
-def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, queue, overflow):
+def run_build_main_post_multiprocessing(docs_dir, html_dir, queue, overflow):
     """Run Sphinx's build_main after setting up httpretty mock responses. Called by multiprocess.Process.
 
     Need to use this instead of httpretty pytest fixtures since forking doesn't exist in Windows and multiprocess runs
@@ -37,7 +34,6 @@ def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, qu
 
     :param str docs_dir: Path to input docs directory.
     :param str html_dir: Path to output html directory.
-    :param dict cached_responses: URL keys and serialized JSON values.
     :param multiprocessing.queues.Queue queue: Queue to transmit stdout/err back to parent process.
     :param iter overflow: Append these args to sphinx-build call.
     """
@@ -48,13 +44,6 @@ def run_build_main_post_multiprocessing(docs_dir, html_dir, cached_responses, qu
     except TypeError:
         capsys = capture.CaptureFixture(capture.SysCapture, None)
     getattr(capsys, "_start")()
-
-    # Re-run httpretty on Windows (due to lack of forking).
-    if sys.platform == "win32":
-        httpretty.enable()
-        if cached_responses:
-            for url, body in cached_responses.items():
-                httpretty.register_uri(httpretty.GET, url, body=body)
 
     # Run.
     result = run_build_main(docs_dir, html_dir, overflow)
@@ -99,7 +88,7 @@ def pytest_namespace():
         :rtype: tuple
         """
         queue = multiprocessing.Queue()
-        args = docs_dir, html_dir, cached_responses, queue, overflow
+        args = docs_dir, html_dir, queue, overflow
         child = multiprocessing.Process(target=run_build_main_post_multiprocessing, args=args)
         child.start()
         child.join()

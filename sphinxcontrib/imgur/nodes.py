@@ -1,8 +1,8 @@
 """Docutils nodes for Imgur embeds."""
-from docutils.nodes import Element, General
+from docutils.nodes import Element
 
 
-class ImgurJavaScriptNode(General, Element):
+class ImgurJavaScriptNode(Element):
     """JavaScript node required after each embedded album/image because Imgur sucks at JavaScript."""
 
     @staticmethod
@@ -25,7 +25,7 @@ class ImgurJavaScriptNode(General, Element):
         spht.body.append("</script>")
 
 
-class ImgurEmbedNode(General, Element):
+class ImgurEmbedNode(Element):
     """Imgur <blockquote><a /></blockquote> node for Sphinx/docutils."""
 
     def __init__(self, imgur_id, hide_post_details):
@@ -34,7 +34,7 @@ class ImgurEmbedNode(General, Element):
         :param str imgur_id: Imgur ID of the album or image.
         :param bool hide_post_details: Hide title and image descriptions in embedded albums or images.
         """
-        super(ImgurEmbedNode, self).__init__()
+        super().__init__()
         self.imgur_id = imgur_id
         self.hide_post_details = hide_post_details
 
@@ -62,7 +62,7 @@ class ImgurEmbedNode(General, Element):
         spht.body.extend(["</a>", "</blockquote>"])
 
 
-class ImgurImageNode(General, Element):
+class ImgurImageNode(Element):
     """Imgur image node for inline images."""
 
     def __init__(self, text, options):
@@ -71,7 +71,7 @@ class ImgurImageNode(General, Element):
         :param str text: The parameter used in the directive markup (e.g. 'hWyW0').
         :param dict options: Options from directive.
         """
-        super(ImgurImageNode, self).__init__()
+        super().__init__()
         if text.startswith("a/"):
             raise NotImplementedError
         self.imgur_id = text
