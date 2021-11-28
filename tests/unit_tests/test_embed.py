@@ -5,7 +5,7 @@ import re
 import pytest
 
 RE_BLOCKQUOTES = re.compile(r'(<blockquote[^>]* class="imgur-embed-pub"[^>]*>)')
-RE_SCRIPTS = re.compile(r'(<script[^>]* src="//s.imgur.com/min/embed.js"[^>]*>)')
+RE_SCRIPTS = re.compile(r'(<script[^>]* src="//s\.imgur\.com/min/embed\.js"[^>]*>)')
 
 
 @pytest.mark.parametrize("album", [False, True])
