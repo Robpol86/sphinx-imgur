@@ -43,6 +43,7 @@ Unreleased
 
 Added
     * Sphinx 1.8 support.
+    * Python 3.9 support.
 
 Changed
     * Renamed project from ``sphinxcontrib-imgur`` to ``sphinx-imgur``
