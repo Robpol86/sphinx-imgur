@@ -10,9 +10,9 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 author = "@Robpol86"
 copyright = "{}, {}".format(time.strftime("%Y"), author)
 master_doc = "index"
-project = __import__("setup").NAME
+project = "sphinx-imgur"
 pygments_style = "friendly"
-release = version = __import__("setup").VERSION
+release = version = "2.0.1"
 templates_path = ["_templates"]
 extensions = list()
 
