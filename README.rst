@@ -46,6 +46,7 @@ Added
 
 Changed
     * Renamed project from ``sphinxcontrib-imgur`` to ``sphinx-imgur``
+    * Re-licensed from MIT to BSD 2-Clause
 
 Removed
     * Title and description roles.
