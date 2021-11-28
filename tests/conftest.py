@@ -1,7 +1,5 @@
 """PyTest fixtures."""
-
 import pytest
-from freezegun import freeze_time
 
 
 class FakeApp(object):
@@ -49,13 +47,6 @@ class FakeApp(object):
 def app():
     """Return FakeApp() instance."""
     return FakeApp()
-
-
-@pytest.yield_fixture
-def freezer():
-    """Mock a specific tine."""
-    with freeze_time("2016-09-20") as frozen_datetime:
-        yield frozen_datetime
 
 
 @pytest.fixture(scope="module")

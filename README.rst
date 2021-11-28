@@ -43,6 +43,9 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 Unreleased
 ----------
 
+Added
+    * Sphinx 1.8 support.
+
 Removed
     * Title and description roles.
     * Support for albums in image directive.
