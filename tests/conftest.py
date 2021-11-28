@@ -1,59 +1,124 @@
-"""PyTest fixtures."""
+"""Fixtures for tests in this directory."""
+import multiprocessing
+import multiprocessing.queues
+import queue
+
 import pytest
+from sphinx import build_main
 
 
-class FakeApp(object):
-    """Fake Sphinx app."""
+def run_build_main(docs_dir, html_dir, overflow):
+    """Run build_main().
 
-    def __init__(self):
-        """Constructor."""
-        self.messages = list()
+    :param str docs_dir: Path to input docs directory.
+    :param str html_dir: Path to output html directory.
+    :param iter overflow: Append these args to sphinx-build call.
 
-    def debug(self, message, *args, **kwargs):
-        """Debug 'logger'.
+    :return: Value from build_main().
+    :rtype: int
+    """
+    argv = ("sphinx-build", str(docs_dir), str(html_dir))
+    if overflow:
+        argv += overflow
+    result = build_main(argv)
+    return result
 
-        :param str message: Log message.
+
+def run_build_main_post_multiprocessing(docs_dir, html_dir, queue, overflow):
+    """Run Sphinx's build_main after setting up httpretty mock responses. Called by multiprocess.Process.
+
+    Need to use this instead of httpretty pytest fixtures since forking doesn't exist in Windows and multiprocess runs
+    in "spawn" mode. This means that everything setup by pytest is lost since subprocesses are generated from scratch on
+    Windows.
+
+    :raise: RuntimeError on Sphinx non-zero exit. This causes multiprocessing.Process().exitcode to be != 0.
+
+    :param str docs_dir: Path to input docs directory.
+    :param str html_dir: Path to output html directory.
+    :param multiprocessing.queues.Queue queue: Queue to transmit stdout/err back to parent process.
+    :param iter overflow: Append these args to sphinx-build call.
+    """
+    # Capture stdout/stderr after forking/spawning.
+    capture = __import__("_pytest").capture
+    try:
+        capsys = capture.CaptureFixture(capture.SysCapture)
+    except TypeError:
+        capsys = capture.CaptureFixture(capture.SysCapture, None)
+    getattr(capsys, "_start")()
+
+    # Run.
+    result = run_build_main(docs_dir, html_dir, overflow)
+    stdout, stderr = capsys.readouterr()
+    queue.put((stdout, stderr))
+    if result != 0:
+        raise RuntimeError(result, stdout, stderr)
+
+
+def pytest_namespace():
+    """Add objects to the pytest namespace.
+
+    E.g. Returning {'func': lambda: True} allows import pytest; assert pytest.func() is True.
+
+    :return: Namespace names and objects.
+    :rtype: dict
+    """
+
+    def add_page(root, name, append=""):
+        """Add a page to the sample Sphinx docs.
+
+        :param py.path.local root: Path to docs root dir.
+        :param str name: Page name.
+        :param str append: Append text to RST document body.
+
+        :return: Path to new page RST file.
+        :rtype: py.path.local
         """
-        if args or kwargs:
-            message = message % (args or kwargs)
-        self.messages.append(["debug", message])
+        root.join("contents.rst").write("    {}\n".format(name), mode="a")
+        page = root.join("{}.rst".format(name))
+        page.write(".. _{}:\n\n{}\n{}\n\n{}".format(name, name.capitalize(), "=" * len(name), append))
+        return page
 
-    def debug2(self, message, *args, **kwargs):
-        """Debug2 'logger'.
+    def build_isolated(docs_dir, html_dir, overflow=None):
+        """Run build_main() through multiprocessing.Process.
 
-        :param str message: Log message.
+        :param str docs_dir: Path to input docs directory.
+        :param str html_dir: Path to output html directory.
+        :param iter overflow: Append these args to sphinx-build call.
+
+        :return: Exit code of subprocess, stdout, and stderr.
+        :rtype: tuple
         """
-        if args or kwargs:
-            message = message % (args or kwargs)
-        self.messages.append(["debug2", message])
+        queue_ = multiprocessing.Queue()
+        args = docs_dir, html_dir, queue_, overflow
+        child = multiprocessing.Process(target=run_build_main_post_multiprocessing, args=args)
+        child.start()
+        child.join()
+        result = child.exitcode
+        try:
+            stdout, stderr = queue_.get(False)
+        except queue.Empty:
+            stdout, stderr = "", ""
+        return result, stdout, stderr
 
-    def info(self, message):
-        """Info 'logger'.
-
-        :param str message: Log message.
-        """
-        self.messages.append(["info", message])
-
-    def warn(self, message, location):
-        """Warning 'logger'.
-
-        :param str message: Log message.
-        :param str location: file path and line number.
-        """
-        self.messages.append(["warn", message, location])
+    return dict(add_page=add_page, build_isolated=build_isolated)
 
 
 @pytest.fixture
-def app():
-    """Return FakeApp() instance."""
-    return FakeApp()
+def docs(tmpdir):
+    """Create sample docs used in this test module.
 
+    :param tmpdir: pytest fixture.
 
-@pytest.fixture(scope="module")
-def tmpdir_module(request, tmpdir_factory):
-    """A tmpdir fixture for the module scope. Persists throughout the module.
-
-    :param request: pytest fixture.
-    :param tmpdir_factory: pytest fixture.
+    :return: Path to docs root.
+    :rtype: py.path
     """
-    return tmpdir_factory.mktemp(request.module.__name__)
+    root = tmpdir.ensure_dir("docs")
+
+    # Create Sphinx config.
+    root.join("conf.py").write("extensions = ['sphinx_imgur.imgur']\n")
+
+    # Create Sphinx docs.
+    root.join("contents.rst").write("Test\n" "====\n" "\n" "Sample documentation.\n" "\n" ".. toctree::\n" "    ignore\n")
+    root.join("ignore.rst").write(".. _ignore:\n\nIgnore\n======\n\nHello World.\n")
+
+    return root

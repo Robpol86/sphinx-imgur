@@ -27,7 +27,7 @@ def test_bad_imgur_id(tmpdir, docs):
     assert result != 0
     assert "WARNING" not in stderr
     assert not html.listdir("*.html")
-    expected = 'Invalid Imgur ID specified. Must be 5-10 letters and numbers.'
+    expected = "Invalid Imgur ID specified. Must be 5-10 letters and numbers."
     assert expected in stderr
 
 

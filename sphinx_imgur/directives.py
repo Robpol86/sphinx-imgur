@@ -67,7 +67,7 @@ class ImgurImageDirective(Directive):
         # Get Imgur ID.
         imgur_id = self.arguments[0]
         if not RE_IMGUR_ID.match(imgur_id):
-            raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers.')
+            raise ImgurError("Invalid Imgur ID specified. Must be 5-10 letters and numbers.")
 
         # Read from conf.py. Unset largest/page targets if :target: is set.
         if self.options.get("target", None):
