@@ -7,7 +7,7 @@ from setuptools import Command, setup
 
 IMPORT = "sphinx_imgur"
 INSTALL_REQUIRES = ["sphinx"]
-LICENSE = "MIT"
+LICENSE = "BSD-2-Clause"
 NAME = "sphinx-imgur"
 VERSION = "2.0.1"
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
             "Environment :: Win32 (MS Windows)",
             "Framework :: Sphinx :: Extension",
             "Intended Audience :: Developers",
-            "License :: OSI Approved :: MIT License",
+            "License :: OSI Approved :: BSD License",
             "Operating System :: MacOS :: MacOS X",
             "Operating System :: Microsoft :: Windows",
             "Operating System :: POSIX :: Linux",
