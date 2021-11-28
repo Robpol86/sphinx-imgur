@@ -9,11 +9,11 @@ Getting started is pretty simple. The first step is to install the library.
 Pip Install
 ===========
 
-The easiest way to get sphinxcontrib-imgur is to use `pip <https://pip.pypa.io>`_. Simply run this command.
+The easiest way to get sphinx-imgur is to use `pip <https://pip.pypa.io>`_. Simply run this command.
 
 .. code-block:: bash
 
-    pip install sphinxcontrib-imgur
+    pip install sphinx-imgur
 
 Latest from GitHub
 ==================
@@ -23,16 +23,16 @@ repository.
 
 .. code-block:: bash
 
-    pip install git+https://github.com/Robpol86/sphinxcontrib-imgur.git
+    pip install git+https://github.com/Robpol86/sphinx-imgur.git
 
 Clone and Install
 =================
 
 Lastly you can also just clone the repo and install from it. Usually you only need to do this if you plan on
-`contributing <https://github.com/Robpol86/sphinxcontrib-imgur/blob/master/CONTRIBUTING.md>`_ to the project.
+`contributing <https://github.com/Robpol86/sphinx-imgur/blob/main/CONTRIBUTING.md>`_ to the project.
 
 .. code-block:: bash
 
-    git clone https://github.com/Robpol86/sphinxcontrib-imgur.git
-    cd sphinxcontrib-imgur
+    git clone https://github.com/Robpol86/sphinx-imgur.git
+    cd sphinx-imgur
     python setup.py install

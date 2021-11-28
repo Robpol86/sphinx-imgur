@@ -76,12 +76,11 @@ def pytest_namespace():
         page.write(".. _{}:\n\n{}\n{}\n\n{}".format(name, name.capitalize(), "=" * len(name), append))
         return page
 
-    def build_isolated(docs_dir, html_dir, cached_responses, overflow=None):
+    def build_isolated(docs_dir, html_dir, overflow=None):
         """Run build_main() through multiprocessing.Process.
 
         :param str docs_dir: Path to input docs directory.
         :param str html_dir: Path to output html directory.
-        :param dict cached_responses: URL keys and serialized JSON values.
         :param iter overflow: Append these args to sphinx-build call.
 
         :return: Exit code of subprocess, stdout, and stderr.
@@ -114,7 +113,7 @@ def docs(tmpdir):
     root = tmpdir.ensure_dir("docs")
 
     # Create Sphinx config.
-    root.join("conf.py").write("extensions = ['sphinxcontrib.imgur']\nimgur_client_id = 'a0b1c2d3e4f56789'\n")
+    root.join("conf.py").write("extensions = ['sphinx_imgur.imgur']\n")
 
     # Create Sphinx docs.
     root.join("contents.rst").write("Test\n" "====\n" "\n" "Sample documentation.\n" "\n" ".. toctree::\n" "    ignore\n")

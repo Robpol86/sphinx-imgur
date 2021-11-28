@@ -12,7 +12,7 @@ Configuration
 =============
 
 If you're just trying to `embed <http://imgur.com/blog/2015/04/07/embed-your-post-anywhere/>`_ albums or images in your
-Sphinx documents you don't need to add anything extra to your ``conf.py``. Just include ``sphinxcontrib.imgur`` in
+Sphinx documents you don't need to add anything extra to your ``conf.py``. Just include ``sphinx_imgur.imgur`` in
 ``extensions``.
 
 If you'd like to use other features in this extension then you'll need to generate a "Client ID" by going to the
@@ -28,14 +28,11 @@ Here is a sample file with the two things you need to do for advanced features:
     author = 'Your Name Here'
     copyright = '2015, Your Name Here'
     exclude_patterns = ['_build']
-    extensions = ['sphinxcontrib.imgur']  # Add to this list.
+    extensions = ['sphinx_imgur.imgur']  # Add to this list.
     master_doc = 'index'
     project = 'my-cool-project'
     release = '1.0'
     version = '1.0'
-
-    # Options for extensions.
-    imgur_client_id = 'abc123def456789'  # Add this line to conf.py.
 
 All Config Options
 ==================

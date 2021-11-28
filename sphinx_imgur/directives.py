@@ -6,7 +6,7 @@ from docutils.parsers.rst import Directive
 from docutils.parsers.rst.directives.images import Image
 from sphinx.errors import SphinxError
 
-from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
+from sphinx_imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
 
 RE_IMGUR_ID = re.compile(r"^(?:a/)?[a-zA-Z0-9]{5,10}$")
 
