@@ -3,14 +3,12 @@
 
 from __future__ import print_function
 
-import os
-
 from setuptools import Command, setup
 
-IMPORT = 'sphinxcontrib.imgur'
-INSTALL_REQUIRES = ['requests', 'sphinx']
+IMPORT = 'sphinx_imgur'
+INSTALL_REQUIRES = ['sphinx']
 LICENSE = 'MIT'
-NAME = 'sphinxcontrib-imgur'
+NAME = 'sphinx-imgur'
 VERSION = '2.0.1'
 
 
@@ -67,7 +65,7 @@ if __name__ == '__main__':
         license=LICENSE,
         long_description='',
         name=NAME,
-        packages=['sphinxcontrib', os.path.join('sphinxcontrib', 'imgur')],
+        packages=['sphinx_imgur'],
         url='https://github.com/Robpol86/' + NAME,
         version=VERSION,
         zip_safe=True,

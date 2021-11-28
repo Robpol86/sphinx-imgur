@@ -10,7 +10,7 @@ class ImgurJavaScriptNode(Element):
         """Append opening tags to document body list.
 
         :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
-        :param sphinxcontrib.imgur.nodes.ImgurJavaScriptNode node: This class' instance.
+        :param sphinx_imgur.nodes.ImgurJavaScriptNode node: This class' instance.
         """
         html_attrs_bq = {"async": "", "src": "//s.imgur.com/min/embed.js", "charset": "utf-8"}
         spht.body.append(spht.starttag(node, "script", "", **html_attrs_bq))
@@ -43,7 +43,7 @@ class ImgurEmbedNode(Element):
         """Append opening tags to document body list.
 
         :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
-        :param sphinxcontrib.imgur.nodes.ImgurEmbedNode node: This class' instance.
+        :param sphinx_imgur.nodes.ImgurEmbedNode node: This class' instance.
         """
         html_attrs_bq = {"CLASS": "imgur-embed-pub", "lang": spht.settings.language_code, "data-id": node.imgur_id}
         if node.hide_post_details:
@@ -115,7 +115,7 @@ class ImgurImageNode(Element):
         """Append opening tags to document body list.
 
         :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
-        :param sphinxcontrib.imgur.nodes.ImgurImageNode node: This class' instance.
+        :param sphinx_imgur.nodes.ImgurImageNode node: This class' instance.
         """
         if node.options["target"]:
             html_attrs_ah = dict(CLASS="reference external image-reference", href=node.options["target"])
@@ -133,7 +133,7 @@ class ImgurImageNode(Element):
         """Append closing tags to document body list.
 
         :param sphinx.writers.html.SmartyPantsHTMLTranslator spht: Object to modify.
-        :param sphinxcontrib.imgur.nodes.ImgurImageNode node: This class' instance.
+        :param sphinx_imgur.nodes.ImgurImageNode node: This class' instance.
         """
         if node.options["target"]:
             spht.body.append("</a>\n")

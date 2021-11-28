@@ -1,10 +1,16 @@
-"""Interface with Sphinx.
+"""Sphinx extension that embeds Imgur images and albums in documents.
 
-Note about the two env variables: app.builder.env and just env are the same. I use them interchangeably for linting
-purposes.
+https://sphinx-imgur.readthedocs.io
+https://github.com/Robpol86/sphinx-imgur
+https://pypi.org/project/sphinx-imgur
 """
-from sphinxcontrib.imgur.directives import ImgurEmbedDirective, ImgurImageDirective
-from sphinxcontrib.imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
+from typing import Dict
+
+from sphinx.application import Sphinx
+
+from sphinx_imgur import __version__
+from sphinx_imgur.directives import ImgurEmbedDirective, ImgurImageDirective
+from sphinx_imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
 
 
 def event_doctree_resolved(__, doctree, _):  # pylint: disable=invalid-name
@@ -19,14 +25,12 @@ def event_doctree_resolved(__, doctree, _):  # pylint: disable=invalid-name
         node.finalize()
 
 
-def setup(app, version):
+def setup(app: Sphinx) -> Dict[str, str]:
     """Called by Sphinx during phase 0 (initialization).
 
-    :param sphinx.application.Sphinx app: Sphinx application object.
-    :param str version: Version of sphinxcontrib-imgur.
+    :param app: Sphinx application object.
 
-    :returns: Extension metadata.
-    :rtype: dict
+    :returns: Extension version.
     """
     app.add_config_value("imgur_api_cache_ttl", 172800, False)
     app.add_config_value("imgur_client_id", None, False)
@@ -43,4 +47,4 @@ def setup(app, version):
 
     app.connect("doctree-resolved", event_doctree_resolved)
 
-    return dict(parallel_read_safe=True, version=version)
+    return dict(version=__version__)

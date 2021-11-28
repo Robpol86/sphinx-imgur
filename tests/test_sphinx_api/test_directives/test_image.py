@@ -22,7 +22,7 @@ def test_bad_imgur_id(tmpdir, docs):
     iid = "inv@lid"
     pytest.add_page(docs, "one", "\n.. imgur-image:: {}\n".format(iid))
     html = tmpdir.join("html")
-    result, stderr = pytest.build_isolated(docs, html, None)[::2]
+    result, stderr = pytest.build_isolated(docs, html)[::2]
 
     assert result != 0
     assert "WARNING" not in stderr
@@ -40,7 +40,7 @@ def test_basic(tmpdir, docs):
     """
     pytest.add_page(docs, "image", "SEP\n\n.. image:: 611EovQ.jpg\n\nSEP\n\n.. imgur-image:: 611EovQ\n\nSEP\n")
     html = tmpdir.join("html")
-    result, stdout, stderr = pytest.build_isolated(docs, html, {})
+    result, stdout, stderr = pytest.build_isolated(docs, html)
 
     # Verify return code and console output.
     assert result == 0
@@ -93,7 +93,7 @@ def test_alt_align(tmpdir, docs):
         ),
     )
     html = tmpdir.join("html")
-    result, stderr = pytest.build_isolated(docs, html, {})[::2]
+    result, stderr = pytest.build_isolated(docs, html)[::2]
 
     assert result == 0
     assert not stderr
@@ -135,7 +135,7 @@ def test_target(tmpdir, docs, set_conf):
         ),
     )
     html = tmpdir.join("html")
-    result, stderr = pytest.build_isolated(docs, html, {})[::2]
+    result, stderr = pytest.build_isolated(docs, html)[::2]
 
     assert result == 0
     assert not stderr

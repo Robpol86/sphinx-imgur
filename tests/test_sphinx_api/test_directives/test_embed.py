@@ -19,7 +19,7 @@ def test_bad_imgur_id(tmpdir, docs, album):
     iid = "a/inv@lid" if album else "inv@lid"
     pytest.add_page(docs, "one", "\n.. imgur-embed:: {}\n".format(iid))
     html = tmpdir.join("html")
-    result, stderr = pytest.build_isolated(docs, html, None)[::2]
+    result, stderr = pytest.build_isolated(docs, html)[::2]
 
     assert result != 0
     assert "WARNING" not in stderr
@@ -44,7 +44,7 @@ def test_embed(tmpdir, docs, hpd_conf):
         pytest.add_page(docs, page, ".. imgur-embed:: a/VMlM6{0}\n\n.. imgur-embed:: 611EovQ{0}\n".format(hpd))
 
     html = tmpdir.join("html")
-    result, stderr = pytest.build_isolated(docs, html, None)[::2]
+    result, stderr = pytest.build_isolated(docs, html)[::2]
 
     assert result == 0
     assert not stderr

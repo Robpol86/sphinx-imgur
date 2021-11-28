@@ -1,27 +1,25 @@
-===================
-sphinxcontrib-imgur
-===================
+============
+sphinx-imgur
+============
 
-Embed `Imgur <http://imgur.com/>`_ images, albums, and their metadata in documents.
+Embed `Imgur <http://imgur.com/>`_ images and albums in documents.
 
-* Python 2.7, 3.3, 3.4, and 3.5 supported on Linux, OS X, and Windows (both 32 and 64 bit versions of Python).
+📖 Full documentation: https://robpol86.github.io/sphinx-imgur
 
-📖 Full documentation: https://robpol86.github.io/sphinxcontrib-imgur
-
-.. image:: https://img.shields.io/appveyor/ci/Robpol86/sphinxcontrib-imgur/master.svg?style=flat-square&label=AppVeyor%20CI
-    :target: https://ci.appveyor.com/project/Robpol86/sphinxcontrib-imgur
+.. image:: https://img.shields.io/appveyor/ci/Robpol86/sphinx-imgur/main.svg?style=flat-square&label=AppVeyor%20CI
+    :target: https://ci.appveyor.com/project/Robpol86/sphinx-imgur
     :alt: Build Status Windows
 
-.. image:: https://img.shields.io/travis/Robpol86/sphinxcontrib-imgur/master.svg?style=flat-square&label=Travis%20CI
-    :target: https://travis-ci.org/Robpol86/sphinxcontrib-imgur
+.. image:: https://img.shields.io/travis/Robpol86/sphinx-imgur/main.svg?style=flat-square&label=Travis%20CI
+    :target: https://travis-ci.org/Robpol86/sphinx-imgur
     :alt: Build Status
 
-.. image:: https://img.shields.io/codecov/c/github/Robpol86/sphinxcontrib-imgur/master.svg?style=flat-square&label=Codecov
-    :target: https://codecov.io/gh/Robpol86/sphinxcontrib-imgur
+.. image:: https://img.shields.io/codecov/c/github/Robpol86/sphinx-imgur/main.svg?style=flat-square&label=Codecov
+    :target: https://codecov.io/gh/Robpol86/sphinx-imgur
     :alt: Coverage Status
 
-.. image:: https://img.shields.io/pypi/v/sphinxcontrib-imgur.svg?style=flat-square&label=Latest
-    :target: https://pypi.python.org/pypi/sphinxcontrib-imgur
+.. image:: https://img.shields.io/pypi/v/sphinx-imgur.svg?style=flat-square&label=Latest
+    :target: https://pypi.python.org/pypi/sphinx-imgur
     :alt: Latest Version
 
 Quickstart
@@ -31,7 +29,7 @@ Install:
 
 .. code:: bash
 
-    pip install sphinxcontrib-imgur
+    pip install sphinx-imgur
 
 .. changelog-section-start
 
@@ -46,12 +44,16 @@ Unreleased
 Added
     * Sphinx 1.8 support.
 
+Changed
+    * Renamed project from ``sphinxcontrib-imgur`` to ``sphinx-imgur``
+
 Removed
     * Title and description roles.
     * Support for albums in image directive.
     * ``imgur_target_default_gallery`` and ``target_gallery`` options.
     * Caching and querying the Imgur API.
     * Auto-detecting size, extension/type, and album images.
+    * Dropped Python 2.7 and <3.6 support
 
 2.0.1 - 2016-10-15
 ------------------
