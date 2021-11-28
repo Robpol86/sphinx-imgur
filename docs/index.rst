@@ -19,9 +19,3 @@ Project Links
     install
     usage
     examples
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Appendix
-
-    changelog
