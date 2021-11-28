@@ -31,16 +31,26 @@ lint: deps
 .PHONY: test
 test: _HELP = Run unit tests
 test: deps
-	poetry run pytest --cov=$(PROJECT_NAME) --cov-report=html --cov-report=xml tests
+	poetry run pytest --cov=$(PROJECT_NAME) --cov-report=html --cov-report=xml tests/unit_tests
 
 .PHONY: testpdb
 testpdb: _HELP = Run unit tests and drop into the debugger on failure
 testpdb: deps
-	poetry run pytest --pdb tests
+	poetry run pytest --pdb tests/unit_tests
+
+.PHONY: it
+it: _HELP = Run integration tests
+it: deps
+	poetry run pytest tests/integration_tests
+
+.PHONY: itpdb
+itpdb: _HELP = Run integration tests and drop into the debugger on failure
+itpdb: deps
+	poetry run pytest --pdb tests/integration_tests
 
 .PHONY: all
-all: _HELP = Run linters, tests, and builds
-all: test lint docs build
+all: _HELP = Run linters, unit tests, integration tests, and builds
+all: test it lint docs build
 
 ## Build
 
