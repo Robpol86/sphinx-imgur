@@ -1,0 +1,11 @@
+[flake8]
+exclude =
+    .venv/*,
+    build/*,
+    dist/*,
+    docs/*,
+ignore =
+    D401,
+import-order-style = smarkets
+max-line-length = 125
+statistics = True
