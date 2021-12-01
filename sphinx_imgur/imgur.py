@@ -20,7 +20,6 @@ class ImgurImage(Directive):
     """Imgur image directive."""
 
     option_spec = images.Image.option_spec.copy()
-    option_spec["target_largest"] = is_true
     option_spec["target_page"] = is_true
     required_arguments = 1
 
@@ -29,20 +28,16 @@ class ImgurImage(Directive):
         # Get Imgur ID.
         imgur_id = self.arguments[0]
 
-        # Read from conf.py. Unset largest/page targets if :target: is set.
+        # Read from conf.py. Unset page targets if :target: is set.
         if self.options.get("target", None):
-            self.options.pop("target_largest", None)
             self.options.pop("target_page", None)
-        elif not any(self.options.get("target_" + i, None) for i in ("largest", "page")):
+        elif not any(self.options.get("target_" + i, None) for i in ("page",)):
             config = self.state.document.settings.env.config
-            self.options.setdefault("target_largest", config.imgur_target_default_largest)
             self.options.setdefault("target_page", config.imgur_target_default_page)
 
         # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
         if self.options.get("target_page", ""):
             self.options["target"] = "//imgur.com/{}".format(imgur_id)
-        elif self.options.get("target_largest", ""):
-            self.options["target"] = "//i.imgur.com/{}.jpg".format(imgur_id)
         elif not self.options.get("target", "") and (
             self.options.get("width", "") or self.options.get("height", "") or self.options.get("scale", "")
         ):
@@ -91,7 +86,6 @@ def setup(app: Sphinx) -> Dict[str, str]:
     :returns: Extension version.
     """
     app.add_config_value("imgur_hide_post_details", False, True)
-    app.add_config_value("imgur_target_default_largest", False, True)
     app.add_config_value("imgur_target_default_page", False, True)
 
     app.add_directive("imgur-embed", ImgurEmbed)

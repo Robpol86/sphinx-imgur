@@ -66,7 +66,6 @@ class ImgurImageNode(nodes.Element):
             height=options.get("height", ""),
             scale=options.get("scale", ""),
             target=options.get("target", ""),
-            target_largest=options.get("target_largest", ""),
             target_page=options.get("target_page", ""),
             width=options.get("width", ""),
         )

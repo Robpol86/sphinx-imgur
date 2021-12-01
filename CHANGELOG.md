@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Title and description roles
 - Support for albums in image directive
 - `imgur_target_default_gallery` and `target_gallery` options
+- `imgur_target_default_largest` and `target_largest` options
 - Caching and querying Imgur's API
 - Auto-detecting size, extension/type, and album images
 - Dropped Python 2.7 and <3.6 support
