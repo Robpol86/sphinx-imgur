@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Caching and querying Imgur's API
 - Auto-detecting size, extension/type, and album images
 - Dropped Python 2.7 and <3.6 support
+- Imgur ID checks (no more babysitting users)
 
 ### Fixed
 
