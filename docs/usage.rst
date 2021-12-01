@@ -43,19 +43,11 @@ All Config Options
 
     The default value of ``hide_post_details`` for :rst:dir:`imgur-embed`. Overridden in the directive.
 
-.. attribute:: imgur_target_default_largest
-
-    *Default: False*
-
-    All :rst:dir:`imgur-image` images by default don't link to anything. Setting this to ``true`` results in all Imgur
-    images to link to the original/full size version of the image by default. Ignored for albums.
-
 .. attribute:: imgur_target_default_page
 
     *Default: False*
 
-    Like :attr:`imgur_target_default_largest` but instead links to the image's page on Imgur by default (with the share
-    buttons, etc). Overrides :attr:`imgur_target_default_largest` if both are set.
+    Links to the image's page on Imgur by default (with the share buttons, etc).
 
 Directives
 ==========
@@ -92,20 +84,14 @@ To see them in action visit the :ref:`Examples` section.
 
         Same as the regular image directive. Resizes the image maintaining the aspect ratio.
 
-    .. attribute:: target_largest
-
-        Image will link directly to the original/full size version. Not available for albums.
-
     .. attribute:: target_page
 
-        Image will link to its page on Imgur (with the share buttons, etc). Takes precedence over
-        :attr:`target_largest`.
+        Image will link to its page on Imgur (with the share buttons, etc).
 
 
     .. attribute:: target
 
-        Same as the regular image directive. Image will link to this URL. Takes precedence over :attr:`target_largest`,
-        and :attr:`target_page`.
+        Same as the regular image directive. Image will link to this URL. Takes precedence over :attr:`target_page`.
 
     .. attribute:: width
 

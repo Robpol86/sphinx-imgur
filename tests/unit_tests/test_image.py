@@ -93,7 +93,7 @@ def test_alt_align(tmpdir, docs):
 
 
 @pytest.mark.usefixtures("copy_images")
-@pytest.mark.parametrize("set_conf", [None, "largest", "page"])
+@pytest.mark.parametrize("set_conf", [None, "page"])
 def test_target(tmpdir, docs, set_conf):
     """Test combination of "target" conf.py and directive options.
 
@@ -111,7 +111,6 @@ def test_target(tmpdir, docs, set_conf):
             "SEP\n\n"
             ".. image:: 611EovQ.jpg\n    :target: https://goo.gl\n\nSEP\n\n"
             ".. imgur-image:: 611EovQ\n    :target: https://goo.gl\n\nSEP\n\n"
-            ".. imgur-image:: 611EovQ\n    :target_largest: true\n\nSEP\n\n"
             ".. imgur-image:: 611EovQ\n    :target_page: true\n\nSEP\n\n"
             ".. imgur-image:: 611EovQ\n\nSEP\n\n"
         ),
@@ -127,11 +126,8 @@ def test_target(tmpdir, docs, set_conf):
     dat = [c.strip() for c in html.join("test.html").read().split("<p>SEP</p>")[1:-1]]
     assert dat[0] == '<a class="reference external image-reference" href="https://goo.gl">%s</a>' % img_i
     assert dat[1] == '<a class="reference external image-reference" href="https://goo.gl">%s</a>' % img
-    assert dat[2] == '<a class="reference external image-reference" href="//i.imgur.com/611EovQ.jpg">%s</a>' % img
-    assert dat[3] == '<a class="reference external image-reference" href="//imgur.com/611EovQ">%s</a>' % img
-    if set_conf == "largest":
-        assert dat[4] == '<a class="reference external image-reference" href="//i.imgur.com/611EovQ.jpg">%s</a>' % img
-    elif set_conf == "page":
-        assert dat[4] == '<a class="reference external image-reference" href="//imgur.com/611EovQ">%s</a>' % img
+    assert dat[2] == '<a class="reference external image-reference" href="//imgur.com/611EovQ">%s</a>' % img
+    if set_conf == "page":
+        assert dat[3] == '<a class="reference external image-reference" href="//imgur.com/611EovQ">%s</a>' % img
     else:
-        assert dat[4] == img  # No link.
+        assert dat[3] == img  # No link.
