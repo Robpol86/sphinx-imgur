@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Renamed project from `sphinxcontrib-imgur` to `sphinx-imgur`
 - Re-licensed from MIT to BSD 2-Clause
+- Refactored tests using sphinx.testing
 
 ## [2.0.1] - 2016-10-15
 

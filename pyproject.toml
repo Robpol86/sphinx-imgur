@@ -57,6 +57,7 @@ flake8-import-order = ">=0.18.1"
 pep8-naming = ">=0.12.1"
 pylint = ">=2.11.1"
 # Tests.
+beautifulsoup4 = ">=4.10.0"
 pytest = "<=3.2"
 pytest-cov = "<=2.6"
 # Project.
