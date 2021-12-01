@@ -41,9 +41,9 @@ def setup(app: Sphinx) -> Dict[str, str]:
 
     app.add_directive("imgur-embed", ImgurEmbedDirective)
     app.add_directive("imgur-image", ImgurImageDirective)
-    app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.visit, ImgurEmbedNode.depart))
-    app.add_node(ImgurImageNode, html=(ImgurImageNode.visit, ImgurImageNode.depart))
-    app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.visit, ImgurJavaScriptNode.depart))
+    app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.html_visit, ImgurEmbedNode.html_depart))
+    app.add_node(ImgurImageNode, html=(ImgurImageNode.html_visit, ImgurImageNode.html_depart))
+    app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.html_visit, ImgurJavaScriptNode.html_depart))
 
     app.connect("doctree-resolved", event_doctree_resolved)
 
