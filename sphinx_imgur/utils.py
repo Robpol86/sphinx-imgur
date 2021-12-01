@@ -1,11 +1,4 @@
 """Helpers."""
-from sphinx.errors import SphinxError
-
-
-class ImgurError(SphinxError):
-    """Non-configuration error. Raised when directive has bad options."""
-
-    category = "Imgur option error"
 
 
 def is_true(argument):

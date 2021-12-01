@@ -37,18 +37,6 @@ Here is a sample file with the two things you need to do for advanced features:
 All Config Options
 ==================
 
-.. attribute:: imgur_api_cache_ttl
-
-    *Default: 172800 seconds (2 days)*
-
-    Time in seconds before cached Imgur API entries are considered expired. Imgur's API has a request limit (even for
-    simple things like getting an image's title) so this extension caches API replies. This lets you keep making
-    multiple changes in your documentation without bombarding the API. Does not apply to embedded albums/images.
-
-.. attribute:: imgur_client_id
-
-    Imgur API Client ID to include in request headers. Required for API calls. More information in the section above.
-
 .. attribute:: imgur_hide_post_details
 
     *Default: False*

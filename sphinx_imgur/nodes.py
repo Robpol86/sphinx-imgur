@@ -75,25 +75,15 @@ class ImgurImageNode(nodes.Element):
 
     def finalize(self):
         """Update attributes after Sphinx cache is updated."""
-        options = self.options
-
-        # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
-        if options["target_page"]:
-            options["target"] = "//imgur.com/{}".format(self.imgur_id)
-        elif options["target_largest"]:
-            options["target"] = "//i.imgur.com/{}.jpg".format(self.imgur_id)
-        elif not options["target"] and (options["width"] or options["height"] or options["scale"]):
-            options["target"] = "//i.imgur.com/{}.jpg".format(self.imgur_id)
-
         # Set src and style.
         self.src = "//i.imgur.com/{}h.jpg".format(self.imgur_id)
-        style = [p for p in ((k, options[k]) for k in ("width", "height")) if p[1]]
+        style = [p for p in ((k, self.options[k]) for k in ("width", "height")) if p[1]]
         if style:
             self.style = "; ".join("{}: {}".format(k, v) for k, v in style)
 
         # Determine alt text.
-        if not options["alt"]:
-            options["alt"] = self.src[2:]
+        if not self.options["alt"]:
+            self.options["alt"] = self.src[2:]
 
     @staticmethod
     def html_visit(writer: HTML5Translator, node: "ImgurImageNode"):
