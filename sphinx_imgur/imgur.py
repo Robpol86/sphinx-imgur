@@ -4,34 +4,30 @@ https://sphinx-imgur.readthedocs.io
 https://github.com/Robpol86/sphinx-imgur
 https://pypi.org/project/sphinx-imgur
 """
-import re
-from typing import Dict
+from typing import Dict, List
 
+from docutils.nodes import Element
 from docutils.parsers.rst import Directive
-from docutils.parsers.rst.directives.images import Image
+from docutils.parsers.rst.directives import images
 from sphinx.application import Sphinx
 
 from sphinx_imgur import __version__
 from sphinx_imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
-from sphinx_imgur.utils import ImgurError, is_true
-
-RE_IMGUR_ID = re.compile(r"^(?:a/)?[a-zA-Z0-9]{5,10}$")
+from sphinx_imgur.utils import is_true
 
 
 class ImgurImage(Directive):
     """Imgur image directive."""
 
-    option_spec = Image.option_spec.copy()
+    option_spec = images.Image.option_spec.copy()
     option_spec["target_largest"] = is_true
     option_spec["target_page"] = is_true
     required_arguments = 1
 
-    def run(self):
+    def run(self) -> List[Element]:
         """Main method."""
         # Get Imgur ID.
         imgur_id = self.arguments[0]
-        if not RE_IMGUR_ID.match(imgur_id):
-            raise ImgurError("Invalid Imgur ID specified. Must be 5-10 letters and numbers.")
 
         # Read from conf.py. Unset largest/page targets if :target: is set.
         if self.options.get("target", None):
@@ -41,6 +37,16 @@ class ImgurImage(Directive):
             config = self.state.document.settings.env.config
             self.options.setdefault("target_largest", config.imgur_target_default_largest)
             self.options.setdefault("target_page", config.imgur_target_default_page)
+
+        # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
+        if self.options.get("target_page", ""):
+            self.options["target"] = "//imgur.com/{}".format(imgur_id)
+        elif self.options.get("target_largest", ""):
+            self.options["target"] = "//i.imgur.com/{}.jpg".format(imgur_id)
+        elif not self.options.get("target", "") and (
+            self.options.get("width", "") or self.options.get("height", "") or self.options.get("scale", "")
+        ):
+            self.options["target"] = "//i.imgur.com/{}.jpg".format(imgur_id)
 
         return [ImgurImageNode(imgur_id, self.options)]
 
@@ -53,12 +59,10 @@ class ImgurEmbed(Directive):
     }
     required_arguments = 1
 
-    def run(self):
+    def run(self) -> List[Element]:
         """Main method."""
         # Get Imgur ID.
         imgur_id = self.arguments[0]
-        if not RE_IMGUR_ID.match(imgur_id):
-            raise ImgurError('Invalid Imgur ID specified. Must be 5-10 letters and numbers. Albums prefixed with "a/".')
 
         # Read from conf.py.
         config = self.state.document.settings.env.config
@@ -86,10 +90,7 @@ def setup(app: Sphinx) -> Dict[str, str]:
 
     :returns: Extension version.
     """
-    app.add_config_value("imgur_api_cache_ttl", 172800, False)
-    app.add_config_value("imgur_client_id", None, False)
     app.add_config_value("imgur_hide_post_details", False, True)
-    app.add_config_value("imgur_target_default_gallery", False, True)
     app.add_config_value("imgur_target_default_largest", False, True)
     app.add_config_value("imgur_target_default_page", False, True)
 

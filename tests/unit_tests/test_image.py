@@ -13,24 +13,6 @@ def copy_images(docs):
         path.copy(docs.join(path.basename[6:]))
 
 
-def test_bad_imgur_id(tmpdir, docs):
-    """Test invalid imgur_id value.
-
-    :param tmpdir: pytest fixture.
-    :param docs: conftest fixture.
-    """
-    iid = "inv@lid"
-    pytest.add_page(docs, "one", "\n.. imgur-image:: {}\n".format(iid))
-    html = tmpdir.join("html")
-    result, stderr = pytest.build_isolated(docs, html)[::2]
-
-    assert result != 0
-    assert "WARNING" not in stderr
-    assert not html.listdir("*.html")
-    expected = "Invalid Imgur ID specified. Must be 5-10 letters and numbers."
-    assert expected in stderr
-
-
 @pytest.mark.usefixtures("copy_images")
 def test_basic(tmpdir, docs):
     """Verify imgur-image directive generates the same HTML as the built-in image directive when using no options.
