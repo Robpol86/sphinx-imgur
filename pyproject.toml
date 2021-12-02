@@ -63,6 +63,7 @@ coverage = {version = "*", extras = ["toml"]}
 pytest = "*"
 pytest-cov = "*"
 pytest-icdiff = "*"
+TexSoup = "*"
 
 [tool.black]
 line-length = 125

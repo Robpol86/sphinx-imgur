@@ -12,38 +12,36 @@ from docutils.parsers.rst.directives import images
 from sphinx.application import Sphinx
 
 from sphinx_imgur import __version__
-from sphinx_imgur.nodes import ImgurEmbedNode, ImgurImageNode, ImgurJavaScriptNode
-from sphinx_imgur.utils import is_true
+from sphinx_imgur.nodes import ImgurEmbedNode, ImgurJavaScriptNode
+from sphinx_imgur.utils import img_src_target_formats, imgur_id_size_ext
+
+DEFAULT_EXT = "jpg"
+DEFAULT_SIZE = "h"
+IMG_SRC_FORMAT = "https://i.imgur.com/%(id)s%(size)s.%(ext)s"
+TARGET_FORMAT = "https://imgur.com/%(id)s"
 
 
-class ImgurImage(Directive):
+class ImgurImage(images.Image):
     """Imgur image directive."""
 
-    required_arguments = 1
     option_spec = images.Image.option_spec.copy()
-    option_spec["target_page"] = is_true
+    option_spec["ext"] = directives.unchanged
+    option_spec["fullsize"] = directives.flag
+    option_spec["img_src_format"] = directives.unchanged
+    option_spec["notarget"] = directives.flag
+    option_spec["size"] = directives.single_char_or_unicode
 
     def run(self) -> List[Element]:
         """Main method."""
-        # Get Imgur ID.
-        imgur_id = self.arguments[0]
+        config = self.state.document.settings.env.config
+        imgur_id, size, ext = imgur_id_size_ext(self.arguments[0], self.options, config)
+        img_src_format, target_format = img_src_target_formats(self.options, config)
 
-        # Read from conf.py. Unset page targets if :target: is set.
-        if self.options.get("target", None):
-            self.options.pop("target_page", None)
-        elif not any(self.options.get("target_" + i, None) for i in ("page",)):
-            config = self.state.document.settings.env.config
-            self.options.setdefault("target_page", config.imgur_target_default_page)
+        self.arguments[0] = img_src_format % {"id": imgur_id, "size": size, "ext": ext}
+        if target_format:
+            self.options["target"] = target_format % {"id": imgur_id, "size": size, "ext": ext}
 
-        # Determine target. Code in directives.py handles defaults and unsets target_* if :target: is set.
-        if self.options.get("target_page", ""):
-            self.options["target"] = "//imgur.com/{}".format(imgur_id)
-        elif not self.options.get("target", "") and (
-            self.options.get("width", "") or self.options.get("height", "") or self.options.get("scale", "")
-        ):
-            self.options["target"] = "//i.imgur.com/{}.jpg".format(imgur_id)
-
-        return [ImgurImageNode(imgur_id, self.options)]
+        return super().run()
 
 
 class ImgurEmbed(Directive):
@@ -66,18 +64,6 @@ class ImgurEmbed(Directive):
         return [node_embed, node_js]
 
 
-def event_doctree_resolved(__, doctree, _):  # pylint: disable=invalid-name
-    """Called by Sphinx after phase 3 (resolving).
-
-    * Call finalizer for ImgurImageNode nodes.
-
-    :param docutils.nodes.document doctree: Tree of docutils nodes.
-    :param _: Not used.
-    """
-    for node in doctree.traverse(ImgurImageNode):
-        node.finalize()
-
-
 def setup(app: Sphinx) -> Dict[str, str]:
     """Called by Sphinx during phase 0 (initialization).
 
@@ -85,15 +71,14 @@ def setup(app: Sphinx) -> Dict[str, str]:
 
     :returns: Extension version.
     """
-    app.add_config_value("imgur_hide_post_details", False, True)
-    app.add_config_value("imgur_target_default_page", False, True)
-
+    app.add_config_value("imgur_default_ext", DEFAULT_EXT, "html")
+    app.add_config_value("imgur_default_size", DEFAULT_SIZE, "html")
+    app.add_config_value("imgur_hide_post_details", False, "html")
+    app.add_config_value("imgur_img_src_format", IMG_SRC_FORMAT, "html")
+    app.add_config_value("imgur_target_format", TARGET_FORMAT, "html")
+    app.add_directive("imgur", ImgurImage)
     app.add_directive("imgur-embed", ImgurEmbed)
     app.add_directive("imgur-image", ImgurImage)
-    app.add_node(ImgurImageNode, html=(ImgurImageNode.html_visit, ImgurImageNode.html_depart))
     app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.html_visit, ImgurEmbedNode.html_depart))
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.html_visit, ImgurJavaScriptNode.html_depart))
-
-    app.connect("doctree-resolved", event_doctree_resolved)
-
     return dict(version=__version__)

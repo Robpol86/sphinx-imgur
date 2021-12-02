@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Python 3.6 through 3.10 support
+- Implicit size and extension support for `.. imgur::`
+- User customizable image and target URL formatters
+- LaTeX support for images
 
 ### Removed
 
@@ -17,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for albums in image directive
 - `imgur_target_default_gallery` and `target_gallery` options
 - `imgur_target_default_largest` and `target_largest` options
+- `imgur_target_default_page` and `target_page` options
 - Caching and querying Imgur's API
 - Auto-detecting size, extension/type, and album images
 - Dropped Python 2.7 and <3.6 support
@@ -28,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored `.. imgur-image::` directive and aliased it to `.. imgur::`, no longer reimplementing the node
 - `:hide_post_details:` now a flag instead of taking a boolean argument
 - Renamed project from `sphinxcontrib-imgur` to `sphinx-imgur`
 - Re-licensed from MIT to BSD 2-Clause
