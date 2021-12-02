@@ -1,21 +1,20 @@
-======================
-sphinx-imgur |version|
-======================
+============
+Sphinx Imgur
+============
 
-Use `Imgur <http://imgur.com/>`_ images and albums in your Sphinx documents instead of hosting them locally. Save
-millions on hosting costs!
+Embed `Imgur <https://imgur.com>`_ images and albums in Sphinx documents/pages. Compatible with
+`sphinxext-opengraph <https://sphinxext-opengraph.readthedocs.io/>`_.
 
 Project Links
 =============
 
-* Documentation: https://robpol86.github.io/sphinx-imgur
+* Documentation: https://sphinx-imgur.readthedocs.io
 * Source code: https://github.com/Robpol86/sphinx-imgur
-* PyPI homepage: https://pypi.python.org/pypi/sphinx-imgur
+* PyPI homepage: https://pypi.org/project/sphinx-imgur
 
 .. toctree::
     :maxdepth: 3
-    :caption: General
+    :caption: Contents
 
     install
     usage
-    examples

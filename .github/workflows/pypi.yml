@@ -1,0 +1,34 @@
+name: PyPI
+
+on:
+  release: {types: [published]}
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - {name: Check out repository code, uses: actions/checkout@v2}
+      - {name: Install Python, uses: actions/setup-python@v2, with: {python-version: "3.10"}}
+      - {name: Install Poetry, uses: abatilo/actions-poetry@v2.1.4}
+      - {name: Copy LICENSE to COPYING, run: cp --no-clobber --verbose LICENSE COPYING}  # For Python wheel.
+      - {name: Build package, run: make build}
+      - name: Store artifacts
+        uses: actions/upload-artifact@v2
+        with: {name: dist, path: dist/, if-no-files-found: error}
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - {name: Fetch packages, uses: actions/download-artifact@v2, with: {name: dist, path: dist}}
+      - name: Publish packages to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Upload packages to Release
+        uses: svenstaro/upload-release-action@v2
+        with: {file: dist/*, file_glob: true, repo_token: "${{ secrets.GITHUB_TOKEN }}", tag: "${{ github.ref }}"}

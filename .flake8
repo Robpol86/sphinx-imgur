@@ -3,7 +3,6 @@ exclude =
     .venv/*,
     build/*,
     dist/*,
-    docs/*,
 ignore =
     D401,
 import-order-style = smarkets

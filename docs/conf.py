@@ -1,36 +1,39 @@
 """Sphinx configuration file."""
 
-import os
-import sys
+# pylint: disable=invalid-name
+
 import time
+from pathlib import Path
+
+import toml
+
+from sphinx_imgur.imgur import DEFAULT_EXT, DEFAULT_SIZE, IMG_SRC_FORMAT, TARGET_FORMAT
+
+PYPROJECT = toml.loads(Path(__file__).parent.parent.joinpath("pyproject.toml").read_text(encoding="utf8"))
 
 
 # General configuration.
-sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
-author = "@Robpol86"
-copyright = "{}, {}".format(time.strftime("%Y"), author)
-master_doc = "index"
-project = "sphinx-imgur"
-pygments_style = "friendly"
-release = version = "2.0.1"
-templates_path = ["_templates"]
-extensions = list()
+author = PYPROJECT["tool"]["poetry"]["authors"][0].split()[0]
+copyright = f'{time.strftime("%Y")}, {author}'  # pylint: disable=redefined-builtin  # noqa
+html_last_updated_fmt = f"%c {time.tzname[time.localtime().tm_isdst]}"
+exclude_patterns = []
+extensions = [
+    "notfound.extension",  # https://sphinx-notfound-page.readthedocs.io
+    "sphinx_copybutton",  # https://sphinx-copybutton.readthedocs.io
+    "sphinx_imgur.imgur",
+    "sphinx_panels",  # https://sphinx-panels.readthedocs.io
+]
+project = PYPROJECT["tool"]["poetry"]["name"]
+pygments_style = "sphinx"
+rst_epilog = f"""
+.. |LABEL_DEFAULT_EXT| replace:: :guilabel:`{DEFAULT_EXT}`
+.. |LABEL_DEFAULT_SIZE| replace:: :guilabel:`{DEFAULT_SIZE}`
+.. |LABEL_IMG_SRC_FORMAT| replace:: :guilabel:`{IMG_SRC_FORMAT}`
+.. |LABEL_TARGET_FORMAT| replace:: :guilabel:`{TARGET_FORMAT}`
+.. |LABEL_HIDE_POST_DETAILS| replace:: :guilabel:`False`
+"""
 
 
 # Options for HTML output.
-html_context = dict(
-    conf_py_path="/docs/",
-    display_github=True,
-    github_repo=os.environ.get("TRAVIS_REPO_SLUG", "/" + project).split("/", 1)[1],
-    github_user=os.environ.get("TRAVIS_REPO_SLUG", "robpol86/").split("/", 1)[0],
-    github_version=os.environ.get("TRAVIS_BRANCH", "master"),
-    source_suffix=".rst",
-)
 html_copy_source = False
-html_favicon = "favicon.ico"
 html_theme = "sphinx_rtd_theme"
-html_title = project
-
-
-# imgur
-extensions.append("sphinx_imgur.imgur")

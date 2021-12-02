@@ -84,14 +84,14 @@ branch = true
 
 [tool.pylint.FORMAT]
 good-names = ["i", "j", "k", "ex", "Run", "_", "x", "y", "z", "fd"]
-ignore = [".venv/*", "build/*", "dist/*", "docs/*"]
-max-args = 7
+ignore = [".venv/*", "build/*", "dist/*"]
 max-line-length = 125
 reports = false
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = [
     "consider-using-f-string",
+    "too-many-arguments",
 ]
 
 [tool.pylint.SIMILARITIES]
