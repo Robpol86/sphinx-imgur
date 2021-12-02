@@ -7,7 +7,7 @@ https://pypi.org/project/sphinx-imgur
 from typing import Dict, List
 
 from docutils.nodes import Element
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive, directives
 from docutils.parsers.rst.directives import images
 from sphinx.application import Sphinx
 
@@ -19,9 +19,9 @@ from sphinx_imgur.utils import is_true
 class ImgurImage(Directive):
     """Imgur image directive."""
 
+    required_arguments = 1
     option_spec = images.Image.option_spec.copy()
     option_spec["target_page"] = is_true
-    required_arguments = 1
 
     def run(self) -> List[Element]:
         """Main method."""
@@ -49,21 +49,21 @@ class ImgurImage(Directive):
 class ImgurEmbed(Directive):
     """Imgur embed directive."""
 
-    option_spec = {
-        "hide_post_details": is_true,
-    }
     required_arguments = 1
+    option_spec = {
+        "hide_post_details": directives.flag,
+    }
 
     def run(self) -> List[Element]:
         """Main method."""
-        # Get Imgur ID.
-        imgur_id = self.arguments[0]
-
-        # Read from conf.py.
         config = self.state.document.settings.env.config
-        hide_post_details = self.options.get("hide_post_details", config.imgur_hide_post_details)
+        imgur_id = self.arguments[0]
+        hide_post_details = "hide_post_details" in self.options or config["imgur_hide_post_details"]
 
-        return [ImgurEmbedNode(imgur_id, hide_post_details), ImgurJavaScriptNode()]
+        node_embed = ImgurEmbedNode(imgur_id, hide_post_details)
+        node_js = ImgurJavaScriptNode()
+
+        return [node_embed, node_js]
 
 
 def event_doctree_resolved(__, doctree, _):  # pylint: disable=invalid-name

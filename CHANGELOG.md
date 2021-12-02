@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Python 3.9 support
+- Python 3.6 through 3.10 support
 
 ### Removed
 
@@ -24,10 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Support for Sphinx 1.8
+- Support for Sphinx 1.7 through 4.3
 
 ### Changed
 
+- `:hide_post_details:` now a flag instead of taking a boolean argument
 - Renamed project from `sphinxcontrib-imgur` to `sphinx-imgur`
 - Re-licensed from MIT to BSD 2-Clause
 - Refactored tests using sphinx.testing

@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Topic :: Documentation :: Sphinx",
     "Topic :: Software Development :: Documentation",
 ]
@@ -58,10 +59,12 @@ pep8-naming = ">=0.12.1"
 pylint = ">=2.11.1"
 # Tests.
 beautifulsoup4 = ">=4.10.0"
-pytest = "<=3.2"
-pytest-cov = "<=2.6"
+coverage = {version = ">=6.1.2", extras = ["toml"]}
+pytest = ">=6.2.5"
+pytest-cov = ">=3.0.0"
+pytest-icdiff = ">=0.5"
 # Project.
-sphinx = "==1.8.6"
+sphinx = ">=4.3.0"
 
 [tool.black]
 line-length = 125
