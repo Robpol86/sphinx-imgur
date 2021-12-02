@@ -6,13 +6,13 @@ https://pypi.org/project/sphinx-imgur
 """
 from typing import Dict, List
 
-from docutils.nodes import Element
+from docutils.nodes import Element, SkipNode
 from docutils.parsers.rst import Directive, directives
 from docutils.parsers.rst.directives import images
 from sphinx.application import Sphinx
 
 from sphinx_imgur import __version__
-from sphinx_imgur.nodes import ImgurEmbedNode, ImgurJavaScriptNode
+from sphinx_imgur.nodes import ImgurEmbedNode, ImgurJavaScriptNode, ImgurOmittedImageNode
 from sphinx_imgur.utils import img_src_target_formats, imgur_id_size_ext
 
 DEFAULT_EXT = "jpg"
@@ -49,19 +49,34 @@ class ImgurEmbed(Directive):
 
     required_arguments = 1
     option_spec = {
+        "alt": directives.unchanged,
+        "ext": directives.unchanged,
+        "fullsize": directives.flag,
         "hide_post_details": directives.flag,
+        "img_src_format": directives.unchanged,
+        "og_imgur_id": directives.unchanged,
+        "size": directives.single_char_or_unicode,
     }
 
     def run(self) -> List[Element]:
         """Main method."""
         config = self.state.document.settings.env.config
-        imgur_id = self.arguments[0]
+        imgur_id, size, ext = imgur_id_size_ext(self.arguments[0], self.options, config)
         hide_post_details = "hide_post_details" in self.options or config["imgur_hide_post_details"]
 
         node_embed = ImgurEmbedNode(imgur_id, hide_post_details)
         node_js = ImgurJavaScriptNode()
+        nodes = [node_embed, node_js]
 
-        return [node_embed, node_js]
+        # Hidden image node for opengraph.
+        try:
+            node_img = ImgurOmittedImageNode(self.block_text, self.options, config, imgur_id, size, ext)
+        except SkipNode:
+            pass
+        else:
+            nodes.append(node_img)
+
+        return nodes
 
 
 def setup(app: Sphinx) -> Dict[str, str]:
@@ -81,4 +96,5 @@ def setup(app: Sphinx) -> Dict[str, str]:
     app.add_directive("imgur-image", ImgurImage)
     app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.html_visit, ImgurEmbedNode.html_depart))
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.html_visit, ImgurJavaScriptNode.html_depart))
+    app.add_node(ImgurOmittedImageNode, html=(ImgurOmittedImageNode.html_visit, ImgurOmittedImageNode.html_visit))
     return dict(version=__version__)
