@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User customizable image and target URL formatters
 - LaTeX support for images
 - [OpenGraph](https://sphinxext-opengraph.readthedocs.io) support
+- `.. imgur-figure::` directive
 
 ### Removed
 

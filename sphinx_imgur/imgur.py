@@ -31,6 +31,29 @@ class ImgurImage(images.Image):
     option_spec["notarget"] = directives.flag
     option_spec["size"] = directives.single_char_or_unicode
 
+    def run(self):
+        """Main method."""
+        config = self.state.document.settings.env.config
+        imgur_id, size, ext = imgur_id_size_ext(self.arguments[0], self.options, config)
+        img_src_format, target_format = img_src_target_formats(self.options, config)
+
+        self.arguments[0] = img_src_format % {"id": imgur_id, "size": size, "ext": ext}
+        if target_format:
+            self.options["target"] = target_format % {"id": imgur_id, "size": size, "ext": ext}
+
+        return super().run()
+
+
+class ImgurFigure(images.Figure):
+    """Imgur figure directive."""
+
+    option_spec = images.Figure.option_spec.copy()
+    option_spec["ext"] = directives.unchanged
+    option_spec["fullsize"] = directives.flag
+    option_spec["img_src_format"] = directives.unchanged
+    option_spec["notarget"] = directives.flag
+    option_spec["size"] = directives.single_char_or_unicode
+
     def run(self) -> List[Element]:
         """Main method."""
         config = self.state.document.settings.env.config
@@ -93,6 +116,7 @@ def setup(app: Sphinx) -> Dict[str, str]:
     app.add_config_value("imgur_target_format", TARGET_FORMAT, "html")
     app.add_directive("imgur", ImgurImage)
     app.add_directive("imgur-embed", ImgurEmbed)
+    app.add_directive("imgur-figure", ImgurFigure)
     app.add_directive("imgur-image", ImgurImage)
     app.add_node(ImgurEmbedNode, html=(ImgurEmbedNode.html_visit, ImgurEmbedNode.html_depart))
     app.add_node(ImgurJavaScriptNode, html=(ImgurJavaScriptNode.html_visit, ImgurJavaScriptNode.html_depart))
