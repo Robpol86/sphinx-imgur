@@ -739,7 +739,7 @@ test = ["pytest"]
 name = "sphinxext-opengraph"
 version = "0.5.0"
 description = "Sphinx Extension to enable OGP support"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -820,12 +820,12 @@ docs = ["sphinx", "jaraco.packaging (>=8.2)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy"]
 
 [extras]
-docs = ["sphinx-notfound-page", "sphinx-panels", "sphinx-rtd-theme", "sphinx-copybutton", "toml"]
+docs = ["sphinx-copybutton", "sphinx-notfound-page", "sphinx-panels", "sphinx-rtd-theme", "sphinxext-opengraph", "toml"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "72f0a7dd7f5290e154fe6e5b54fe5a9aa9963cbebe0e6e4adb9a4066073caccc"
+content-hash = "ca7bb8dfca9f9703b88ee42ef3d55ef140dd8ea2dde204d43df73c2b4ea09c8f"
 
 [metadata.files]
 alabaster = [

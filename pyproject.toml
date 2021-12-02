@@ -44,10 +44,18 @@ sphinx-copybutton = {version = "*", optional = true}
 sphinx-notfound-page = {version = "*", optional = true}
 sphinx-panels = {version = "*", optional = true}
 sphinx-rtd-theme = {version = "*", optional = true}
+sphinxext-opengraph = "*"
 toml = {version = "*", optional = true}
 
 [tool.poetry.extras]
-docs = ["sphinx-notfound-page", "sphinx-panels", "sphinx-rtd-theme", "sphinx-copybutton", "toml"]
+docs = [
+    "sphinx-copybutton",
+    "sphinx-notfound-page",
+    "sphinx-panels",
+    "sphinx-rtd-theme",
+    "sphinxext-opengraph",
+    "toml",
+]
 
 [tool.poetry.dev-dependencies]
 # Linters.
