@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implicit size and extension support for `.. imgur::`
 - User customizable image and target URL formatters
 - LaTeX support for images
+- [OpenGraph](https://sphinxext-opengraph.readthedocs.io) support
 
 ### Removed
 

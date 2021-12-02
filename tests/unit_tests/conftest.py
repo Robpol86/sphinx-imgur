@@ -3,12 +3,23 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from bs4 import BeautifulSoup, element
 from sphinx.testing.path import path
 from sphinx.testing.util import SphinxTestApp
 from TexSoup import TexNode, TexSoup
 
 pytest_plugins = "sphinx.testing.fixtures"  # pylint: disable=invalid-name
+
+
+@pytest.fixture(autouse=True)
+def skip_opengraph(request: FixtureRequest):
+    """Skip opengraph tests when not installed."""
+    if "opengraph" in request.node.name:
+        try:
+            __import__("sphinxext.opengraph")
+        except ImportError:
+            pytest.skip("Opengraph not installed")
 
 
 @pytest.fixture(scope="session")
@@ -47,6 +58,12 @@ def _index_html(sphinx_app: SphinxTestApp) -> BeautifulSoup:
 def img_tags(index_html: BeautifulSoup) -> List[element.Tag]:
     """Return all <img> tags in index.html."""
     return index_html.find_all("img")
+
+
+@pytest.fixture()
+def meta_tags(index_html: BeautifulSoup) -> List[element.Tag]:
+    """Return all <meta> tags in index.html."""
+    return index_html.find_all("meta")
 
 
 @pytest.fixture()

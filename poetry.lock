@@ -736,6 +736,17 @@ lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
 
 [[package]]
+name = "sphinxext-opengraph"
+version = "0.5.0"
+description = "Sphinx Extension to enable OGP support"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+sphinx = ">=2.0"
+
+[[package]]
 name = "texsoup"
 version = "0.3.1"
 description = "parses valid LaTeX and provides variety of Beautiful-Soup-esque methods and Pythonic idioms for iterating over and searching the parse tree"
@@ -814,7 +825,7 @@ docs = ["sphinx-notfound-page", "sphinx-panels", "sphinx-rtd-theme", "sphinx-cop
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "f0a3f7630604c59f3ee9eaa6158fc5b0b20d6acd7df0200c796a6a585be204e5"
+content-hash = "72f0a7dd7f5290e154fe6e5b54fe5a9aa9963cbebe0e6e4adb9a4066073caccc"
 
 [metadata.files]
 alabaster = [
@@ -1226,6 +1237,10 @@ sphinxcontrib-qthelp = [
 sphinxcontrib-serializinghtml = [
     {file = "sphinxcontrib-serializinghtml-1.1.5.tar.gz", hash = "sha256:aa5f6de5dfdf809ef505c4895e51ef5c9eac17d0f287933eb49ec495280b6952"},
     {file = "sphinxcontrib_serializinghtml-1.1.5-py2.py3-none-any.whl", hash = "sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd"},
+]
+sphinxext-opengraph = [
+    {file = "sphinxext-opengraph-0.5.0.tar.gz", hash = "sha256:6efb05fe077e00b7a487e03b24bf56268bae92d42ef3f9da89616b60bc4a702c"},
+    {file = "sphinxext_opengraph-0.5.0-py3-none-any.whl", hash = "sha256:50d493dc3bbcec324211ca56f9c04218fac1c4311cfc33a9cc75cb0bed63bd13"},
 ]
 texsoup = [
     {file = "TexSoup-0.3.1.tar.gz", hash = "sha256:3f6b2ad0abe3688a6656f544c1ba04d0eb25f423f8c377b7369f9ce061ddb70b"},

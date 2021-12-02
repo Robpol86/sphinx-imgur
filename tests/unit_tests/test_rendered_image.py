@@ -117,6 +117,31 @@ def test_image_latex(latex_graphics: List[TexNode], ls_out_files: Dict[str, int]
     assert target.text == ["https://imgur.com/611EovQ", "611EovQm", ".jpeg"]
 
 
+@pytest.mark.sphinx("html", testroot="image-opengraph")
+def test_image_opengraph(meta_tags: List[element.Tag]):
+    """Test."""
+    og_image = [t for t in meta_tags if t.get("property", "") == "og:image"][0]
+    assert og_image.get("content") == "https://i.imgur.com/611EovQh.jpg"
+    og_image_alt = [t for t in meta_tags if t.get("property", "") == "og:image:alt"][0]
+    assert og_image_alt.get("content") == "<no title>"
+
+
+@pytest.mark.sphinx("html", testroot="image-opengraph-alt")
+def test_image_opengraph_alt(meta_tags: List[element.Tag]):
+    """Test."""
+    og_image = [t for t in meta_tags if t.get("property", "") == "og:image"][0]
+    assert og_image.get("content") == "https://i.imgur.com/611EovQh.jpg"
+    og_image_alt = [t for t in meta_tags if t.get("property", "") == "og:image:alt"][0]
+    assert og_image_alt.get("content") == "Alt Text"
+
+
+@pytest.mark.sphinx("html", testroot="image-opengraph-size")
+def test_image_opengraph_size(meta_tags: List[element.Tag]):
+    """Test."""
+    og_image = [t for t in meta_tags if t.get("property", "") == "og:image"][0]
+    assert og_image.get("content") == "https://i.imgur.com/611EovQs.jpg"
+
+
 @pytest.mark.sphinx("html", testroot="image-size")
 def test_image_size(img_tags: List[element.Tag]):
     """Test."""

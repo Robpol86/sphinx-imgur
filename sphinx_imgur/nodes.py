@@ -1,6 +1,10 @@
 """Docutils nodes for Imgur embeds."""
+from typing import Any, Dict
+
 from docutils import nodes
 from sphinx.writers.html5 import HTML5Translator
+
+from sphinx_imgur.utils import img_src_target_formats, imgur_id_size_ext
 
 
 class ImgurEmbedNode(nodes.Element):
@@ -45,3 +49,31 @@ class ImgurJavaScriptNode(nodes.Element):
     def html_depart(writer: HTML5Translator, _):
         """Append closing tags to document body list."""
         writer.body.append("</script>")
+
+
+class ImgurOmittedImageNode(nodes.image):
+    """Hidden image node not included in output. Used for opengraph compatibility."""
+
+    def __init__(self, block_text: str, options: Dict[str, Any], config: Dict[str, Any], imgur_id: str, size: str, ext: str):
+        """Generate URL for hidden image.
+
+        :param block_text: Raw rst text, probably not used by parent class.
+        :param options: Embed directive options.
+        :param config: Sphinx config.
+        :param imgur_id: Imgur ID from embed directive.
+        :param size: Opengraph image size from embed directive.
+        :param ext: Opengraph image extension from embed directive.
+        """
+        img_src_format, _ = img_src_target_formats(options, config)
+        if "og_imgur_id" in options:
+            imgur_id, size, ext = imgur_id_size_ext(options["og_imgur_id"], options, config)
+        if imgur_id.startswith("a/"):
+            # No hidden image when all we have is an album.
+            raise nodes.SkipNode
+        uri = img_src_format % {"id": imgur_id, "size": size, "ext": ext}
+        super().__init__(block_text, uri=uri, **options)
+
+    @staticmethod
+    def html_visit(writer: HTML5Translator, _):
+        """Always tell Sphinx writers to skip this node."""
+        raise nodes.SkipNode
