@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Topic :: Documentation :: Sphinx",
     "Topic :: Software Development :: Documentation",
 ]
@@ -50,18 +51,18 @@ docs = ["sphinx-notfound-page", "sphinx-panels", "sphinx-rtd-theme", "sphinx-cop
 
 [tool.poetry.dev-dependencies]
 # Linters.
-black = "*"  # not semver
-flake8 = ">=4.0.1"
-flake8-docstrings = ">=1.6.0"
-flake8-import-order = ">=0.18.1"
-pep8-naming = ">=0.12.1"
-pylint = ">=2.11.1"
+black = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+flake8-import-order = "*"
+pep8-naming = "*"
+pylint = "*"
 # Tests.
-beautifulsoup4 = ">=4.10.0"
-pytest = "<=3.2"
-pytest-cov = "<=2.6"
-# Project.
-sphinx = "==1.8.6"
+beautifulsoup4 = "*"
+coverage = {version = "*", extras = ["toml"]}
+pytest = "*"
+pytest-cov = "*"
+pytest-icdiff = "*"
 
 [tool.black]
 line-length = 125

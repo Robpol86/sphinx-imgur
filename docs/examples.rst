@@ -43,10 +43,10 @@ Album Without Details
 .. code-block:: rst
 
     .. imgur-embed:: a/9YZHA
-        :hide_post_details: True
+        :hide_post_details:
 
 .. imgur-embed:: a/9YZHA
-    :hide_post_details: True
+    :hide_post_details:
 
 Image With Details
 ------------------
@@ -63,10 +63,10 @@ Image Without Details
 .. code-block:: rst
 
     .. imgur-embed:: Srt4owo
-        :hide_post_details: True
+        :hide_post_details:
 
 .. imgur-embed:: Srt4owo
-    :hide_post_details: True
+    :hide_post_details:
 
 Image Directive
 ===============
