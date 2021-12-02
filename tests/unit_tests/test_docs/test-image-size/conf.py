@@ -4,3 +4,5 @@ extensions = ["sphinx_imgur.imgur"]
 html_theme = "basic"
 master_doc = "index"
 nitpicky = True
+
+imgur_default_size = "l"

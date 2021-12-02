@@ -24,6 +24,6 @@ def test_changelog():
     changelog = Path(__file__).parent.parent.parent / "CHANGELOG.md"
 
     with changelog.open("r") as handle:
-        changelog_head = handle.read(1024).splitlines()
+        changelog_head = handle.read(1048576).splitlines()
 
     assert [line for line in changelog_head if line.startswith(f"## [{version}] - ")]
