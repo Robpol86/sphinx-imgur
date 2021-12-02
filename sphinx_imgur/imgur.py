@@ -31,7 +31,7 @@ class ImgurImage(images.Image):
     option_spec["notarget"] = directives.flag
     option_spec["size"] = directives.single_char_or_unicode
 
-    def run(self):
+    def run(self) -> List[Element]:
         """Main method."""
         config = self.state.document.settings.env.config
         imgur_id, size, ext = imgur_id_size_ext(self.arguments[0], self.options, config)
