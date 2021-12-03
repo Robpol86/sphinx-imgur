@@ -38,3 +38,8 @@ rst_epilog = f"""
 # Options for HTML output.
 html_copy_source = False
 html_theme = "sphinx_rtd_theme"
+
+
+# https://sphinxext-opengraph.readthedocs.io/en/latest/#options
+ogp_site_name = "sphinx-imgur"
+ogp_use_first_image = True
