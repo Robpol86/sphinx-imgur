@@ -4,35 +4,26 @@
 Installation
 ============
 
-Getting started is pretty simple. The first step is to install the library.
+To install the library:
 
-Pip Install
-===========
+.. tabbed:: Install from PyPI
 
-The easiest way to get sphinx-imgur is to use `pip <https://pip.pypa.io>`_. Simply run this command.
+    .. code-block:: bash
 
-.. code-block:: bash
+        pip install sphinx-imgur
 
-    pip install sphinx-imgur
+.. tabbed:: Install from GitHub
 
-Latest from GitHub
-==================
+    .. code-block:: bash
 
-You can also elect to install the latest bleeding-edge version by using pip to install directly from the GitHub
-repository.
+        pip install git+https://github.com/Robpol86/sphinx-imgur@main
 
-.. code-block:: bash
+Once the package is installed add ``sphinx_imgur.imgur`` to your extensions list in your ``conf.py`` file.
 
-    pip install git+https://github.com/Robpol86/sphinx-imgur.git
+.. code-block:: python
 
-Clone and Install
-=================
-
-Lastly you can also just clone the repo and install from it. Usually you only need to do this if you plan on
-`contributing <https://github.com/Robpol86/sphinx-imgur/blob/main/CONTRIBUTING.md>`_ to the project.
-
-.. code-block:: bash
-
-    git clone https://github.com/Robpol86/sphinx-imgur.git
-    cd sphinx-imgur
-    python setup.py install
+    # conf.py
+    extensions = [
+         # ... other extensions here
+         "sphinx_imgur.imgur",
+    ]

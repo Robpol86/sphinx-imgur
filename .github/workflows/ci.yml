@@ -38,12 +38,12 @@ jobs:
       - {name: Install Python, uses: actions/setup-python@v2, with: {python-version: "${{matrix.python}}"}, id: py}
       - {name: Install Poetry, uses: abatilo/actions-poetry@v2.1.4}
       - {name: Install dependencies, run: make deps}
-      - {name: Remove OpenGraph, run: "poetry remove --dev sphinxext-opengraph", if: "startsWith(matrix.sphinx, '1.')"}
+      - {name: Remove OpenGraph, run: "poetry remove sphinxext-opengraph; poetry remove -D $_", if: "startsWith(matrix.sphinx, '1.')"}
       - {name: Downgrade Sphinx, run: "poetry add --dev sphinx=${{matrix.sphinx}}", if: "${{matrix.sphinx}}"}
       - {name: Run lints, run: make lint}
       - {name: Run tests, run: make test}
       - {name: Run integration tests, run: make it}
-      - {name: Build docs, run: make docs}
+      - {name: Build docs, run: make docs, if: "!startsWith(matrix.sphinx, '1.')"}
       - {name: Build package, run: make build}
       - name: Upload coverage
         uses: codecov/codecov-action@v1.5.0
