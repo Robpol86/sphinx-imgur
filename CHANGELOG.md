@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- N/A
+
+## [3.0.0] - 2021-12-02
+
 ### Added
 
 - Python 3.6 through 3.10 support
