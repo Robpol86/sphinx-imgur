@@ -4,6 +4,16 @@ export POETRY_VIRTUALENVS_IN_PROJECT = true
 
 ## Dependencies
 
+init: _HELP = Initialize Python VirtualEnv via Poetry (optional PYTHON_PATH or PYTHON_VERSION env vars)
+init: PYTHON_VERSION ?= 3
+init:
+ifdef PYTHON_PATH
+	poetry env use $(PYTHON_PATH)
+else
+	command -V python$(PYTHON_VERSION) < /dev/null
+	poetry env use $(shell command -v python$(PYTHON_VERSION) < /dev/null)
+endif
+
 poetry.lock: _HELP = Lock dependency versions to file
 poetry.lock:
 	poetry lock
@@ -12,7 +22,6 @@ poetry.lock:
 deps: _HELP = Install project dependencies
 deps:
 	poetry install -E docs
-	poetry run python -V
 
 requirements.txt: _HELP = Generate development requirements.txt
 requirements.txt: poetry.lock
@@ -22,30 +31,30 @@ requirements.txt: poetry.lock
 
 .PHONY: lint
 lint: _HELP = Run linters
-lint: deps
+lint:
 	poetry check
 	poetry run black --check --color --diff .
-	poetry run flake8 --application-import-names $(PROJECT_NAME),tests
-	poetry run pylint $(PROJECT_NAME) tests docs/conf.py
+	poetry run flake8 --application-import-names $(PROJECT_NAME),docs,tests
+	poetry run pylint $(PROJECT_NAME) docs tests
 
 .PHONY: test
 test: _HELP = Run unit tests
-test: deps
+test:
 	poetry run pytest --cov=$(PROJECT_NAME) --cov-report=html --cov-report=xml tests/unit_tests
 
 .PHONY: testpdb
 testpdb: _HELP = Run unit tests and drop into the debugger on failure
-testpdb: deps
+testpdb:
 	poetry run pytest --pdb tests/unit_tests
 
 .PHONY: it
 it: _HELP = Run integration tests
-it: deps
+it:
 	poetry run pytest tests/integration_tests
 
 .PHONY: itpdb
 itpdb: _HELP = Run integration tests and drop into the debugger on failure
-itpdb: deps
+itpdb:
 	poetry run pytest --pdb tests/integration_tests
 
 .PHONY: all
@@ -59,20 +68,24 @@ build: _HELP = Build Python package (sdist and wheel)
 build:
 	poetry build -n -vvv
 
-docs/_build/html/index.html: deps
-	poetry run sphinx-build -a -E -n -W docs $(@D)
+docs/_build/html/index.html::
+	poetry run sphinx-build -n -W docs $(@D)
 	@echo Documentation available here: $@
 
 .PHONY: docs
 docs: _HELP = Build HTML documentation
 docs: docs/_build/html/index.html
 
+autodocs: _HELP = Start a web server, open browser, and auto-rebuild HTML on file changes
+autodocs: docs/_build/html/index.html
+	poetry run sphinx-autobuild --open-browser --delay=1 --host localhost -n -W docs $(<D)
+
 ## Misc
 
 clean: _HELP = Remove temporary files
 clean:
-	rm -rfv *.egg-info/ *cache*/ .*cache*/ .coverage coverage.xml htmlcov/ dist/ docs/_build requirements.txt
-	find . -name __pycache__ -type d -exec rm -r {} +
+	rm -rfv *.egg-info/ *cache*/ .*cache*/ .coverage coverage.xml htmlcov/ dist/ docs/_build/ requirements.txt
+	find . -path '*/.*' -prune -o -name __pycache__ -type d -exec rm -r {} +
 
 distclean: _HELP = Remove temporary files including virtualenv
 distclean: clean
