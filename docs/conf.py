@@ -1,19 +1,12 @@
 """Sphinx configuration file."""
-
 # pylint: disable=invalid-name
-
 import time
-from pathlib import Path
-
-import toml
 
 from sphinx_imgur.imgur import DEFAULT_EXT, DEFAULT_SIZE, IMG_SRC_FORMAT, TARGET_FORMAT
 
-PYPROJECT = toml.loads(Path(__file__).parent.parent.joinpath("pyproject.toml").read_text(encoding="utf8"))
-
 
 # General configuration.
-author = PYPROJECT["tool"]["poetry"]["authors"][0].split()[0]
+author = "Robpol86"
 copyright = f'{time.strftime("%Y")}, {author}'  # pylint: disable=redefined-builtin  # noqa
 html_last_updated_fmt = f"%c {time.tzname[time.localtime().tm_isdst]}"
 exclude_patterns = []
@@ -24,8 +17,9 @@ extensions = [
     "sphinx_panels",  # https://sphinx-panels.readthedocs.io
     "sphinxext.opengraph",  # https://sphinxext-opengraph.readthedocs.io
 ]
-project = PYPROJECT["tool"]["poetry"]["name"]
-pygments_style = "sphinx"
+language = "en"
+project = "sphinx-imgur"
+pygments_style = "vs"
 rst_epilog = f"""
 .. |LABEL_DEFAULT_EXT| replace:: :guilabel:`{DEFAULT_EXT}`
 .. |LABEL_DEFAULT_SIZE| replace:: :guilabel:`{DEFAULT_SIZE}`
@@ -41,5 +35,6 @@ html_theme = "sphinx_rtd_theme"
 
 
 # https://sphinxext-opengraph.readthedocs.io/en/latest/#options
-ogp_site_name = "sphinx-imgur"
+ogp_site_name = project
+ogp_type = "website"
 ogp_use_first_image = True
