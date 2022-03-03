@@ -11,16 +11,18 @@ in the project's directory run this if you're on macOS (requires [Homebrew](http
 brew install python@3.7
 brew install poetry  # More info: https://python-poetry.org
 make clean
-POETRY_VIRTUALENVS_IN_PROJECT=true poetry env use "$(brew --prefix)/opt/python@3.7/bin/python3"
+make PYTHON_PATH="$(brew --prefix)/opt/python@3.7/bin/python3" init
+make deps
 ```
 
 On Ubuntu (including Windows WSL2):
 
 ```bash
-sudo apt-get update && sudo apt-get install make python3-virtualenv python3.9
-curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 -
+sudo apt-get update && sudo apt-get install make python3-virtualenv python3
+curl -sSL https://install.python-poetry.org | python3 -
 make clean
-POETRY_VIRTUALENVS_IN_PROJECT=true poetry env use "$(which python3.9)"
+make PYTHON_VERSION=3.7 init
+make deps
 ```
 
 Then see if you can run lints and tests:

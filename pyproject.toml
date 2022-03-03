@@ -40,6 +40,7 @@ python = "^3.6.2"
 # Project dependencies.
 sphinx = "*"
 # Docs.
+sphinx-autobuild = {version = "*", optional = true}
 sphinx-copybutton = {version = "*", optional = true}
 sphinx-notfound-page = {version = "*", optional = true}
 sphinx-panels = {version = "*", optional = true}
@@ -49,6 +50,7 @@ toml = {version = "*", optional = true}
 
 [tool.poetry.extras]
 docs = [
+    "sphinx-autobuild",
     "sphinx-copybutton",
     "sphinx-notfound-page",
     "sphinx-panels",
@@ -76,8 +78,7 @@ TexSoup = "*"
 
 [tool.black]
 line-length = 125
-target-version = ["py36", "py37", "py38", "py39"]
-
+target-version = ["py36", "py37", "py38", "py39", "py310"]
 [tool.coverage.report]
 exclude_lines = [
     "^\\s*from",
